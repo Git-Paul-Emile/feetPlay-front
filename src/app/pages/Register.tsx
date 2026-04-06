@@ -1,20 +1,54 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Link } from 'react-router';
-import { X, Mail, Phone, User as UserIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { X, Mail, Phone, User as UserIcon, Lock, Eye, EyeOff } from 'lucide-react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import { Footer } from '../components/Footer';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Register() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Register attempt:', { firstName, lastName, email, phone });
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await register({
+        name: `${firstName} ${lastName}`.trim(),
+        email,
+        phone,
+        password,
+        role: 'viewer'
+      });
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de l\'inscription');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialRegister = (provider: string) => {
@@ -126,6 +160,50 @@ export function Register() {
                 />
               </div>
 
+              {/* Password Field */}
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                  <Lock className="w-5 h-5 text-[#999999]" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Mot de passe"
+                  className="w-full h-[56px] bg-transparent border border-[#3a3a3a] rounded-full px-12 text-white placeholder:text-[#666666] font-['Inter',sans-serif] text-sm focus:outline-none focus:border-[#CDFF71] transition-colors"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-[#999999] hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                  <Lock className="w-5 h-5 text-[#999999]" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirmer le mot de passe"
+                  className="w-full h-[56px] bg-transparent border border-[#3a3a3a] rounded-full px-12 text-white placeholder:text-[#666666] font-['Inter',sans-serif] text-sm focus:outline-none focus:border-[#CDFF71] transition-colors"
+                  required
+                />
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="text-red-500 text-sm text-center bg-red-500/10 py-2 rounded-lg">
+                  {error}
+                </div>
+              )}
+
               {/* Already Have Account Link */}
               <div className="text-right">
                 <Link 
@@ -140,11 +218,12 @@ export function Register() {
               {/* Submit Button */}
               <motion.button
                 type="submit"
-                className="w-full h-[56px] bg-[#e8e3ff] rounded-full font-['Inter',sans-serif] font-semibold text-black text-base hover:bg-[#d5ceff] transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                disabled={isLoading}
+                className="w-full h-[56px] bg-[#e8e3ff] rounded-full font-['Inter',sans-serif] font-semibold text-black text-base hover:bg-[#d5ceff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                whileTap={{ scale: isLoading ? 1 : 0.98 }}
               >
-                S'inscrire
+                {isLoading ? 'Inscription en cours...' : 'S\'inscrire'}
               </motion.button>
             </form>
 

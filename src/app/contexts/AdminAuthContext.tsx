@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { fetchWithApiFallback } from '../utils/serviceConfig';
 
 export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'finance' | 'marketing';
 
@@ -22,7 +23,6 @@ interface AdminAuthContextType {
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
-const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? 'http://localhost:8001/api';
 const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
 const ADMIN_USER_KEY  = 'feetiplay_admin_user';
 
@@ -49,7 +49,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options?.headers ?? {}),
   };
-  const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  const res = await fetchWithApiFallback(endpoint, { ...options, headers });
   const body = await res.json().catch(() => ({ message: 'Erreur serveur' }));
   if (!res.ok) throw new Error(body.message ?? 'Erreur serveur');
   return body.data as T;

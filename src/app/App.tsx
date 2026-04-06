@@ -10,11 +10,9 @@ export default function App() {
   return (
     <AuthProvider>
       <AppProvider>
-        <FavoritesProvider>
-          <AdminAuthProvider>
-            <RouterProvider router={router} />
-          </AdminAuthProvider>
-        </FavoritesProvider>
+        <AdminAuthProvider>
+          <RouterProvider router={router} />
+        </AdminAuthProvider>
       </AppProvider>
     </AuthProvider>
   );

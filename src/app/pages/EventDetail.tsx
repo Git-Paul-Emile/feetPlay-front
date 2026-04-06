@@ -1,23 +1,17 @@
-import { useParams, useNavigate, Link } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import { X, Ticket, Heart, Calendar, Clock, Tag, MapPin, Users, Share2 } from 'lucide-react';
+import { X, Ticket, Heart, Clock, Tag, MapPin, Users, Share2, ExternalLink } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PurchaseModal, PurchaseData } from '../components/PurchaseModal';
 import { DigitalTicket } from '../components/DigitalTicket';
 import svgPaths from "../../imports/svg-z30khrsoqy";
+import EventsAPI from '../services/api/EventsAPI';
+import Feeti2EventsAPI, { type Feeti2Event } from '../services/api/Feeti2EventsAPI';
+import { getPreferredFeeti2BaseUrl } from '../utils/serviceConfig';
 
-// Import event images
-import imgCardImg from "figma:asset/bfa6be3c8aeb7f6fbc82814faf0255da53e42d8a.png";
-import imgCardImg1 from "figma:asset/441c73cde7747c7424dd532b5b0bf39c965feea3.png";
-import imgCardImg2 from "figma:asset/eeb54bfeb7f715a11c3f77fa7d5f1a847fc8360e.png";
-import imgCardImg3 from "figma:asset/879e9dd2c894a941eb3593ea43d7255c4e45bef8.png";
-import imgCardImg4 from "figma:asset/47894590a720b34953c1f32b52b442f91508500b.png";
-import imgImage16 from "figma:asset/49fa43eb1358f314a712031188cb5e36b4e29a94.png";
-import imgImage17 from "figma:asset/275df41f1998ac5cd6aedaf66f372364c7dc51c8.png";
-import imgImage18 from "figma:asset/ec899bdbbbe994047f36c763e04f1455d001377c.png";
-import imgImage19 from "figma:asset/75045cfe4cb9a585ca1b0274032b51485c28f5f7.png";
-import imgImage20 from "figma:asset/4fbcabd8a9fe9270a8dfafbfe0191ac3d1016beb.png";
+const FEETI2_URL = getPreferredFeeti2BaseUrl();
+
 
 interface EventDetailData {
   id: string;
@@ -36,93 +30,32 @@ interface EventDetailData {
   duration?: string;
   organizer?: string;
   capacity?: string;
+  source?: 'feetiplay' | 'feeti2';
+  feeti2EventId?: string;
 }
 
-// Mock event data - En production, ces données viendraient d'une API
-const eventsData: Record<string, EventDetailData> = {
-  '1': {
-    id: '1',
-    title: 'Yaye Padura',
-    image: imgCardImg,
-    location: 'Salle Savorgnon - IFC, Brazzaville',
-    date: '20 Nov',
-    time: '19h00',
-    category: 'Concert',
-    categories: ['Concert', 'Musique Live', 'Rumba'],
-    description: 'Découvrez Yaye Padura dans une soirée exceptionnelle de rumba congolaise. Un événement musical incontournable qui célèbre la richesse de notre patrimoine musical avec les plus grands artistes de la scène locale. Ambiance garantie et show spectaculaire au programme !',
-    reference: 'F25L11-30',
-    isLive: true,
-    price: 3000,
-    duration: '2h30',
-    organizer: 'FEETI Productions',
-    capacity: '500 places'
-  },
-  '2': {
-    id: '2',
-    title: 'Festival Mbote - Edition 2025',
-    image: imgCardImg1,
-    location: 'Stade des Martyrs, Kinshasa',
-    date: '25 Nov',
-    time: '14h00',
-    category: 'Festival',
-    categories: ['Festival', 'Musique', 'Culture'],
-    description: 'Le plus grand festival de musique d\'Afrique Centrale revient pour une édition mémorable ! Découvrez les meilleurs artistes de la scène africaine dans une ambiance festive et conviviale. Un événement gratuit et ouvert à tous, célébrant la diversité culturelle et musicale.',
-    reference: 'F25M01-15',
-    isLive: true,
-    isFree: true,
-    duration: '6h00',
-    organizer: 'Festival Mbote Org',
-    capacity: '10,000 places'
-  },
-  '3': {
-    id: '3',
-    title: 'Concert Live Jazz',
-    image: imgCardImg2,
-    location: 'Chez Ntemba, Kinshasa',
-    date: '28 Nov',
-    time: '20h00',
-    category: 'Concert',
-    categories: ['Jazz', 'Concert', 'Musique Live'],
-    description: 'Soirée jazz intimiste dans le cadre élégant de Chez Ntemba. Les meilleurs musiciens de jazz de la région se réunissent pour une performance acoustique exceptionnelle. Un moment de pure élégance musicale à ne pas manquer.',
-    reference: 'F25J02-08',
-    price: 8000,
-    duration: '3h00',
-    organizer: 'Jazz Club Kinshasa',
-    capacity: '150 places'
-  },
-  '4': {
-    id: '4',
-    title: 'Spectacle Comédie',
-    image: imgCardImg3,
-    location: 'Pullman Hotel, Kinshasa',
-    date: '5 Dec',
-    time: '21h00',
-    category: 'Comedy',
-    categories: ['Comédie', 'Humour', 'Stand-up'],
-    description: 'Une soirée d\'humour et de rires avec les meilleurs comédiens de la ville ! Stand-up, sketchs et improvisation au programme. Venez vous détendre et profiter d\'un moment de pure comédie dans une ambiance chaleureuse.',
-    reference: 'F25C03-12',
-    price: 12000,
-    duration: '2h00',
-    organizer: 'Comedy Club 243',
-    capacity: '200 places'
-  },
-  '5': {
-    id: '5',
-    title: 'Soirée Danse Afro',
-    image: imgCardImg4,
-    location: 'Fleuve Congo Hotel, Kinshasa',
-    date: '10 Dec',
-    time: '18h00',
-    category: 'Danse',
-    categories: ['Danse', 'Afro', 'Workshop'],
-    description: 'Participez à une soirée danse afro exceptionnelle ! Ateliers de danse, performances et DJ sets afro pour une ambiance électrique. Événement gratuit ouvert à tous les passionnés de danse et de culture africaine.',
-    reference: 'F25D04-20',
-    isFree: true,
-    duration: '4h00',
-    organizer: 'Afro Dance Collective',
-    capacity: '300 places'
-  },
-};
+
+function mapFeeti2ToDetail(e: Feeti2Event): EventDetailData {
+  return {
+    id: e.id,
+    title: e.title,
+    image: e.image,
+    location: e.country ?? 'En ligne',
+    date: e.date,
+    time: e.time,
+    category: e.category,
+    categories: [e.category],
+    description: e.description,
+    reference: `FP-${e.id.slice(-6).toUpperCase()}`,
+    isLive: e.isLive,
+    isFree: e.isFree,
+    price: e.price,
+    duration: e.duration,
+    organizer: e.channelName,
+    source: 'feeti2',
+    feeti2EventId: e.id,
+  };
+}
 
 export function EventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -132,9 +65,58 @@ export function EventDetail() {
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchaseData, setPurchaseData] = useState<PurchaseData | null>(null);
   const [showTicket, setShowTicket] = useState(false);
+  const [apiEvent, setApiEvent] = useState<EventDetailData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Get event data
-  const event = id ? eventsData[id] : null;
+  // Essaie de charger l'événement depuis l'API (feetiPlay puis feeti2)
+  useEffect(() => {
+    if (!id) { setLoading(false); return; }
+    const load = async () => {
+      try {
+        // 1. Essai depuis feetiPlay
+        const fpEvent = await EventsAPI.getById(id);
+        if (fpEvent) {
+          setApiEvent({
+            id: fpEvent.id,
+            title: fpEvent.title,
+            image: fpEvent.image,
+            location: fpEvent.location ?? fpEvent.channelName,
+            date: fpEvent.date,
+            time: fpEvent.time,
+            category: fpEvent.category,
+            categories: fpEvent.tags?.length ? fpEvent.tags : [fpEvent.category],
+            description: fpEvent.description,
+            reference: `FP-${fpEvent.id.slice(-6).toUpperCase()}`,
+            isLive: fpEvent.isLive,
+            isFree: fpEvent.isFree,
+            price: fpEvent.price,
+            duration: fpEvent.duration,
+            organizer: fpEvent.channelName,
+            source: 'feetiplay',
+          });
+          return;
+        }
+      } catch { /* non trouvé sur feetiPlay */ }
+      try {
+        // 2. Essai depuis feeti2 via intégration
+        const f2Events = await Feeti2EventsAPI.getStreamingEvents();
+        const found = f2Events.find(e => e.id === id);
+        if (found) setApiEvent(mapFeeti2ToDetail(found));
+      } catch { /* non trouvé non plus */ }
+    };
+    load().finally(() => setLoading(false));
+  }, [id]);
+
+  // Priorité : API > mock
+  const event = apiEvent;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[#CDFF71] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -329,31 +311,52 @@ export function EventDetail() {
                 </motion.button>
               )}
 
-              {/* View Announcement Button */}
-              <motion.button
-                className="bg-[#de0035] hover:bg-[#de0035]/90 flex items-center gap-3 px-6 md:px-8 py-3 rounded-sm transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Ticket className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                <span className="font-['SF_Pro',sans-serif] font-normal text-white text-base md:text-lg">
-                  Voir l'annonce
-                </span>
-              </motion.button>
+              {/* Lien vers feeti2 si l'événement vient de feeti2 */}
+              {event.source === 'feeti2' && event.feeti2EventId && (
+                <motion.a
+                  href={`${FEETI2_URL}/events/${event.feeti2EventId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#4f46e5] hover:bg-[#4f46e5]/90 flex items-center gap-3 px-6 md:px-8 py-3 rounded-sm transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <ExternalLink className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  <span className="font-['SF_Pro',sans-serif] font-normal text-white text-base md:text-lg">
+                    Acheter sur Féeti
+                  </span>
+                </motion.a>
+              )}
 
-              {/* Favorite Button */}
-              <motion.button
-                onClick={handleToggleFavorite}
-                className="w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Heart
-                  className={`w-7 h-7 md:w-8 md:h-8 transition-colors ${
-                    isInFavorites ? 'fill-white text-white' : 'text-white'
-                  }`}
-                />
-              </motion.button>
+              {/* Bouton voir annonce (événements feetiPlay uniquement) */}
+              {event.source !== 'feeti2' && (
+                <motion.button
+                  className="bg-[#de0035] hover:bg-[#de0035]/90 flex items-center gap-3 px-6 md:px-8 py-3 rounded-sm transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Ticket className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  <span className="font-['SF_Pro',sans-serif] font-normal text-white text-base md:text-lg">
+                    Voir l'annonce
+                  </span>
+                </motion.button>
+              )}
+
+              {/* Favorite Button — feeti2 events can't be favorited in FeetiPlay */}
+              {event.source !== 'feeti2' && (
+                <motion.button
+                  onClick={handleToggleFavorite}
+                  className="w-12 h-12 flex items-center justify-center hover:scale-110 transition-transform"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Heart
+                    className={`w-7 h-7 md:w-8 md:h-8 transition-colors ${
+                      isInFavorites ? 'fill-white text-white' : 'text-white'
+                    }`}
+                  />
+                </motion.button>
+              )}
             </motion.div>
           </div>
         </div>

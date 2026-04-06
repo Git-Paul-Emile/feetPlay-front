@@ -23,6 +23,7 @@ export interface StreamingEvent {
   viewerCount?: number;
   hasTicket?: boolean;
   streamUrl?: string;
+  location?: string;
   createdAt: string;
 }
 

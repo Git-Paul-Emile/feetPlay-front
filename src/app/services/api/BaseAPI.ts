@@ -1,6 +1,8 @@
 // Base API Service pour FeetiPlay
 // Gestion centralisée des appels HTTP avec cache, retry et error handling
 
+import { fetchWithApiFallback, getPreferredApiBaseUrl } from '../../utils/serviceConfig';
+
 export interface APIResponse<T> {
   success: boolean;
   data?: T;
@@ -16,8 +18,9 @@ export interface APIConfig {
 }
 
 class BaseAPIService {
-  protected readonly baseUrl: string =
-    (import.meta as any).env?.VITE_API_URL ?? 'http://localhost:8001/api';
+  protected get baseUrl(): string {
+    return getPreferredApiBaseUrl();
+  }
 
   private readonly tokenKey = 'feetiplay_token';
   private readonly adminTokenKey = 'feetiplay_admin_token';
@@ -61,7 +64,7 @@ class BaseAPIService {
       ...(fetchOptions.headers ?? {}),
     };
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const response = await fetchWithApiFallback(endpoint, {
       ...fetchOptions,
       headers,
     });

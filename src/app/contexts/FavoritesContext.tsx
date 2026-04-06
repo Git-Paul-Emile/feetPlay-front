@@ -1,4 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { useNavigate, useLocation } from 'react-router';
+import { useAuth } from './AuthContext';
+import EventsAPI, { type StreamingEvent } from '../services/api/EventsAPI';
 
 interface FavoriteEvent {
   id: string;
@@ -14,16 +17,18 @@ interface FavoriteEvent {
   hasStreaming?: boolean;
   duration?: string;
   fullDate?: string;
-  addedAt: number;
+  addedAt?: number;
 }
 
 interface FavoritesContextType {
   favorites: FavoriteEvent[];
-  addFavorite: (event: Omit<FavoriteEvent, 'addedAt'>) => void;
-  removeFavorite: (eventId: string) => void;
+  addFavorite: (event: Omit<FavoriteEvent, 'addedAt'>) => Promise<void>;
+  removeFavorite: (eventId: string) => Promise<void>;
   isFavorite: (eventId: string) => boolean;
-  toggleFavorite: (event: Omit<FavoriteEvent, 'addedAt'>) => void;
+  toggleFavorite: (event: Omit<FavoriteEvent, 'addedAt'>) => Promise<void>;
   clearAllFavorites: () => void;
+  isLoading: boolean;
+  requiresAuth: () => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -31,49 +36,94 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<FavoriteEvent[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, token } = useAuth();
 
-  // Load favorites from localStorage on mount
-  useEffect(() => {
-    const storedFavorites = localStorage.getItem('feeti-favorites');
-    if (storedFavorites) {
-      try {
-        const parsed = JSON.parse(storedFavorites);
-        setFavorites(parsed);
-      } catch (error) {
-        console.error('Error loading favorites:', error);
-      }
+  const requiresAuth = useCallback(() => {
+    navigate('/login', { state: { from: location } });
+  }, [navigate, location]);
+
+  const loadFromAPI = useCallback(async () => {
+    if (!isAuthenticated || !token) return;
+    try {
+      const events = await EventsAPI.fetchApi<StreamingEvent[]>('/events/favorites');
+      setFavorites(events.map(e => ({
+        id: e.id,
+        title: e.title,
+        image: e.image,
+        location: e.channelName,
+        date: e.date,
+        time: e.time,
+        category: e.category,
+        isLive: e.isLive,
+        isFree: e.isFree,
+        price: e.price,
+        hasStreaming: !!e.streamUrl,
+        duration: e.duration,
+      })));
+    } catch (error) {
+      console.error('Error loading favorites from API:', error);
     }
-    setIsLoaded(true);
-  }, []);
+  }, [isAuthenticated, token]);
 
-  // Save favorites to localStorage whenever they change
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('feeti-favorites', JSON.stringify(favorites));
+    if (isAuthenticated && token) {
+      loadFromAPI().then(() => setIsLoaded(true));
+    } else {
+      setIsLoaded(true);
     }
-  }, [favorites, isLoaded]);
+  }, [isAuthenticated, token, loadFromAPI]);
 
-  const addFavorite = (event: Omit<FavoriteEvent, 'addedAt'>) => {
-    const newFavorite: FavoriteEvent = {
-      ...event,
-      addedAt: Date.now(),
-    };
-    setFavorites(prev => [newFavorite, ...prev]);
+  const addFavorite = async (event: Omit<FavoriteEvent, 'addedAt'>) => {
+    if (!isAuthenticated || !token) {
+      requiresAuth();
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await EventsAPI.fetchApi<{ isFavorited: boolean }>(`/events/${event.id}/favorite`, {
+        method: 'POST',
+      });
+      setFavorites(prev => {
+        if (prev.some(f => f.id === event.id)) return prev;
+        return [{ ...event, addedAt: Date.now() }, ...prev];
+      });
+    } catch (error) {
+      console.error('Error adding favorite:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const removeFavorite = (eventId: string) => {
-    setFavorites(prev => prev.filter(fav => fav.id !== eventId));
+  const removeFavorite = async (eventId: string) => {
+    if (!isAuthenticated || !token) {
+      requiresAuth();
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await EventsAPI.fetchApi<{ isFavorited: boolean }>(`/events/${eventId}/favorite`, {
+        method: 'POST',
+      });
+      setFavorites(prev => prev.filter(fav => fav.id !== eventId));
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isFavorite = (eventId: string): boolean => {
     return favorites.some(fav => fav.id === eventId);
   };
 
-  const toggleFavorite = (event: Omit<FavoriteEvent, 'addedAt'>) => {
+  const toggleFavorite = async (event: Omit<FavoriteEvent, 'addedAt'>) => {
     if (isFavorite(event.id)) {
-      removeFavorite(event.id);
+      await removeFavorite(event.id);
     } else {
-      addFavorite(event);
+      await addFavorite(event);
     }
   };
 
@@ -83,14 +133,16 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   return (
     <FavoritesContext.Provider
-      value={{
+      value={useMemo(() => ({
         favorites,
         addFavorite,
         removeFavorite,
         isFavorite,
         toggleFavorite,
         clearAllFavorites,
-      }}
+        isLoading,
+        requiresAuth,
+      }), [favorites, isLoading, requiresAuth])}
     >
       {children}
     </FavoritesContext.Provider>

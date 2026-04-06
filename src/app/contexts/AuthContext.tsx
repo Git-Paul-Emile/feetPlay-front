@@ -30,6 +30,8 @@ export interface AppUser {
 
 interface AuthContextType {
   user: AppUser | null;
+  isAuthenticated: boolean;
+  token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<AppUser>;
   register: (data: RegisterData) => Promise<AppUser>;
@@ -59,41 +61,53 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
+  const [token, setToken] = useState<string | null>(AuthAPI.getToken());
   const [isLoading, setIsLoading] = useState(true);
 
   // Restaure la session au montage via le token stocké
   useEffect(() => {
-    const token = AuthAPI.getToken();
-    if (!token) {
+    const storedToken = AuthAPI.getToken();
+    if (!storedToken) {
       setIsLoading(false);
       return;
     }
+    setToken(storedToken);
     AuthAPI.getMe()
       .then(authUser => setUser(mapToAppUser(authUser)))
       .catch(() => {
         localStorage.removeItem('feetiplay_token');
         localStorage.removeItem('feetiplay_user');
+        setToken(null);
       })
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<AppUser> => {
-    const { user: authUser } = await AuthAPI.login(email, password);
+    const { user: authUser, accessToken } = await AuthAPI.login(email, password);
+    localStorage.setItem('feetiplay_token', accessToken);
+    localStorage.setItem('feetiplay_user', JSON.stringify(authUser));
     const appUser = mapToAppUser(authUser);
     setUser(appUser);
+    setToken(accessToken);
     return appUser;
   }, []);
 
   const register = useCallback(async (data: RegisterData): Promise<AppUser> => {
-    const { user: authUser } = await AuthAPI.register(data);
+    const { user: authUser, accessToken } = await AuthAPI.register(data);
+    localStorage.setItem('feetiplay_token', accessToken);
+    localStorage.setItem('feetiplay_user', JSON.stringify(authUser));
     const appUser = mapToAppUser(authUser);
     setUser(appUser);
+    setToken(accessToken);
     return appUser;
   }, []);
 
   const logout = useCallback(async (): Promise<void> => {
     try { await AuthAPI.logout(); } catch { /* ignore */ }
+    localStorage.removeItem('feetiplay_token');
+    localStorage.removeItem('feetiplay_user');
     setUser(null);
+    setToken(null);
   }, []);
 
   const updateProfile = useCallback(async (data: UpdateProfileData): Promise<AppUser> => {
@@ -109,12 +123,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteAccount = useCallback(async (password: string): Promise<void> => {
     await AuthAPI.deleteAccount(password);
+    localStorage.removeItem('feetiplay_token');
+    localStorage.removeItem('feetiplay_user');
     setUser(null);
+    setToken(null);
   }, []);
 
   return (
     <AuthContext.Provider value={{
-      user, isLoading,
+      user,
+      isAuthenticated: !!user,
+      token: AuthAPI.getToken(),
+      isLoading,
       login, register, logout,
       updateProfile, changePassword, deleteAccount,
     }}>

@@ -1,19 +1,34 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { X, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import { Footer } from '../components/Footer';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', { email, password });
+    setError('');
+    
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Email ou mot de passe incorrect');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -112,14 +127,22 @@ export function Login() {
                 </Link>
               </div>
 
+              {/* Error Message */}
+              {error && (
+                <div className="text-red-500 text-sm text-center bg-red-500/10 py-2 rounded-lg">
+                  {error}
+                </div>
+              )}
+
               {/* Submit Button */}
               <motion.button
                 type="submit"
-                className="w-full h-[56px] bg-[#CDFF71] rounded-full font-['Inter',sans-serif] font-semibold text-black text-base hover:bg-[#b8e663] transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                disabled={isLoading}
+                className="w-full h-[56px] bg-[#CDFF71] rounded-full font-['Inter',sans-serif] font-semibold text-black text-base hover:bg-[#b8e663] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                whileTap={{ scale: isLoading ? 1 : 0.98 }}
               >
-                Se connecter
+                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
               </motion.button>
             </form>
 

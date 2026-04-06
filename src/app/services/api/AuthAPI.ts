@@ -1,6 +1,6 @@
 // Auth API Service pour FeetiPlay — connecté au backend réel
 
-const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? 'http://localhost:8001/api';
+import { fetchWithApiFallback } from '../../utils/serviceConfig';
 
 export interface AuthUser {
   id: string;
@@ -59,7 +59,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options?.headers ?? {}),
   };
-  const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  const res = await fetchWithApiFallback(endpoint, { ...options, headers });
   const body = await res.json().catch(() => ({ message: 'Erreur serveur' }));
   if (!res.ok) throw new ApiError(body.message ?? 'Erreur serveur', res.status, body.errors);
   return body.data as T;

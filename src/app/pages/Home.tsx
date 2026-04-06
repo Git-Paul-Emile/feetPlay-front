@@ -1,134 +1,128 @@
 import { ReplayBanner } from '../components/ReplayBanner';
-import { EventCard } from '../components/EventCard';
+import { EventCard, EventCardProps } from '../components/EventCard';
 import { SortFilter, SortOption } from '../components/SortFilter';
 import { sortEvents } from '../utils/sortEvents';
-import { ReplayCard } from '../components/ReplayCard';
+import { ReplayCard, ReplayCardProps } from '../components/ReplayCard';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { Eye, X } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import EventsAPI, { StreamingEvent } from '../services/api/EventsAPI';
 
 // Import SVG paths
 import svgPaths from "../../imports/svg-on6vk22quy";
 import categorySvgPaths from "../../imports/svg-s9aj5k89tw";
 
-// Import all images from Figma
-import imgCardImg from "figma:asset/bfa6be3c8aeb7f6fbc82814faf0255da53e42d8a.png";
-import imgCardImg1 from "figma:asset/441c73cde7747c7424dd532b5b0bf39c965feea3.png";
-import imgCardImg2 from "figma:asset/eeb54bfeb7f715a11c3f77fa7d5f1a847fc8360e.png";
-import imgCardImg3 from "figma:asset/879e9dd2c894a941eb3593ea43d7255c4e45bef8.png";
-import imgCardImg4 from "figma:asset/47894590a720b34953c1f32b52b442f91508500b.png";
-import imgRectangle4189 from "figma:asset/9c38c9e9d6b093e4c0f4f4d0cb3f471f64548b44.png";
-import imgImage16 from "figma:asset/49fa43eb1358f314a712031188cb5e36b4e29a94.png";
-import imgImage17 from "figma:asset/275df41f1998ac5cd6aedaf66f372364c7dc51c8.png";
-import imgImage18 from "figma:asset/ec899bdbbbe994047f36c763e04f1455d001377c.png";
-import imgImage19 from "figma:asset/75045cfe4cb9a585ca1b0274032b51485c28f5f7.png";
-import imgImage20 from "figma:asset/4fbcabd8a9fe9270a8dfafbfe0191ac3d1016beb.png";
-import imgImage21 from "figma:asset/9b779636dff8669a8ebe0146669ac311e330cc4e.png";
-import imgImage22 from "figma:asset/58fc2a9b37d8e9cc2c922874cc5b7043ac4b68ce.png";
-import imgImage23 from "figma:asset/71e272ddf4eb676867179d420352c0ed53ed08f6.png";
-import imgImage14 from "figma:asset/8e5f3463a14418977bae5067abd0af0b3a184d6f.png";
-import imgImage24 from "figma:asset/13c8f478c4ac182bcae3355ddc4fb0742396f2b3.png";
-import imgImage25 from "figma:asset/af4f8497cd796b01f6c149bd2d388e5f991489ff.png";
-import imgImage26 from "figma:asset/6a8c591a36a76b0ae46f649c9870fe44bce470e7.png";
-import imgImage27 from "figma:asset/2bfa3e53c40b7bc1dddd06c6eaef1de790eeeb00.png";
-import imgRectangle42 from "figma:asset/31a63f55d67c21dfc7dd601b567f5841965a32bb.png";
-import imgRectangle11251 from "figma:asset/6f6beb2a2738b5e06d6523651c97ac18e9f5ae4d.png";
-import imgRectangle11252 from "figma:asset/ffba1ec7509ea330744bbca8b25ba7293ca299f1.png";
-import imgRectangle11253 from "figma:asset/2cdcd8e28ce45013666b2c6a1ccbf6e59db24a0c.png";
-import imgRectangle14 from "figma:asset/ef1c7a84ffcc0c7ff81640c9a21f3b59c0f022a9.png";
-import imgRectangle15 from "figma:asset/06b162c1f83a8666dc1db17b0575bdba3b090bc6.png";
-import imgRectangle16 from "figma:asset/e0ae57a6b7e747b6f009c5d469f7f0870740e20b.png";
-import imgRectangle17 from "figma:asset/f9729dab27554e3204cb7e326a0747a52f7461b2.png";
-import imgRectangle18 from "figma:asset/8bf475b1baf942622ef73eae62f42443362a84c0.png";
-import imgRectangle19 from "figma:asset/ab5fbf86c9ca0dd20e8190a5dcf0070bd643c38e.png";
-import imgRectangle20 from "figma:asset/0d14b47da8f906a94e5fd4eda4e67f2d47d5690e.png";
+// ── Types locaux ─────────────────────────────────────────────────────────────
 
-// Hero Slider Data
-const heroSlides = [
-  {
-    id: 1,
-    image: imgRectangle4189,
-    title: 'AFRO JEMBE JAIYE',
-    location: 'University of Moratuwa',
-    date: 'SAM.15 - 09 - 2025',
-    description: 'Millie Bobby Brown (Málaga, February 19, 2004) is a Spanish-born British actress. She started her acting career when she moved.',
-    price: 12000
-  },
-  {
-    id: 2,
-    image: imgImage16,
-    title: 'CONCERT LIVE AFROBEAT',
-    location: 'Stade de Kinshasa',
-    date: 'DIM.20 - 10 - 2025',
-    description: 'Découvrez le plus grand concert afrobeat de l\'année avec les stars internationales de la musique africaine sur scène.',
-    isFree: true
-  },
-  {
-    id: 3,
-    image: imgImage17,
-    title: 'FESTIVAL CULTURE & ARTS',
-    location: 'Palais du Peuple',
-    date: 'VEN.25 - 11 - 2025',
-    description: 'Une célébration unique de la culture africaine mêlant danse, musique traditionnelle et arts contemporains dans un spectacle époustouflant.',
-    price: 18000
-  },
-  {
-    id: 4,
-    image: imgImage18,
-    title: 'SOIRÉE JAZZ LIVE',
-    location: 'Centre Culturel',
-    date: 'SAM.05 - 12 - 2025',
-    description: 'Une soirée exceptionnelle de jazz avec les meilleurs musiciens locaux et internationaux dans une ambiance intimiste et chaleureuse.',
-    price: 9500
-  }
-];
+interface HeroSlide {
+  id: string;
+  image: string;
+  title: string;
+  location: string;
+  date: string;
+  description: string;
+  price?: number;
+  isFree: boolean;
+}
 
-// Event cards data based on Figma design
-const upcomingEvents = [
-  { id: '1', image: imgImage16, title: 'Yaye Padura', location: 'Salle Savorgnon - IFC, Brazzaville', date: 'NOV 20', category: 'Concert', price: 3000, hasStreaming: true },
-  { id: '2', image: imgImage17, title: 'Festival Mbote - Edition 2025', location: 'Stade des Martyrs, Kinshasa', date: 'NOV 25', category: 'Festival', isFree: true, hasStreaming: true },
-  { id: '3', image: imgImage18, title: 'Concert Live Jazz', location: 'Chez Ntemba, Kinshasa', date: 'NOV 28', category: 'Concert', price: 8000, hasStreaming: true },
-  { id: '4', image: imgImage19, title: 'Spectacle Comédie', location: 'Pullman Hotel, Kinshasa', date: 'DEC 05', category: 'Comedy', price: 12000, hasStreaming: true },
-  { id: '5', image: imgImage20, title: 'Soirée Danse Afro', location: 'Fleuve Congo Hotel, Kinshasa', date: 'DEC 10', category: 'Danse', isFree: true, hasStreaming: true },
-  { id: '6', image: imgImage21, title: 'Festival Culturel', location: 'Palais des Sports', date: 'DEC 18', category: 'Festival', price: 10000, hasStreaming: true },
-  { id: '7', image: imgImage22, title: 'Concert Live', location: 'Arena Kinshasa', date: 'DEC 22', category: 'Concert', price: 15000, hasStreaming: true },
-  { id: '8', image: imgImage23, title: 'Théâtre Musical', location: 'Théâtre National', date: 'DEC 25', category: 'Theatre', price: 6000, hasStreaming: true },
-];
+interface UpcomingEvent {
+  id: string;
+  image: string;
+  title: string;
+  location: string;
+  date: string; // format "NOV 20"
+  isFree: boolean;
+  price?: number;
+}
 
-const liveStreamingEvents = [
-  { id: '1', image: imgCardImg, title: 'Dadju- concert Montréal', location: 'Salle Savorgnon - IFC', date: '19h 30m', category: 'Comedy', isLive: true, isFree: true, hasStreaming: true },
-  { id: '2', image: imgCardImg1, title: 'Dadju- concert Montréal', location: 'Salle Savorgnon - IFC', date: '20h 00m', category: 'Comedy', isLive: true, price: 5000, hasStreaming: true },
-  { id: '3', image: imgCardImg2, title: 'Dadju- concert Montréal', location: 'Salle Savorgnon - IFC', date: '18h 15m', category: 'Fantasy', isLive: true, price: 7500, hasStreaming: true },
-  { id: '4', image: imgCardImg3, title: 'Dadju- concert Montréal', location: 'Salle Savorgnon - IFC', date: '21h 30m', category: 'Family', isLive: true, isFree: true, hasStreaming: true },
-  { id: '5', image: imgCardImg4, title: 'Dadju- concert Montréal', location: 'Salle Savorgnon - IFC', date: '22h 00m', category: 'Fantasy', isLive: true, price: 10000, hasStreaming: true },
-  { id: '6', image: imgImage16, title: 'Live Concert Paris', location: 'Paris Arena', date: '19h 45m', category: 'Concert', isLive: true, price: 15000, hasStreaming: true },
-  { id: '7', image: imgImage17, title: 'Show en Direct', location: 'Lyon Zenith', date: '20h 30m', category: 'Show', isLive: true, isFree: true, hasStreaming: true },
-  { id: '8', image: imgImage18, title: 'Festival Live', location: 'Marseille Dome', date: '21h 00m', category: 'Festival', isLive: true, price: 12000, hasStreaming: true },
-];
+// ── Helpers de formatage de dates ─────────────────────────────────────────────
 
-const freeEvents = [
-  { image: imgCardImg, title: 'Dadju- concert Montréal', location: 'Montréal Arena', date: '20 April', category: 'Concert', isFree: true, hasStreaming: true },
-  { image: imgCardImg1, title: 'Dadju- concert Montréal', location: 'Montréal Arena', date: '21 April', category: 'Concert', price: 8000, hasStreaming: true },
-  { image: imgCardImg2, title: 'Dadju- concert Montréal', location: 'Montréal Arena', date: '22 April', category: 'Concert', isFree: true, hasStreaming: true },
-  { image: imgCardImg3, title: 'Dadju- concert Montréal', location: 'Montréal Arena', date: '23 April', category: 'Concert', price: 6500, hasStreaming: true },
-  { image: imgCardImg4, title: 'Dadju- concert Montréal', location: 'Montréal Arena', date: '24 April', category: 'Concert', price: 9000, hasStreaming: true },
-  { image: imgImage19, title: 'Concert Gratuit', location: 'Bruxelles Hall', date: '25 April', category: 'Concert', isFree: true, hasStreaming: true },
-  { image: imgImage20, title: 'Spectacle Libre', location: 'Genève Arena', date: '28 April', category: 'Spectacle', price: 11000, hasStreaming: true },
-  { image: imgImage21, title: 'Soirée Culturelle', location: 'Lausanne Centre', date: '30 April', category: 'Culture', isFree: true, hasStreaming: true },
-];
+const FR_DAYS = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+const FR_MONTHS = ['JAN', 'FEV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUL', 'AOU', 'SEP', 'OCT', 'NOV', 'DEC'];
 
-const replayEvents = [
-  { image: imgRectangle11251, title: 'Concert Dadju Brazzaville', location: 'Salle Savorgnon -IFC', date: 'SAM 20.12.2025' },
-  { image: imgRectangle11252, title: 'Festival Afro Jembe Jaiye', location: 'Palais des Sports', date: 'VEN 15.11.2025' },
-  { image: imgRectangle11253, title: 'Soirée Jazz Live', location: 'Centre Culturel Français', date: 'DIM 08.12.2025' },
-  { image: imgImage24, title: 'Concert Fally Ipupa', location: 'Stade des Martyrs', date: 'SAM 14.12.2025' },
-  { image: imgImage25, title: 'Nuit du Ndombolo', location: 'Fleuve Congo Hotel', date: 'VEN 22.11.2025' },
-];
+function formatHeroDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const dayName = FR_DAYS[d.getDay()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dayName}.${day} - ${month} - ${d.getFullYear()}`;
+}
+
+function formatCardDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return `${FR_MONTHS[d.getMonth()]} ${d.getDate()}`;
+}
+
+function formatReplayDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const dayName = FR_DAYS[d.getDay()];
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dayName} ${day}.${month}.${d.getFullYear()}`;
+}
+
+// ── Mappers StreamingEvent → types locaux ─────────────────────────────────────
+
+function mapToHeroSlide(e: StreamingEvent): HeroSlide {
+  return {
+    id: e.id,
+    image: e.image,
+    title: e.title,
+    location: e.channelName,
+    date: formatHeroDate(e.date),
+    description: e.description,
+    price: e.isFree ? undefined : e.price,
+    isFree: e.isFree,
+  };
+}
+
+function mapToUpcoming(e: StreamingEvent): UpcomingEvent {
+  return {
+    id: e.id,
+    image: e.image,
+    title: e.title,
+    location: e.channelName,
+    date: formatCardDate(e.date),
+    isFree: e.isFree,
+    price: e.isFree ? undefined : e.price,
+  };
+}
+
+function mapToEventCard(e: StreamingEvent): EventCardProps {
+  return {
+    id: e.id,
+    image: e.image,
+    title: e.title,
+    location: e.channelName,
+    date: e.time,
+    category: e.category,
+    isLive: e.isLive,
+    isFree: e.isFree,
+    hasStreaming: true,
+    price: e.isFree ? undefined : e.price,
+  };
+}
+
+function mapToReplayCard(e: StreamingEvent): ReplayCardProps {
+  return {
+    image: e.image,
+    title: e.title,
+    location: e.channelName,
+    date: formatReplayDate(e.date),
+    duration: e.duration,
+    category: e.category,
+  };
+}
+
+// ── Catégories (UI statique) ──────────────────────────────────────────────────
 
 const categories = [
-  { 
-    name: 'Cinema', 
+  {
+    name: 'Cinema',
     active: true,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -138,8 +132,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Concert', 
+  {
+    name: 'Concert',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -151,8 +145,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Art', 
+  {
+    name: 'Art',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -162,8 +156,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Music', 
+  {
+    name: 'Music',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -173,8 +167,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Sport', 
+  {
+    name: 'Sport',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -185,8 +179,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Brunches', 
+  {
+    name: 'Brunches',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -197,8 +191,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Business', 
+  {
+    name: 'Business',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -208,8 +202,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Technology', 
+  {
+    name: 'Technology',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -219,8 +213,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Fashion', 
+  {
+    name: 'Fashion',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -230,8 +224,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Outdoor', 
+  {
+    name: 'Outdoor',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -241,8 +235,8 @@ const categories = [
       </svg>
     )
   },
-  { 
-    name: 'Education', 
+  {
+    name: 'Education',
     active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
@@ -253,11 +247,20 @@ const categories = [
   },
 ];
 
+// ── Composant principal ───────────────────────────────────────────────────────
+
 export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeCategory, setActiveCategory] = useState(0);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  
+
+  // Données depuis l'API
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
+  const [liveStreamingEvents, setLiveStreamingEvents] = useState<EventCardProps[]>([]);
+  const [freeEvents, setFreeEvents] = useState<EventCardProps[]>([]);
+  const [replayEvents, setReplayEvents] = useState<ReplayCardProps[]>([]);
+
   // Refs for carousel scrolling
   const upcomingRef = useRef<HTMLDivElement>(null);
   const liveStreamRef = useRef<HTMLDivElement>(null);
@@ -265,14 +268,37 @@ export function Home() {
   const categoryRef = useRef<HTMLDivElement>(null);
   const replayRef = useRef<HTMLDivElement>(null);
 
-  // Auto-play slider
+  // Chargement des données depuis l'API
   useEffect(() => {
+    (async () => {
+      try {
+        const [all, liveData, replays] = await Promise.all([
+          EventsAPI.getAll(),
+          EventsAPI.getLive(),
+          EventsAPI.getReplays(),
+        ]);
+
+        const featured = all.filter(e => e.isFeatured);
+        const heroSource = (featured.length > 0 ? featured : all).slice(0, 4);
+        setHeroSlides(heroSource.map(mapToHeroSlide));
+        setUpcomingEvents(all.filter(e => !e.isLive && !e.isReplay).map(mapToUpcoming));
+        setLiveStreamingEvents(liveData.map(mapToEventCard));
+        setFreeEvents(all.filter(e => e.isFree).map(mapToEventCard));
+        setReplayEvents(replays.map(mapToReplayCard));
+      } catch (err) {
+        console.error('Erreur chargement events:', err);
+      }
+    })();
+  }, []);
+
+  // Auto-play slider (redémarre quand heroSlides change)
+  useEffect(() => {
+    if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000); // Change slide every 5 seconds
-
+    }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -287,154 +313,161 @@ export function Home() {
   };
 
   const navigate = useNavigate();
+  const currentHero = heroSlides[currentSlide];
 
   return (
     <div className="relative bg-[#080808] min-h-screen">
       {/* Hero Section - Active Slider */}
       <section className="relative h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px] xl:h-[930px] w-full overflow-hidden">
         {/* Slider Images */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7 }}
-            className="absolute inset-0"
-          >
-            <img 
-              src={heroSlides[currentSlide].image} 
-              alt={heroSlides[currentSlide].title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080808] from-[29.365%] via-[rgba(8,8,8,0.51)] via-[58.6%] to-[rgba(8,8,8,0)] to-[82.52%] mix-blend-multiply opacity-50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(8,8,8,0.69)] from-[29.365%] via-[rgba(8,8,8,0.35)] via-[58.6%] to-[rgba(8,8,8,0)] to-[82.52%] mix-blend-multiply opacity-84" />
-          </motion.div>
-        </AnimatePresence>
+        {currentHero && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7 }}
+              className="absolute inset-0"
+            >
+              <img
+                src={currentHero.image}
+                alt={currentHero.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#080808] from-[29.365%] via-[rgba(8,8,8,0.51)] via-[58.6%] to-[rgba(8,8,8,0)] to-[82.52%] mix-blend-multiply opacity-50" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(8,8,8,0.69)] from-[29.365%] via-[rgba(8,8,8,0.35)] via-[58.6%] to-[rgba(8,8,8,0)] to-[82.52%] mix-blend-multiply opacity-84" />
+            </motion.div>
+          </AnimatePresence>
+        )}
 
         {/* Hero Content */}
-        <div className="relative h-full flex items-end pb-16 sm:pb-20 md:pb-24 lg:pb-32">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-[75px] w-full">
-            <div className="max-w-[1287px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentSlide}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -30 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Title */}
-                  <h1 className="font-['Montserrat',sans-serif] font-semibold text-white text-[36px] sm:text-[44px] md:text-[52px] lg:text-[64px] xl:text-[76px] leading-[1.1] mb-3 md:mb-4 lg:mb-6">
-                    {heroSlides[currentSlide].title}
-                  </h1>
-
-                  {/* Location and Date */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3 lg:gap-[14px] mb-3 md:mb-4 lg:mb-6">
-                    {/* Location */}
-                    <div className="flex items-center gap-2 md:gap-2.5 lg:gap-3">
-                      <div className="h-5 w-4 md:h-6 md:w-5 lg:h-7 lg:w-6 flex-shrink-0">
-                        <svg className="w-full h-full" fill="none" viewBox="0 0 30 40">
-                          <g>
-                            <path d={svgPaths.p185cb180} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                            <path d={svgPaths.p188be600} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                          </g>
-                        </svg>
-                      </div>
-                      <p className="font-['DM_Sans',sans-serif] font-normal text-[#dfe1e4] text-[15px] sm:text-[17px] md:text-[19px] lg:text-[21px] xl:text-[24px] leading-normal">
-                        {heroSlides[currentSlide].location}
-                      </p>
-                    </div>
-                    
-                    <div className="hidden sm:block bg-[rgba(255,255,255,0.6)] h-7 md:h-8 lg:h-9 w-[2px]" />
-                    
-                    {/* Calendar and Date */}
-                    <div className="flex items-center gap-2 md:gap-2.5 lg:gap-3">
-                      <div className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 flex-shrink-0">
-                        <svg className="w-full h-full" fill="none" viewBox="0 0 31 34">
-                          <path d={svgPaths.p23bf7380} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                        </svg>
-                      </div>
-                      <p className="font-['DM_Sans',sans-serif] font-normal text-[#dfe1e4] text-[15px] sm:text-[17px] md:text-[19px] lg:text-[21px] xl:text-[24px] leading-normal">
-                        {heroSlides[currentSlide].date}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div className="mb-5 md:mb-6 lg:mb-8 max-w-[1100px]">
-                    <p className="font-['Montserrat',sans-serif] font-normal text-white text-[13px] sm:text-[15px] md:text-[17px] lg:text-[19px] xl:text-[22px] leading-[1.5] line-clamp-2">
-                      {heroSlides[currentSlide].description}
-                    </p>
-                  </div>
-
-                  {/* Price Badge */}
+        {currentHero && (
+          <div className="relative h-full flex items-end pb-16 sm:pb-20 md:pb-24 lg:pb-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-[75px] w-full">
+              <div className="max-w-[1287px]">
+                <AnimatePresence mode="wait">
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    key={currentSlide}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.4 }}
-                    className="mb-5 md:mb-6 lg:mb-7"
+                    exit={{ opacity: 0, y: -30 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    {heroSlides[currentSlide].isFree ? (
-                      <div className="inline-flex items-center gap-2 md:gap-2.5 bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
-                        <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full bg-white flex items-center justify-center">
-                          <span className="text-[#DE0035] text-xs md:text-sm lg:text-base font-bold"></span>
-                        </div>
-                        <span className="font-['DM_Sans',sans-serif] font-bold text-white text-sm md:text-base lg:text-lg xl:text-xl">
-                          100% Gratuit
-                        </span>
-                      </div>
-                    ) : heroSlides[currentSlide].price ? (
-                      <div className="inline-flex items-center gap-2 md:gap-2.5 bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
-                        <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full bg-white flex items-center justify-center">
-                          <span className="text-[#DE0035] text-xs md:text-sm lg:text-base font-bold">₣</span>
-                        </div>
-                        <span className="font-['DM_Sans',sans-serif] font-bold text-white text-sm md:text-base lg:text-lg xl:text-xl">
-                          {heroSlides[currentSlide].price.toLocaleString()} FCFA
-                        </span>
-                      </div>
-                    ) : null}
-                  </motion.div>
+                    {/* Title */}
+                    <h1 className="font-['Montserrat',sans-serif] font-semibold text-white text-[36px] sm:text-[44px] md:text-[52px] lg:text-[64px] xl:text-[76px] leading-[1.1] mb-3 md:mb-4 lg:mb-6">
+                      {currentHero.title}
+                    </h1>
 
-                  {/* CTA Buttons */}
-                  <div className="flex flex-wrap items-center gap-2.5 md:gap-3 lg:gap-4">
-                    {/* En savoir + Button */}
-                    <motion.button 
-                      onClick={() => navigate(`/event/${heroSlides[currentSlide].id}`)}
-                      className="bg-[#de0035] flex items-center justify-center gap-2 md:gap-2.5 lg:gap-3 h-[48px] md:h-[52px] lg:h-[56px] px-5 md:px-6 lg:px-8 rounded-none hover:bg-[#c5002f] transition-colors"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                    {/* Location and Date */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3 lg:gap-[14px] mb-3 md:mb-4 lg:mb-6">
+                      {/* Location */}
+                      <div className="flex items-center gap-2 md:gap-2.5 lg:gap-3">
+                        <div className="h-5 w-4 md:h-6 md:w-5 lg:h-7 lg:w-6 flex-shrink-0">
+                          <svg className="w-full h-full" fill="none" viewBox="0 0 30 40">
+                            <g>
+                              <path d={svgPaths.p185cb180} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
+                              <path d={svgPaths.p188be600} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
+                            </g>
+                          </svg>
+                        </div>
+                        <p className="font-['DM_Sans',sans-serif] font-normal text-[#dfe1e4] text-[15px] sm:text-[17px] md:text-[19px] lg:text-[21px] xl:text-[24px] leading-normal">
+                          {currentHero.location}
+                        </p>
+                      </div>
+
+                      <div className="hidden sm:block bg-[rgba(255,255,255,0.6)] h-7 md:h-8 lg:h-9 w-[2px]" />
+
+                      {/* Calendar and Date */}
+                      <div className="flex items-center gap-2 md:gap-2.5 lg:gap-3">
+                        <div className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 flex-shrink-0">
+                          <svg className="w-full h-full" fill="none" viewBox="0 0 31 34">
+                            <path d={svgPaths.p23bf7380} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
+                          </svg>
+                        </div>
+                        <p className="font-['DM_Sans',sans-serif] font-normal text-[#dfe1e4] text-[15px] sm:text-[17px] md:text-[19px] lg:text-[21px] xl:text-[24px] leading-normal">
+                          {currentHero.date}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="mb-5 md:mb-6 lg:mb-8 max-w-[1100px]">
+                      <p className="font-['Montserrat',sans-serif] font-normal text-white text-[13px] sm:text-[15px] md:text-[17px] lg:text-[19px] xl:text-[22px] leading-[1.5] line-clamp-2">
+                        {currentHero.description}
+                      </p>
+                    </div>
+
+                    {/* Price Badge */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
+                      className="mb-5 md:mb-6 lg:mb-7"
                     >
-                      <span className="font-['SF_Pro',sans-serif] font-normal text-white text-[16px] md:text-[18px] lg:text-[20px] leading-[1.4]">
-                        En savoir +
-                      </span>
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </motion.button>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+                      {currentHero.isFree ? (
+                        <div className="inline-flex items-center gap-2 md:gap-2.5 bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
+                          <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full bg-white flex items-center justify-center">
+                            <span className="text-[#DE0035] text-xs md:text-sm lg:text-base font-bold"></span>
+                          </div>
+                          <span className="font-['DM_Sans',sans-serif] font-bold text-white text-sm md:text-base lg:text-lg xl:text-xl">
+                            100% Gratuit
+                          </span>
+                        </div>
+                      ) : currentHero.price ? (
+                        <div className="inline-flex items-center gap-2 md:gap-2.5 bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
+                          <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full bg-white flex items-center justify-center">
+                            <span className="text-[#DE0035] text-xs md:text-sm lg:text-base font-bold">₣</span>
+                          </div>
+                          <span className="font-['DM_Sans',sans-serif] font-bold text-white text-sm md:text-base lg:text-lg xl:text-xl">
+                            {currentHero.price.toLocaleString()} FCFA
+                          </span>
+                        </div>
+                      ) : null}
+                    </motion.div>
+
+                    {/* CTA Buttons */}
+                    <div className="flex flex-wrap items-center gap-2.5 md:gap-3 lg:gap-4">
+                      {/* En savoir + Button */}
+                      <motion.button
+                        onClick={() => navigate(`/event/${currentHero.id}`)}
+                        className="bg-[#de0035] flex items-center justify-center gap-2 md:gap-2.5 lg:gap-3 h-[48px] md:h-[52px] lg:h-[56px] px-5 md:px-6 lg:px-8 rounded-none hover:bg-[#c5002f] transition-colors"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <span className="font-['SF_Pro',sans-serif] font-normal text-white text-[16px] md:text-[18px] lg:text-[20px] leading-[1.4]">
+                          En savoir +
+                        </span>
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Slider Indicators - Enhanced */}
-        <div className="absolute bottom-6 md:bottom-7 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 lg:gap-5 z-10">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`transition-all duration-300 rounded-[30px] ${
-                index === currentSlide
-                  ? 'bg-[#cdff71] w-[20px] md:w-[24px] lg:w-[28px] h-[10px] md:h-[12px] lg:h-[14px]'
-                  : 'bg-white opacity-60 hover:opacity-80 w-[10px] md:w-[12px] lg:w-[14px] h-[10px] md:h-[12px] lg:h-[14px] rounded-full'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
+        {heroSlides.length > 0 && (
+          <div className="absolute bottom-6 md:bottom-7 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 lg:gap-5 z-10">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 rounded-[30px] ${
+                  index === currentSlide
+                    ? 'bg-[#cdff71] w-[20px] md:w-[24px] lg:w-[28px] h-[10px] md:h-[12px] lg:h-[14px]'
+                    : 'bg-white opacity-60 hover:opacity-80 w-[10px] md:w-[12px] lg:w-[14px] h-[10px] md:h-[12px] lg:h-[14px] rounded-full'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Main Content */}
@@ -448,7 +481,7 @@ export function Home() {
                 className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 lg:px-5 py-2 md:py-2.5 lg:py-3 rounded-[100px] shrink-0 transition-all ${
                   index === activeCategory
                     ? 'bg-[#cdff71]'
-                    : 'bg-white border border-[#dfe1e4] border-[0.3px]'
+                    : 'bg-white border-[0.3px] border-[#dfe1e4]'
                 }`}
                 onClick={() => setActiveCategory(index)}
                 whileHover={{ scale: 1.03 }}
@@ -472,9 +505,9 @@ export function Home() {
               A ne pas rater
             </h2>
             <div className="flex items-center gap-3 md:gap-6">
-              <button 
+              <button
                 onClick={() => scrollCarousel(upcomingRef, 'left')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
                 aria-label="Précédent"
               >
@@ -482,9 +515,9 @@ export function Home() {
                   <path d={svgPaths.p22419180} fill="#B3B3B3" />
                 </svg>
               </button>
-              <button 
+              <button
                 onClick={() => scrollCarousel(upcomingRef, 'right')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
                 aria-label="Suivant"
               >
@@ -511,7 +544,7 @@ export function Home() {
                     className="absolute w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black from-[6.808%] to-[rgba(0,0,0,0)] to-[74.883%]" />
-                  
+
                   {/* Date Badge */}
                   <div className="absolute left-4 md:left-6 lg:left-12 top-16 md:top-20 lg:top-28 flex flex-col items-center gap-1">
                     <p className="font-['DM_Sans',sans-serif] font-bold text-[#de0035] text-base md:text-lg lg:text-[22px] text-center">
@@ -571,9 +604,9 @@ export function Home() {
               Video en live streaming
             </h2>
             <div className="flex items-center gap-3 md:gap-6">
-              <button 
+              <button
                 onClick={() => scrollCarousel(liveStreamRef, 'left')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
                 aria-label="Précédent"
               >
@@ -581,9 +614,9 @@ export function Home() {
                   <path d={svgPaths.p22419180} fill="#B3B3B3" />
                 </svg>
               </button>
-              <button 
+              <button
                 onClick={() => scrollCarousel(liveStreamRef, 'right')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
                 aria-label="Suivant"
               >
@@ -616,9 +649,9 @@ export function Home() {
               100% Gratuit
             </h2>
             <div className="flex items-center gap-3 md:gap-6">
-              <button 
+              <button
                 onClick={() => scrollCarousel(freeEventsRef, 'left')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
                 aria-label="Précédent"
               >
@@ -626,9 +659,9 @@ export function Home() {
                   <path d={svgPaths.p22419180} fill="#B3B3B3" />
                 </svg>
               </button>
-              <button 
+              <button
                 onClick={() => scrollCarousel(freeEventsRef, 'right')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
                 aria-label="Suivant"
               >
@@ -660,9 +693,9 @@ export function Home() {
               Replay
             </h2>
             <div className="flex items-center gap-3 md:gap-6">
-              <button 
+              <button
                 onClick={() => scrollCarousel(replayRef, 'left')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
                 aria-label="Précédent"
               >
@@ -670,9 +703,9 @@ export function Home() {
                   <path d={svgPaths.p22419180} fill="#B3B3B3" />
                 </svg>
               </button>
-              <button 
+              <button
                 onClick={() => scrollCarousel(replayRef, 'right')}
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
+                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all"
                 style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
                 aria-label="Suivant"
               >
@@ -696,7 +729,7 @@ export function Home() {
 
       {/* Video Modal Popup */}
       <AnimatePresence>
-        {videoModalOpen && (
+        {videoModalOpen && currentHero && (
           <>
             {/* Backdrop */}
             <motion.div
@@ -732,7 +765,7 @@ export function Home() {
                     className="w-full h-full"
                     controls
                     autoPlay
-                    poster={heroSlides[currentSlide].image}
+                    poster={currentHero.image}
                   >
                     <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
                     Votre navigateur ne supporte pas la lecture de vidéos.
@@ -742,10 +775,10 @@ export function Home() {
                 {/* Video Info */}
                 <div className="p-4 md:p-6 lg:p-8">
                   <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl md:text-2xl lg:text-3xl mb-2">
-                    {heroSlides[currentSlide].title}
+                    {currentHero.title}
                   </h3>
                   <p className="font-['DM_Sans',sans-serif] text-[#dfe1e4] text-sm md:text-base mb-4">
-                    {heroSlides[currentSlide].description}
+                    {currentHero.description}
                   </p>
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -756,7 +789,7 @@ export function Home() {
                         </g>
                       </svg>
                       <span className="font-['DM_Sans',sans-serif] text-white text-sm md:text-base">
-                        {heroSlides[currentSlide].location}
+                        {currentHero.location}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -764,7 +797,7 @@ export function Home() {
                         <path d={svgPaths.p23bf7380} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
                       </svg>
                       <span className="font-['DM_Sans',sans-serif] text-white text-sm md:text-base">
-                        {heroSlides[currentSlide].date}
+                        {currentHero.date}
                       </span>
                     </div>
                   </div>
