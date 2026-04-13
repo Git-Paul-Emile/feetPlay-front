@@ -24,6 +24,7 @@ interface HeroSlide {
   description: string;
   price?: number;
   isFree: boolean;
+  streamUrl?: string;
 }
 
 interface UpcomingEvent {
@@ -77,6 +78,7 @@ function mapToHeroSlide(e: StreamingEvent): HeroSlide {
     description: e.description,
     price: e.isFree ? undefined : e.price,
     isFree: e.isFree,
+    streamUrl: e.streamUrl,
   };
 }
 
@@ -767,7 +769,7 @@ export function Home() {
                     autoPlay
                     poster={currentHero.image}
                   >
-                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                    {currentHero.streamUrl && <source src={currentHero.streamUrl} type="video/mp4" />}
                     Votre navigateur ne supporte pas la lecture de vidéos.
                   </video>
                 </div>

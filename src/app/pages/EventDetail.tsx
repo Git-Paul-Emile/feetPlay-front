@@ -1,14 +1,15 @@
 import { useParams, useNavigate } from 'react-router';
-import { motion } from 'motion/react';
-import { X, Ticket, Heart, Clock, Tag, MapPin, Users, Share2, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Ticket, Heart, Clock, Tag, MapPin, Users, Share2, ExternalLink, Play, Radio } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useState, useEffect } from 'react';
 import { PurchaseModal, PurchaseData } from '../components/PurchaseModal';
 import { DigitalTicket } from '../components/DigitalTicket';
-import svgPaths from "../../imports/svg-z30khrsoqy";
+import { MuxPlayer, extractMuxPlaybackId } from '../components/MuxPlayer';
 import EventsAPI from '../services/api/EventsAPI';
 import Feeti2EventsAPI, { type Feeti2Event } from '../services/api/Feeti2EventsAPI';
 import { getPreferredFeeti2BaseUrl } from '../utils/serviceConfig';
+import { useViewerCount } from '../hooks/useViewerCount';
 
 const FEETI2_URL = getPreferredFeeti2BaseUrl();
 
@@ -32,6 +33,8 @@ interface EventDetailData {
   capacity?: string;
   source?: 'feetiplay' | 'feeti2';
   feeti2EventId?: string;
+  streamUrl?: string | null;
+  isReplay?: boolean;
 }
 
 
@@ -54,6 +57,7 @@ function mapFeeti2ToDetail(e: Feeti2Event): EventDetailData {
     organizer: e.channelName,
     source: 'feeti2',
     feeti2EventId: e.id,
+    streamUrl: e.streamUrl,
   };
 }
 
@@ -67,6 +71,9 @@ export function EventDetail() {
   const [showTicket, setShowTicket] = useState(false);
   const [apiEvent, setApiEvent] = useState<EventDetailData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [playerError, setPlayerError] = useState(false);
+  const [playerRetryKey, setPlayerRetryKey] = useState(0);
 
   // Essaie de charger l'événement depuis l'API (feetiPlay puis feeti2)
   useEffect(() => {
@@ -88,10 +95,12 @@ export function EventDetail() {
             description: fpEvent.description,
             reference: `FP-${fpEvent.id.slice(-6).toUpperCase()}`,
             isLive: fpEvent.isLive,
+            isReplay: fpEvent.isReplay,
             isFree: fpEvent.isFree,
             price: fpEvent.price,
             duration: fpEvent.duration,
             organizer: fpEvent.channelName,
+            streamUrl: fpEvent.streamUrl,
             source: 'feetiplay',
           });
           return;
@@ -107,8 +116,13 @@ export function EventDetail() {
     load().finally(() => setLoading(false));
   }, [id]);
 
-  // Priorité : API > mock
   const event = apiEvent;
+
+  // Viewer count SSE — actif uniquement pendant le player live
+  const liveViewerCount = useViewerCount(
+    showPlayer && event?.isLive ? event.id : undefined,
+    !!event?.isLive
+  );
 
   if (loading) {
     return (
@@ -328,16 +342,17 @@ export function EventDetail() {
                 </motion.a>
               )}
 
-              {/* Bouton voir annonce (événements feetiPlay uniquement) */}
-              {event.source !== 'feeti2' && (
+              {/* Bouton Watch (live ou replay) — feetiPlay events avec streamUrl */}
+              {event.source !== 'feeti2' && (event.isLive || event.isReplay) && extractMuxPlaybackId(event.streamUrl) && (
                 <motion.button
+                  onClick={() => setShowPlayer(true)}
                   className="bg-[#de0035] hover:bg-[#de0035]/90 flex items-center gap-3 px-6 md:px-8 py-3 rounded-sm transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Ticket className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  <Play className="w-5 h-5 md:w-6 md:h-6 text-white" fill="white" />
                   <span className="font-['SF_Pro',sans-serif] font-normal text-white text-base md:text-lg">
-                    Voir l'annonce
+                    {event.isReplay ? 'Voir le replay' : 'Regarder en direct'}
                   </span>
                 </motion.button>
               )}
@@ -480,6 +495,80 @@ export function EventDetail() {
         onClose={() => setShowTicket(false)}
         purchaseData={purchaseData}
       />
+
+      {/* Mux Player Overlay */}
+      <AnimatePresence>
+        {showPlayer && extractMuxPlaybackId(event.streamUrl) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-4"
+          >
+            <div className="w-full max-w-5xl">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-white font-bold text-lg">{event.title}</h2>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    {event.isLive && (
+                      <span className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        EN DIRECT
+                      </span>
+                    )}
+                    {event.isLive && liveViewerCount > 0 && (
+                      <span className="inline-flex items-center gap-1.5 text-white/60 text-xs">
+                        <Radio className="w-3 h-3 text-[#CDFF71]" />
+                        {liveViewerCount.toLocaleString()} spectateur{liveViewerCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowPlayer(false); setPlayerError(false); }}
+                  className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+
+              <div className="w-full aspect-video rounded-xl overflow-hidden bg-black">
+                {playerError ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-white/60">
+                    <svg className="w-14 h-14 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <p className="text-sm text-center px-4">
+                      {event.isLive
+                        ? 'Le direct est temporairement indisponible.'
+                        : 'Impossible de charger le replay.'}
+                    </p>
+                    <button
+                      onClick={() => { setPlayerError(false); setPlayerRetryKey(k => k + 1); }}
+                      className="px-5 py-2 bg-[#DE0035] text-white text-sm rounded-full hover:bg-[#c5002f] transition-colors"
+                    >
+                      Réessayer
+                    </button>
+                  </div>
+                ) : (
+                  <MuxPlayer
+                    key={playerRetryKey}
+                    playbackId={extractMuxPlaybackId(event.streamUrl)!}
+                    streamType={event.isLive ? 'live' : 'on-demand'}
+                    title={event.title}
+                    poster={event.image}
+                    autoPlay
+                    eventId={event.id}
+                    eventTitle={event.title}
+                    onError={() => setPlayerError(true)}
+                  />
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

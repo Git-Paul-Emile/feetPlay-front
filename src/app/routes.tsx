@@ -29,10 +29,17 @@ const FavoritesLazy      = lazy(() => import('./pages/Favorites').then(m => ({ d
 const EventDetailLazy    = lazy(() => import('./pages/EventDetail').then(m => ({ default: m.EventDetail })));
 const EventListLazy      = lazy(() => import('./pages/EventList').then(m => ({ default: m.EventList })));
 const SearchResultsLazy  = lazy(() => import('./pages/SearchResults').then(m => ({ default: m.SearchResults })));
+const WatchHistoryLazy   = lazy(() => import('./pages/WatchHistory').then(m => ({ default: m.WatchHistory })));
 
 // Lazy load admin sous-pages
 const EventsManagementLazy = lazy(() => import('./pages/admin/EventsManagement').then(m => ({ default: m.EventsManagement })));
 const SystemLogsLazy       = lazy(() => import('./pages/admin/SystemLogs').then(m => ({ default: m.SystemLogs })));
+const UsersManagementLazy  = lazy(() => import('./pages/admin/UsersManagement').then(m => ({ default: m.UsersManagement })));
+const FinancesPageLazy     = lazy(() => import('./pages/admin/FinancesPage').then(m => ({ default: m.FinancesPage })));
+const CRMPageLazy          = lazy(() => import('./pages/admin/CRMPage').then(m => ({ default: m.CRMPage })));
+const NotificationsPageLazy = lazy(() => import('./pages/admin/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
+const SettingsPageLazy        = lazy(() => import('./pages/admin/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const StreamingAnalyticsLazy  = lazy(() => import('./pages/admin/StreamingAnalytics').then(m => ({ default: m.StreamingAnalytics })));
 
 // Spinner de chargement commun
 function PageLoader() {
@@ -63,8 +70,15 @@ const Favorites      = withSuspense(FavoritesLazy);
 const EventDetail    = withSuspense(EventDetailLazy);
 const EventList      = withSuspense(EventListLazy);
 const SearchResults  = withSuspense(SearchResultsLazy);
-const EventsManagement = withSuspense(EventsManagementLazy);
-const SystemLogs       = withSuspense(SystemLogsLazy);
+const WatchHistory   = withSuspense(WatchHistoryLazy);
+const EventsManagement  = withSuspense(EventsManagementLazy);
+const SystemLogs        = withSuspense(SystemLogsLazy);
+const UsersManagement   = withSuspense(UsersManagementLazy);
+const FinancesPage      = withSuspense(FinancesPageLazy);
+const CRMPage           = withSuspense(CRMPageLazy);
+const NotificationsPage = withSuspense(NotificationsPageLazy);
+const SettingsPage         = withSuspense(SettingsPageLazy);
+const StreamingAnalytics   = withSuspense(StreamingAnalyticsLazy);
 
 // Pages légales wrappées
 const TermsOfService = withSuspense(TermsOfServiceLazy);
@@ -74,22 +88,6 @@ const LegalNotice    = withSuspense(LegalNoticeLazy);
 const RefundPolicy   = withSuspense(RefundPolicyLazy);
 const FAQ            = withSuspense(FAQLazy);
 
-// Placeholders pour les pages en construction
-function UsersPlaceholder() {
-  return <div className="p-8 text-white">Gestion des utilisateurs - En construction</div>;
-}
-function CRMPlaceholder() {
-  return <div className="p-8 text-white">CRM & Analytics - En construction</div>;
-}
-function NotificationsPlaceholder() {
-  return <div className="p-8 text-white">Notifications Push - En construction</div>;
-}
-function FinancesPlaceholder() {
-  return <div className="p-8 text-white">Finances - En construction</div>;
-}
-function SettingsPlaceholder() {
-  return <div className="p-8 text-white">Paramètres - En construction</div>;
-}
 
 function AdminRedirect() {
   return <Navigate to="/admin/dashboard" replace />;
@@ -108,7 +106,8 @@ export const router = createBrowserRouter([
       { path: 'favorites', Component: Favorites },
       { path: 'events',    Component: EventList },
       { path: 'event/:id', Component: EventDetail },
-      { path: 'search',    Component: SearchResults },
+      { path: 'search',         Component: SearchResults },
+      { path: 'watch-history',  Component: WatchHistory },
     ],
   },
   // ── Legal ────────────────────────────────────────────────────────────────
@@ -139,11 +138,12 @@ export const router = createBrowserRouter([
       { path: 'dashboard',          Component: AdminDashboard },
       { path: 'events',             Component: EventsManagement },
       { path: 'logs',               Component: SystemLogs },
-      { path: 'users',              Component: UsersPlaceholder },
-      { path: 'crm',                Component: CRMPlaceholder },
-      { path: 'notifications',      Component: NotificationsPlaceholder },
-      { path: 'finances',           Component: FinancesPlaceholder },
-      { path: 'settings',           Component: SettingsPlaceholder },
+      { path: 'users',              Component: UsersManagement },
+      { path: 'crm',                Component: CRMPage },
+      { path: 'notifications',      Component: NotificationsPage },
+      { path: 'finances',           Component: FinancesPage },
+      { path: 'settings',            Component: SettingsPage },
+      { path: 'analytics/streaming', Component: StreamingAnalytics },
     ],
   },
 ]);

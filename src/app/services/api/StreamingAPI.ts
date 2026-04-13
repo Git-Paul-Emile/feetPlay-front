@@ -112,6 +112,17 @@ class StreamingAPIService extends BaseAPIService {
     await this.fetchApi('/streaming/watch-history', { method: 'DELETE' });
     this.invalidateCache('watch-history');
   }
+
+  // ── Signed token Mux (pour contenu premium) ──────────────────────────────
+
+  async getMuxToken(eventId: string): Promise<{ token: string | null; playbackId: string }> {
+    const res = await this.request(`mux-token:${eventId}`, () =>
+      this.fetchApi<{ token: string | null; playbackId: string }>(`/streaming/mux-token/${eventId}`),
+      { cache: false }
+    );
+    if (!res.data) throw new Error('Impossible de récupérer le token de lecture');
+    return res.data;
+  }
 }
 
 const StreamingAPI = new StreamingAPIService();

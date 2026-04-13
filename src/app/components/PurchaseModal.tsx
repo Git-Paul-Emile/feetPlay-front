@@ -5,6 +5,9 @@ import { X, CreditCard, Smartphone, CheckCircle2 } from 'lucide-react';
 // Import SVG paths for the button
 import svgPaths from '../../imports/svg-pirafvy7od';
 
+// ─── API base URL (feetiPlay backend) ────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+
 export interface PurchaseData {
   eventId: string;
   eventTitle: string;
@@ -55,17 +58,76 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
     setStep('payment');
   };
 
+  const [mobileOperator, setMobileOperator] = useState<'mtn' | 'orange' | 'airtel'>('mtn');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
   const handlePaymentSubmit = async () => {
     const isFreeEvent = !event.price || event.price === 0;
-    
-    // For free events, no payment method needed
-    // For paid events, payment method is required
-    if (isFreeEvent || paymentMethod) {
-      setLoading(true);
-      setStep('processing');
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    if (!isFreeEvent && !paymentMethod) return;
+
+    setLoading(true);
+    setStep('processing');
+    setPaymentError(null);
+
+    try {
+      // Déterminer le provider et obtenir un paymentId
+      let paymentProvider: 'stripe' | 'mobile_money' | 'paystack' = 'stripe';
+      let paymentId = `fp_sim_${Date.now()}`;
+
+      if (paymentMethod === 'mobile-money') {
+        paymentProvider = 'mobile_money';
+        try {
+          const mmRes = await fetch(`${API_BASE}/api/payments/mobile-money/initialize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone: formData.userPhone,
+              provider: mobileOperator,
+              amount: event.price || 0,
+              currency: 'FCFA',
+            }),
+          });
+          const mmData = await mmRes.json();
+          paymentId = mmData?.data?.transaction_id || paymentId;
+        } catch { /* simulation : continue */ }
+      } else if (paymentMethod === 'card') {
+        paymentProvider = 'stripe';
+        try {
+          const strRes = await fetch(`${API_BASE}/api/payments/stripe/create-intent`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: event.price || 0, currency: 'FCFA' }),
+          });
+          const strData = await strRes.json();
+          paymentId = strData?.data?.intent_id || paymentId;
+        } catch { /* simulation : continue */ }
+      }
+
+      // Confirmer le paiement + créer l'accès streaming + envoyer email
+      const confirmRes = await fetch(`${API_BASE}/api/payments/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventSource: 'feetiplay',
+          eventId: event.id,
+          eventTitle: event.title,
+          eventDate: event.date,
+          eventTime: event.time || '15:05',
+          price: event.price,
+          currency: 'FCFA',
+          holderName: formData.userName,
+          holderEmail: formData.userEmail,
+          holderPhone: formData.userPhone,
+          paymentProvider,
+          paymentId,
+        }),
+      });
+
+      if (!confirmRes.ok) {
+        const errData = await confirmRes.json().catch(() => ({}));
+        throw new Error((errData as any)?.message || 'Erreur lors du paiement');
+      }
 
       const purchaseData: PurchaseData = {
         eventId: event.id,
@@ -80,17 +142,17 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
       };
 
       onPurchaseComplete(purchaseData);
+    } catch (err: any) {
+      setPaymentError(err?.message || 'Une erreur est survenue. Veuillez réessayer.');
+      setStep('payment');
+    } finally {
       setLoading(false);
-      
-      // Reset for next use
-      setStep('info');
-      setPaymentMethod(null);
-      setFormData({
-        userName: '',
-        userEmail: '',
-        userPhone: '',
-        userCity: '',
-      });
+      if (step !== 'payment') {
+        // Reset pour la prochaine utilisation
+        setStep('info');
+        setPaymentMethod(null);
+        setFormData({ userName: '', userEmail: '', userPhone: '', userCity: '' });
+      }
     }
   };
 
@@ -391,6 +453,13 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
                     </div>
                   </div>
 
+                  {/* Erreur paiement */}
+                  {paymentError && (
+                    <div className="mb-4 bg-red-500/20 border border-red-500/40 rounded-[8px] p-4">
+                      <p className="font-['Inter',sans-serif] text-red-300 text-sm">{paymentError}</p>
+                    </div>
+                  )}
+
                   {/* Payment Methods */}
                   {event.price && event.price > 0 && (
                     <div className="mb-8">
@@ -426,6 +495,26 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
                             <CheckCircle2 className="w-6 h-6 text-[#cdff71]" />
                           )}
                         </motion.button>
+
+                        {/* Opérateur Mobile Money */}
+                        {paymentMethod === 'mobile-money' && (
+                          <div className="flex gap-2 px-1">
+                            {(['mtn', 'orange', 'airtel'] as const).map(op => (
+                              <button
+                                key={op}
+                                type="button"
+                                onClick={() => setMobileOperator(op)}
+                                className={`flex-1 py-2 px-3 rounded-[6px] border text-sm font-medium transition-all ${
+                                  mobileOperator === op
+                                    ? 'border-[#cdff71] bg-[rgba(205,255,113,0.15)] text-[#cdff71]'
+                                    : 'border-[#62656a] text-white/60 hover:border-white/40'
+                                }`}
+                              >
+                                {op === 'mtn' ? 'MTN' : op === 'orange' ? 'Orange' : 'Airtel'}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
                         {/* Credit Card */}
                         <motion.button

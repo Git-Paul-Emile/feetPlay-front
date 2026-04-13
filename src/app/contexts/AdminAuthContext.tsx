@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { fetchWithApiFallback } from '../utils/serviceConfig';
+import AdminAPI from '../services/api/AdminAPI';
 
 export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'finance' | 'marketing';
 
@@ -55,17 +56,20 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
   return body.data as T;
 }
 
-function logAction(currentUser: AdminUser | null, action: string, description: string) {
-  const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
-  logs.unshift({
-    id: Date.now().toString(),
+function logAction(currentUser: AdminUser | null, action: string, description: string, level: 'info' | 'success' | 'warning' | 'error' = 'info') {
+  if (!currentUser) return;
+  AdminAPI.createLog({
     action,
     description,
-    user: currentUser?.name || 'Unknown',
-    role: currentUser?.role || 'unknown',
-    timestamp: new Date().toISOString(),
+    level,
+    adminName: currentUser.name,
+    adminRole: currentUser.role,
+  }).catch(() => {
+    // Fallback localStorage si l'API est indisponible
+    const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
+    logs.unshift({ id: Date.now().toString(), action, description, user: currentUser.name, role: currentUser.role, timestamp: new Date().toISOString() });
+    localStorage.setItem('admin_logs', JSON.stringify(logs.slice(0, 200)));
   });
-  localStorage.setItem('admin_logs', JSON.stringify(logs.slice(0, 1000)));
 }
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
@@ -98,7 +102,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(data.admin));
       setUser(data.admin);
       setIsAuthenticated(true);
-      logAction(data.admin, 'login', `${data.admin.name} s'est connecté`);
+      logAction(data.admin, 'login', `${data.admin.name} s'est connecté`, 'success');
       return true;
     } catch {
       return false;
