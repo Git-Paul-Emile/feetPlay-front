@@ -7,7 +7,7 @@ import { motion } from 'motion/react';
 import categorySvgPaths from "../../imports/svg-ckb5lqxig6";
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import EventsAPI, { type StreamingEvent } from '../services/api/EventsAPI';
-import { format, isThisMonth, isLastMonth, parseISO } from 'date-fns';
+import { format, isThisMonth, parseISO, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 const categories = [
@@ -196,7 +196,13 @@ export function Replay() {
     {
       label: 'Le mois dernier',
       events: filtered.filter(e => {
-        try { return isLastMonth(parseISO(e.date)); } catch { return false; }
+        try {
+          const parsed = parseISO(e.date);
+          const lastMonth = subMonths(new Date(), 1);
+          return parsed.getMonth() === lastMonth.getMonth() && parsed.getFullYear() === lastMonth.getFullYear();
+        } catch {
+          return false;
+        }
       }),
     },
     {

@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from './AuthContext';
-import EventsAPI, { type StreamingEvent } from '../services/api/EventsAPI';
+import EventsAPI from '../services/api/EventsAPI';
 
 interface FavoriteEvent {
   id: string;
@@ -35,21 +35,20 @@ const FavoritesContext = createContext<FavoritesContextType | undefined>(undefin
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<FavoriteEvent[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const requiresAuth = useCallback(() => {
     navigate('/login', { state: { from: location } });
   }, [navigate, location]);
 
   const loadFromAPI = useCallback(async () => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated) return;
     try {
-      const events = await EventsAPI.fetchApi<StreamingEvent[]>('/events/favorites');
-      setFavorites(events.map(e => ({
+      const events = await EventsAPI.getFavorites();
+      setFavorites(events.map((e) => ({
         id: e.id,
         title: e.title,
         image: e.image,
@@ -66,28 +65,23 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error loading favorites from API:', error);
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    if (isAuthenticated && token) {
-      loadFromAPI().then(() => setIsLoaded(true));
-    } else {
-      setIsLoaded(true);
-    }
-  }, [isAuthenticated, token, loadFromAPI]);
+    void loadFromAPI();
+  }, [loadFromAPI]);
 
   const addFavorite = async (event: Omit<FavoriteEvent, 'addedAt'>) => {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       requiresAuth();
       return;
     }
+
     setIsLoading(true);
     try {
-      await EventsAPI.fetchApi<{ isFavorited: boolean }>(`/events/${event.id}/favorite`, {
-        method: 'POST',
-      });
-      setFavorites(prev => {
-        if (prev.some(f => f.id === event.id)) return prev;
+      await EventsAPI.toggleFavorite(event.id);
+      setFavorites((prev) => {
+        if (prev.some((favorite) => favorite.id === event.id)) return prev;
         return [{ ...event, addedAt: Date.now() }, ...prev];
       });
     } catch (error) {
@@ -98,16 +92,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFavorite = async (eventId: string) => {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       requiresAuth();
       return;
     }
+
     setIsLoading(true);
     try {
-      await EventsAPI.fetchApi<{ isFavorited: boolean }>(`/events/${eventId}/favorite`, {
-        method: 'POST',
-      });
-      setFavorites(prev => prev.filter(fav => fav.id !== eventId));
+      await EventsAPI.toggleFavorite(eventId);
+      setFavorites((prev) => prev.filter((favorite) => favorite.id !== eventId));
     } catch (error) {
       console.error('Error removing favorite:', error);
     } finally {
@@ -115,16 +108,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isFavorite = (eventId: string): boolean => {
-    return favorites.some(fav => fav.id === eventId);
-  };
+  const isFavorite = (eventId: string): boolean => favorites.some((favorite) => favorite.id === eventId);
 
   const toggleFavorite = async (event: Omit<FavoriteEvent, 'addedAt'>) => {
     if (isFavorite(event.id)) {
       await removeFavorite(event.id);
-    } else {
-      await addFavorite(event);
+      return;
     }
+
+    await addFavorite(event);
   };
 
   const clearAllFavorites = () => {

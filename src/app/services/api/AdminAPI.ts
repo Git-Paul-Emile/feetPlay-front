@@ -3,16 +3,9 @@
 import { fetchWithApiFallback } from '../../utils/serviceConfig';
 import type { StreamingEvent } from './EventsAPI';
 
-const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
-
+// Le token Firebase est injecté automatiquement par fetchWithApiFallback.
 async function adminFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options?.headers ?? {}),
-  };
-  const res = await fetchWithApiFallback(`/admin${endpoint}`, { ...options, headers });
+  const res = await fetchWithApiFallback(`/api/admin${endpoint}`, options);
   const body = await res.json().catch(() => ({ message: 'Erreur serveur' }));
   if (!res.ok) throw new Error(body.message ?? 'Erreur serveur');
   return body.data as T;

@@ -1,0 +1,1 @@
+import{f as e}from"./index-BGCkxBiZ.js";const n={getStreamingEvents(){return e.integration.getStreamingEvents()},getLiveEvents(){return e.integration.getLiveEvents()},getReplayEvents(){return e.integration.getReplayEvents()}};export{n as F};

@@ -1,8 +1,23 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { fetchWithApiFallback } from '../utils/serviceConfig';
-import AdminAPI from '../services/api/AdminAPI';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { auth } from "../config/firebase";
+import { fetchWithApiFallback } from "../utils/serviceConfig";
+import AdminAPI from "../services/api/AdminAPI";
 
-export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'finance' | 'marketing';
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export type UserRole = "super_admin" | "admin" | "moderator" | "finance" | "marketing";
 
 export interface AdminUser {
   id: string;
@@ -16,47 +31,45 @@ export interface AdminUser {
 interface AdminAuthContextType {
   user: AdminUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
   hasRole: (role: UserRole | UserRole[]) => boolean;
 }
 
-const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
+// ── Permissions par rôle — miroir du backend ──────────────────────────────────
 
-const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
-const ADMIN_USER_KEY  = 'feetiplay_admin_user';
-
-// Permissions par rôle — miroir du backend
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   super_admin: [
-    'view_dashboard', 'manage_events', 'manage_users', 'manage_crm',
-    'send_notifications', 'view_logs', 'manage_settings', 'manage_backup',
-    'manage_monitoring', 'manage_roles', 'view_finances',
+    "view_dashboard", "manage_events", "manage_users", "manage_crm",
+    "send_notifications", "view_logs", "manage_settings", "manage_backup",
+    "manage_monitoring", "manage_roles", "view_finances",
   ],
   admin: [
-    'view_dashboard', 'manage_events', 'manage_users', 'manage_crm',
-    'send_notifications', 'view_logs',
+    "view_dashboard", "manage_events", "manage_users", "manage_crm",
+    "send_notifications", "view_logs",
   ],
-  moderator: ['view_dashboard', 'manage_events', 'view_users', 'view_logs'],
-  finance: ['view_dashboard', 'view_finances', 'view_events', 'view_users', 'view_logs'],
-  marketing: ['view_dashboard', 'manage_crm', 'send_notifications', 'view_events', 'view_users'],
+  moderator: ["view_dashboard", "manage_events", "view_users", "view_logs"],
+  finance: ["view_dashboard", "view_finances", "view_events", "view_users", "view_logs"],
+  marketing: ["view_dashboard", "manage_crm", "send_notifications", "view_events", "view_users"],
 };
 
-async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options?.headers ?? {}),
-  };
-  const res = await fetchWithApiFallback(endpoint, { ...options, headers });
-  const body = await res.json().catch(() => ({ message: 'Erreur serveur' }));
-  if (!res.ok) throw new Error(body.message ?? 'Erreur serveur');
-  return body.data as T;
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+async function fetchAdminProfile(): Promise<AdminUser> {
+  const res = await fetchWithApiFallback("/api/admin/auth/me");
+  const body = await res.json().catch(() => ({ message: "Erreur serveur" }));
+  if (!res.ok) throw new Error(body.message ?? "Erreur serveur");
+  return body.data as AdminUser;
 }
 
-function logAction(currentUser: AdminUser | null, action: string, description: string, level: 'info' | 'success' | 'warning' | 'error' = 'info') {
+function logAction(
+  currentUser: AdminUser | null,
+  action: string,
+  description: string,
+  level: "info" | "success" | "warning" | "error" = "info"
+) {
   if (!currentUser) return;
   AdminAPI.createLog({
     action,
@@ -65,72 +78,92 @@ function logAction(currentUser: AdminUser | null, action: string, description: s
     adminName: currentUser.name,
     adminRole: currentUser.role,
   }).catch(() => {
-    // Fallback localStorage si l'API est indisponible
-    const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
-    logs.unshift({ id: Date.now().toString(), action, description, user: currentUser.name, role: currentUser.role, timestamp: new Date().toISOString() });
-    localStorage.setItem('admin_logs', JSON.stringify(logs.slice(0, 200)));
+    const logs = JSON.parse(localStorage.getItem("admin_logs") || "[]");
+    logs.unshift({
+      id: Date.now().toString(),
+      action,
+      description,
+      user: currentUser.name,
+      role: currentUser.role,
+      timestamp: new Date().toISOString(),
+    });
+    localStorage.setItem("admin_logs", JSON.stringify(logs.slice(0, 200)));
   });
 }
 
+// ── Context ───────────────────────────────────────────────────────────────────
+
+const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
+
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Restaurer la session depuis le localStorage au chargement
+  // ── Persistance de session via Firebase Auth ───────────────────────────────
   useEffect(() => {
-    const storedUser = localStorage.getItem(ADMIN_USER_KEY);
-    const storedToken = localStorage.getItem(ADMIN_TOKEN_KEY);
-    if (storedUser && storedToken) {
-      try {
-        const parsed = JSON.parse(storedUser) as AdminUser;
-        setUser(parsed);
-        setIsAuthenticated(true);
-      } catch {
-        localStorage.removeItem(ADMIN_USER_KEY);
-        localStorage.removeItem(ADMIN_TOKEN_KEY);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const adminUser = await fetchAdminProfile();
+          setUser(adminUser);
+        } catch {
+          // Non admin ou profil introuvable
+          setUser(null);
+        }
+      } else {
+        setUser(null);
       }
-    }
+      setIsLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  // ── Connexion ──────────────────────────────────────────────────────────────
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      const data = await apiFetch<{ admin: AdminUser; accessToken: string }>(
-        '/admin/auth/login',
-        { method: 'POST', body: JSON.stringify({ email, password }) }
-      );
-      localStorage.setItem(ADMIN_TOKEN_KEY, data.accessToken);
-      localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(data.admin));
-      setUser(data.admin);
-      setIsAuthenticated(true);
-      logAction(data.admin, 'login', `${data.admin.name} s'est connecté`, 'success');
+      await signInWithEmailAndPassword(auth, email, password);
+      const adminUser = await fetchAdminProfile();
+      setUser(adminUser);
+      logAction(adminUser, "login", `${adminUser.name} s'est connecté`, "success");
       return true;
     } catch {
       return false;
     }
-  };
+  }, []);
 
-  const logout = () => {
-    if (user) logAction(user, 'logout', `${user.name} s'est déconnecté`);
-    apiFetch('/admin/auth/logout', { method: 'POST' }).catch(() => {});
+  // ── Déconnexion ────────────────────────────────────────────────────────────
+  const logout = useCallback(async (): Promise<void> => {
+    if (user) logAction(user, "logout", `${user.name} s'est déconnecté`);
+    await signOut(auth);
     setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem(ADMIN_TOKEN_KEY);
-    localStorage.removeItem(ADMIN_USER_KEY);
-  };
+  }, [user]);
 
-  const hasPermission = (permission: string): boolean => {
-    if (!user) return false;
-    return user.permissions.includes(permission);
-  };
+  // ── Permissions / rôles ────────────────────────────────────────────────────
+  const hasPermission = useCallback(
+    (permission: string): boolean => !!user && user.permissions.includes(permission),
+    [user]
+  );
 
-  const hasRole = (role: UserRole | UserRole[]): boolean => {
-    if (!user) return false;
-    if (Array.isArray(role)) return role.includes(user.role);
-    return user.role === role;
-  };
+  const hasRole = useCallback(
+    (role: UserRole | UserRole[]): boolean => {
+      if (!user) return false;
+      return Array.isArray(role) ? role.includes(user.role) : user.role === role;
+    },
+    [user]
+  );
 
   return (
-    <AdminAuthContext.Provider value={{ user, isAuthenticated, login, logout, hasPermission, hasRole }}>
+    <AdminAuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        logout,
+        hasPermission,
+        hasRole,
+      }}
+    >
       {children}
     </AdminAuthContext.Provider>
   );
@@ -139,7 +172,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 export function useAdminAuth() {
   const context = useContext(AdminAuthContext);
   if (context === undefined) {
-    throw new Error('useAdminAuth must be used within AdminAuthProvider');
+    throw new Error("useAdminAuth must be used within AdminAuthProvider");
   }
   return context;
 }

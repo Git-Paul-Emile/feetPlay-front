@@ -22,9 +22,6 @@ class BaseAPIService {
     return getPreferredApiBaseUrl();
   }
 
-  private readonly tokenKey = 'feetiplay_token';
-  private readonly adminTokenKey = 'feetiplay_admin_token';
-
   private cache: Map<string, { data: unknown; timestamp: number }> = new Map();
   private pendingRequests: Map<string, Promise<unknown>> = new Map();
 
@@ -39,35 +36,16 @@ class BaseAPIService {
     if (config) this.config = { ...this.config, ...config };
   }
 
-  // ── Auth headers ────────────────────────────────────────────────────────────
-
-  protected getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
-  protected getAdminToken(): string | null {
-    return localStorage.getItem(this.adminTokenKey);
-  }
-
   // ── HTTP fetch ──────────────────────────────────────────────────────────────
+  // Token injection is handled exclusively by fetchWithApiFallback (Firebase ID token).
 
   protected async fetchApi<T>(
     endpoint: string,
     options?: RequestInit & { useAdminToken?: boolean }
   ): Promise<T> {
-    const { useAdminToken, ...fetchOptions } = options ?? {};
-    const token = useAdminToken ? this.getAdminToken() : this.getToken();
+    const { useAdminToken: _useAdminToken, ...fetchOptions } = options ?? {};
 
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(fetchOptions.headers ?? {}),
-    };
-
-    const response = await fetchWithApiFallback(endpoint, {
-      ...fetchOptions,
-      headers,
-    });
+    const response = await fetchWithApiFallback(endpoint, fetchOptions);
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({ message: 'Erreur serveur' }));

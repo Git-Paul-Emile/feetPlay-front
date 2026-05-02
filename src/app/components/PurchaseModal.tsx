@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CreditCard, Smartphone, CheckCircle2 } from 'lucide-react';
+import { backendGateway } from '../services/backend/gateway';
 
 // Import SVG paths for the button
 import svgPaths from '../../imports/svg-pirafvy7od';
 
-// ─── API base URL (feetiPlay backend) ────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
+// ─── API base URL (feetiPlay backend) ────────────────────────────────
 export interface PurchaseData {
   eventId: string;
   eventTitle: string;
@@ -71,6 +72,35 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
     setPaymentError(null);
 
     try {
+      await backendGateway.checkout.purchaseAccess({
+        eventSource: 'feetiplay',
+        eventId: event.id,
+        eventTitle: event.title,
+        eventDate: event.date,
+        eventTime: event.time || '15:05',
+        price: event.price,
+        currency: 'FCFA',
+        holderName: formData.userName,
+        holderEmail: formData.userEmail,
+        holderPhone: formData.userPhone,
+        paymentMethod,
+        mobileOperator,
+      });
+
+      const gatewayPurchaseData: PurchaseData = {
+        eventId: event.id,
+        eventTitle: event.title,
+        eventImage: event.image,
+        eventLocation: event.location,
+        eventDate: event.date,
+        eventTime: event.time || '15:05',
+        eventReference: event.reference,
+        eventPrice: event.price,
+        ...formData,
+      };
+
+      onPurchaseComplete(gatewayPurchaseData);
+      return;
       // Déterminer le provider et obtenir un paymentId
       let paymentProvider: 'stripe' | 'mobile_money' | 'paystack' = 'stripe';
       let paymentId = `fp_sim_${Date.now()}`;
