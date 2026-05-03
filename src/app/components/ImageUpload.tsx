@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { fetchWithApiFallback } from '../utils/serviceConfig';
+import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
 const USER_TOKEN_KEY  = 'feetiplay_token';
@@ -39,7 +40,7 @@ export function ImageUpload({ value, onChange, folder = 'feetiplay', label = 'Im
       if (!res.ok) throw new Error(body.message ?? 'Erreur upload');
       onChange(body.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload');
+      setError(firebaseClientErrorToUserMessage(err, 'Erreur lors de l\'upload.'));
     } finally {
       setUploading(false);
     }

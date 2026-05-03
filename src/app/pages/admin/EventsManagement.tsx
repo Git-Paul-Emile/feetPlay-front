@@ -19,6 +19,7 @@ import { ImageUpload } from '../../components/ImageUpload';
 import AdminAPI, { type AdminChannel, type AdminEventCreateInput, type AdminEventUpdateInput } from '../../services/api/AdminAPI';
 import type { StreamingEvent } from '../../services/api/EventsAPI';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 interface EventAdminCard {
   id: string;
@@ -132,7 +133,7 @@ export function EventsManagement() {
         setError(null);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Impossible de charger les événements.');
+        setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les événements.'));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -164,7 +165,7 @@ export function EventsManagement() {
       await AdminAPI.deleteEvent(event.id);
       setEvents(prev => prev.filter(e => e.id !== event.id));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+      alert(firebaseClientErrorToUserMessage(err, 'Erreur lors de la suppression.'));
     } finally {
       setActionLoading(null);
     }
@@ -214,7 +215,7 @@ export function EventsManagement() {
       setEvents(prev => prev.map(e => e.id === editModal.id ? mapEvent(updated) : e));
       closeModal();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      setFormError(firebaseClientErrorToUserMessage(err, 'Erreur lors de la sauvegarde.'));
     } finally {
       setSaving(false);
     }
@@ -231,7 +232,7 @@ export function EventsManagement() {
       setEvents(prev => [mapEvent(created), ...prev]);
       closeModal();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Erreur lors de la création');
+      setFormError(firebaseClientErrorToUserMessage(err, 'Erreur lors de la création.'));
     } finally {
       setSaving(false);
     }

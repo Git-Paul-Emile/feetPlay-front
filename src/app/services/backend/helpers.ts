@@ -27,6 +27,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { auth, db } from "../../config/firebase";
+import { firebaseClientErrorToUserMessage } from "../../utils/firebaseUserFacingError";
 
 export function toIsoDate(value: unknown): string {
   if (!value) return new Date().toISOString();
@@ -59,14 +60,22 @@ export function requireCurrentUser(): User {
 }
 
 export async function signInAndGetUser(email: string, password: string) {
-  await signInWithEmailAndPassword(auth, email, password);
-  return requireCurrentUser();
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    return requireCurrentUser();
+  } catch (e) {
+    throw new Error(firebaseClientErrorToUserMessage(e));
+  }
 }
 
 export async function createFirebaseAccount(name: string, email: string, password: string) {
-  const result = await createUserWithEmailAndPassword(auth, email, password);
-  await updateFirebaseProfile(result.user, { displayName: name });
-  return result.user;
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await updateFirebaseProfile(result.user, { displayName: name });
+    return result.user;
+  } catch (e) {
+    throw new Error(firebaseClientErrorToUserMessage(e));
+  }
 }
 
 export async function changeFirebasePassword(currentPassword: string, newPassword: string) {
@@ -75,9 +84,13 @@ export async function changeFirebasePassword(currentPassword: string, newPasswor
     throw new Error("Non authentifie");
   }
 
-  const credential = EmailAuthProvider.credential(user.email, currentPassword);
-  await reauthenticateWithCredential(user, credential);
-  await updatePassword(user, newPassword);
+  try {
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, newPassword);
+  } catch (e) {
+    throw new Error(firebaseClientErrorToUserMessage(e));
+  }
 }
 
 export async function deleteFirebaseAccount(password: string) {
@@ -86,9 +99,13 @@ export async function deleteFirebaseAccount(password: string) {
     throw new Error("Non authentifie");
   }
 
-  const credential = EmailAuthProvider.credential(user.email, password);
-  await reauthenticateWithCredential(user, credential);
-  await deleteFirebaseUser(user);
+  try {
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+    await deleteFirebaseUser(user);
+  } catch (e) {
+    throw new Error(firebaseClientErrorToUserMessage(e));
+  }
 }
 
 export async function logoutFirebase() {

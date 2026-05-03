@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Users, Search, Trash2, Shield, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import AdminAPI, { type AdminUserItem } from '../../services/api/AdminAPI';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 const ROLES = ['viewer', 'premium', 'streamer', 'admin', 'super_admin'] as const;
 const ROLE_LABELS: Record<string, string> = {
@@ -47,7 +48,7 @@ export function UsersManagement() {
       offset: page * PAGE_SIZE,
     })
       .then(({ users: u, total: t }) => { setUsers(u); setTotal(t); })
-      .catch(err => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .catch(err => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des utilisateurs.')))
       .finally(() => setLoading(false));
   }, [search, roleFilter, page]);
 
@@ -64,7 +65,7 @@ export function UsersManagement() {
       setUsers(prev => prev.filter(u => u.id !== user.id));
       setTotal(prev => prev - 1);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erreur');
+      alert(firebaseClientErrorToUserMessage(err, 'Impossible de supprimer cet utilisateur.'));
     } finally {
       setActionLoading(null);
     }
@@ -78,7 +79,7 @@ export function UsersManagement() {
       setUsers(prev => prev.map(u => u.id === roleModal.id ? { ...u, role: newRole } : u));
       setRoleModal(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erreur');
+      alert(firebaseClientErrorToUserMessage(err, 'Impossible de modifier le rôle.'));
     } finally {
       setActionLoading(null);
     }

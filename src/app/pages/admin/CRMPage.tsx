@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { Users, Crown, Radio, UserCheck, TrendingUp, Tv } from 'lucide-react';
 import AdminAPI, { type AdminStats } from '../../services/api/AdminAPI';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 const ROLE_CONFIG = [
   { key: 'viewer',     label: 'Visiteurs',   color: '#6b7280' },
@@ -70,7 +71,7 @@ export function CRMPage() {
         }));
         setPlanData(planCounts);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des statistiques.'));
       } finally {
         setLoading(false);
       }

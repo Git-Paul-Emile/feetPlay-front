@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { DollarSign, ShoppingCart, TrendingUp, Tv, Download } from 'lucide-react';
 import AdminAPI, { type AdminStats, type AdminTicketItem, type AdminChannel } from '../../services/api/AdminAPI';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 function formatFCFA(amount: number) {
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(2)}M FCFA`;
@@ -27,7 +28,7 @@ export function FinancesPage() {
       AdminAPI.getChannels(),
     ])
       .then(([s, t, c]) => { setStats(s); setTickets(t); setChannels(c); })
-      .catch(err => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .catch(err => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des finances.')))
       .finally(() => setLoading(false));
   }, []);
 

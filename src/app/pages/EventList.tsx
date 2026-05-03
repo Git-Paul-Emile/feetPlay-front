@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { EventCard } from '../components/EventCard';
 import EventsAPI, { type StreamingEvent } from '../services/api/EventsAPI';
 import svgPaths from "../../imports/svg-z30khrsoqy";
+import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 function formatEventDate(date: string, time?: string) {
   const parsed = new Date(date);
@@ -50,7 +51,7 @@ export function EventList() {
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : 'Impossible de charger les evenements.');
+        setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les evenements.'));
       })
       .finally(() => {
         if (mounted) setLoading(false);

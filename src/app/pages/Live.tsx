@@ -11,6 +11,7 @@ import Feeti2EventsAPI, { type Feeti2Event } from '../services/api/Feeti2EventsA
 import { getPreferredFeeti2BaseUrl } from '../utils/serviceConfig';
 import categorySvgPaths from "../../imports/svg-ckb5lqxig6";
 import svgPaths from "../../imports/svg-z30khrsoqy";
+import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 const FEETI2_URL = getPreferredFeeti2BaseUrl();
 
@@ -155,7 +156,7 @@ export function Live() {
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : 'Impossible de charger les donnees live.');
+        setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les donnees live.'));
       })
       .finally(() => {
         if (mounted) setLoading(false);

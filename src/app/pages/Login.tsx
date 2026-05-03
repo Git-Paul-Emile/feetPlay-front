@@ -5,6 +5,7 @@ import { X, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import { Footer } from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
+import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 export function Login() {
   const navigate = useNavigate();
@@ -24,8 +25,8 @@ export function Login() {
     try {
       await login(email, password);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Email ou mot de passe incorrect');
+    } catch (err: unknown) {
+      setError(firebaseClientErrorToUserMessage(err, 'E-mail ou mot de passe incorrect. Vérifiez vos informations.'));
     } finally {
       setIsLoading(false);
     }

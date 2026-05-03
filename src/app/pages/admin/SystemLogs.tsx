@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import AdminAPI, { type SystemLogItem } from '../../services/api/AdminAPI';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 const PAGE_SIZE = 50;
 
@@ -42,7 +43,7 @@ export function SystemLogs() {
       offset: page * PAGE_SIZE,
     })
       .then(({ logs: l, total: t }) => { setLogs(l); setTotal(t); })
-      .catch(err => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .catch(err => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des journaux.')))
       .finally(() => setLoading(false));
   }, [filterLevel, search, page]);
 

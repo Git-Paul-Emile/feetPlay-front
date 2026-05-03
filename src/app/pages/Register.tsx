@@ -5,6 +5,7 @@ import { X, Mail, Phone, User as UserIcon, Lock, Eye, EyeOff } from 'lucide-reac
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import { Footer } from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
+import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 export function Register() {
   const navigate = useNavigate();
@@ -44,8 +45,8 @@ export function Register() {
         role: 'viewer'
       });
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'inscription');
+    } catch (err: unknown) {
+      setError(firebaseClientErrorToUserMessage(err, 'Impossible de finaliser votre inscription pour le moment.'));
     } finally {
       setIsLoading(false);
     }

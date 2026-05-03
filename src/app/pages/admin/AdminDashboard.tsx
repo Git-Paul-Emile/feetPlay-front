@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import AdminAPI, { type AdminStats, type AdminEventItem, type AdminTicketItem } from '../../services/api/AdminAPI';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 function formatFCFA(amount: number) {
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M FCFA`;
@@ -36,7 +37,7 @@ export function AdminDashboard() {
         setEvents(e);
         if (t) setTickets(t);
       })
-      .catch(err => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .catch(err => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement du tableau de bord.')))
       .finally(() => setLoading(false));
   }, [hasPermission]);
 

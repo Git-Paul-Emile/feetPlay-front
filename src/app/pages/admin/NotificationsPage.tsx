@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Send, Trash2, Info, AlertTriangle, Gift, Wrench } from 'lucide-react';
 import AdminAPI, { type AdminNotificationItem, type SendNotificationInput } from '../../services/api/AdminAPI';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 const TYPE_CONFIG = {
   info:        { icon: Info,          color: 'text-blue-400',   bg: 'bg-blue-500/10',    label: 'Info'          },
@@ -45,7 +46,7 @@ export function NotificationsPage() {
     setLoading(true);
     AdminAPI.getNotifications({ limit: 50 })
       .then(({ notifications: n, total: t }) => { setNotifications(n); setTotal(t); })
-      .catch(err => setError(err instanceof Error ? err.message : 'Erreur'))
+      .catch(err => setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les notifications.')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -60,7 +61,7 @@ export function NotificationsPage() {
       setTotal(prev => prev + 1);
       setForm({ ...DEFAULT_FORM, sentBy: user?.name ?? '' });
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Erreur d\'envoi');
+      setFormError(firebaseClientErrorToUserMessage(err, 'Erreur lors de l\'envoi de la notification.'));
     } finally {
       setSending(false);
     }
@@ -73,7 +74,7 @@ export function NotificationsPage() {
       setNotifications(prev => prev.filter(n => n.id !== id));
       setTotal(prev => prev - 1);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erreur');
+      alert(firebaseClientErrorToUserMessage(err, 'Impossible de supprimer la notification.'));
     } finally {
       setDeleteId(null);
     }

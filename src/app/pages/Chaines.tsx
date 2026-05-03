@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Play, Users, Video } from 'lucide-react';
 import ChannelsAPI, { type Channel } from '../services/api/ChannelsAPI';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 export function Chaines() {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -20,7 +21,7 @@ export function Chaines() {
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : 'Impossible de charger les chaines.');
+        setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les chaines.'));
       })
       .finally(() => {
         if (mounted) setLoading(false);

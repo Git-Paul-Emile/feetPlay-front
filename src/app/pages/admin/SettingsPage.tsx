@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { User, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { fetchWithApiFallback } from '../../utils/serviceConfig';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 import { ImageUpload } from '../../components/ImageUpload';
 
 const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
@@ -56,7 +57,7 @@ export function SettingsPage() {
       localStorage.setItem(ADMIN_USER_KEY, JSON.stringify({ ...stored, name: updated.name, avatar: updated.avatar }));
       showToast(setProfileToast, 'success', 'Profil mis à jour avec succès.');
     } catch (err) {
-      showToast(setProfileToast, 'error', err instanceof Error ? err.message : 'Erreur de mise à jour');
+      showToast(setProfileToast, 'error', firebaseClientErrorToUserMessage(err, 'Erreur de mise à jour du profil.'));
     } finally {
       setProfileLoading(false);
     }
@@ -72,7 +73,7 @@ export function SettingsPage() {
       setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
       showToast(setPwdToast, 'success', 'Mot de passe modifié avec succès.');
     } catch (err) {
-      showToast(setPwdToast, 'error', err instanceof Error ? err.message : 'Erreur de modification');
+      showToast(setPwdToast, 'error', firebaseClientErrorToUserMessage(err, 'Impossible de modifier le mot de passe.'));
     } finally {
       setPwdLoading(false);
     }

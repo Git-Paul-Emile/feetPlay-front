@@ -2,6 +2,7 @@
 // Gestion centralisée des appels HTTP avec cache, retry et error handling
 
 import { fetchWithApiFallback, getPreferredApiBaseUrl } from '../../utils/serviceConfig';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
 export interface APIResponse<T> {
   success: boolean;
@@ -175,20 +176,11 @@ class BaseAPIService {
 
   private getErrorMessage(error: unknown): string {
     const e = error as { code?: string; message?: string };
-    if (e.code) {
-      const messages: Record<string, string> = {
-        'permission-denied': "Vous n'avez pas les permissions nécessaires",
-        'unauthenticated': 'Veuillez vous connecter pour continuer',
-        'not-found': 'Ressource introuvable',
-        'already-exists': 'Cette ressource existe déjà',
-        'unavailable': 'Service temporairement indisponible',
-      };
-      return messages[e.code] ?? e.message ?? 'Une erreur est survenue';
-    }
     if (e.message === 'Request timeout') return 'La requête a pris trop de temps. Veuillez réessayer.';
-    if (e.message?.includes('network') || e.message?.includes('fetch'))
+    if (e.message?.toLowerCase().includes('network') || e.message?.toLowerCase().includes('fetch')) {
       return 'Erreur de connexion. Vérifiez votre connexion internet.';
-    return e.message ?? 'Une erreur inattendue est survenue';
+    }
+    return firebaseClientErrorToUserMessage(error);
   }
 
   // ── Utilitaires ───────────────────────────────────────────────────────────
