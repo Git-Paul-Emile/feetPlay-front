@@ -1,8 +1,13 @@
 import {
+  GoogleAuthProvider,
+  getAdditionalUserInfo,
   EmailAuthProvider,
   createUserWithEmailAndPassword,
   deleteUser as deleteFirebaseUser,
   reauthenticateWithCredential,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   signOut,
   updatePassword,
@@ -66,6 +71,90 @@ export async function signInAndGetUser(email: string, password: string) {
   } catch (e) {
     throw new Error(firebaseClientErrorToUserMessage(e));
   }
+}
+
+export const GOOGLE_REDIRECT_PENDING_KEY = "feetiplay_google_redirect_pending";
+
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
+
+export async function signInWithGooglePopup() {
+  try {
+    // Consommer d'abord un éventuel résultat de redirect précédent
+    const redirectResult = await getRedirectResult(auth);
+    if (redirectResult) {
+      window.sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY);
+      const info = getAdditionalUserInfo(redirectResult);
+      const idToken = await redirectResult.user.getIdToken();
+      return {
+        user: redirectResult.user,
+        idToken,
+        isNewUser: Boolean(info?.isNewUser),
+        profile: info?.profile as Record<string, unknown> | null,
+      };
+    }
+
+    // Nettoie une éventuelle session Firebase corrompue avant d'ouvrir Google.
+    if (auth.currentUser) {
+      await signOut(auth).catch(() => undefined);
+    }
+
+    // Essayer d'abord la popup
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const info = getAdditionalUserInfo(result);
+      const idToken = await result.user.getIdToken();
+      return {
+        user: result.user,
+        idToken,
+        isNewUser: Boolean(info?.isNewUser),
+        profile: info?.profile as Record<string, unknown> | null,
+      };
+    } catch (popupError: unknown) {
+      const errorCode = (popupError as { code?: string }).code;
+      
+      // Si la popup est bloquée ou fermée, fallback sur la redirection
+      if (
+        errorCode === "auth/popup-blocked" ||
+        errorCode === "auth/popup-closed-by-user" ||
+        errorCode === "auth/cancelled-popup-request"
+      ) {
+        console.log("Popup bloquée ou fermée, passage à la redirection Google...");
+        window.sessionStorage.setItem(GOOGLE_REDIRECT_PENDING_KEY, "1");
+        await signInWithRedirect(auth, googleProvider);
+        // La redirection va recharger la page, donc ce return n'est pas atteint
+        throw new Error("Redirection initiée, recharge de la page en cours...");
+      }
+
+      // Autres erreurs : relancer
+      throw popupError;
+    }
+  } catch (e) {
+    const message = String((e as { message?: unknown })?.message ?? "");
+    if (message.includes("accounts:lookup")) {
+      throw new Error(
+        "Configuration Firebase invalide (clé API/projet/domaine autorisé). Vérifiez les variables VITE_FIREBASE_* et la liste des domaines autorisés dans Firebase Auth.",
+      );
+    }
+    throw e;
+  }
+}
+
+export async function signInWithGoogleRedirect() {
+  await signInWithRedirect(auth, googleProvider);
+}
+
+export async function consumeGoogleRedirectResult() {
+  const result = await getRedirectResult(auth);
+  if (!result) return null;
+  const info = getAdditionalUserInfo(result);
+  const idToken = await result.user.getIdToken();
+  return {
+    user: result.user,
+    idToken,
+    isNewUser: Boolean(info?.isNewUser),
+    profile: info?.profile as Record<string, unknown> | null,
+  };
 }
 
 export async function createFirebaseAccount(name: string, email: string, password: string) {

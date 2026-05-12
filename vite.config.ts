@@ -1,4 +1,4 @@
-﻿import { defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 import path from 'path'
 import fs from 'fs'
 import tailwindcss from '@tailwindcss/vite'
@@ -49,5 +49,8 @@ export default defineConfig(() => ({
     port: FRONTEND_PORT,
     strictPort: true,
     open: true,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
   },
 }))

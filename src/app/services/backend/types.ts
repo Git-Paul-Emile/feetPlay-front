@@ -20,6 +20,22 @@ export interface RegisterData {
   role?: "viewer" | "streamer";
 }
 
+export interface GoogleCompletionData {
+  name: string;
+  phone?: string;
+  role?: "viewer" | "streamer";
+}
+
+export interface GoogleAuthStartResult {
+  requiresCompletion: boolean;
+  user?: AuthUser;
+  prefill?: {
+    name?: string;
+    email?: string;
+    avatar?: string | null;
+  };
+}
+
 export interface UpdateProfileData {
   name?: string;
   email?: string;
@@ -164,6 +180,8 @@ export interface AuthProvider {
   subscribe(listener: AuthStateListener): () => void;
   login(email: string, password: string): Promise<AuthUser>;
   register(data: RegisterData): Promise<AuthUser>;
+  startGoogleAuth(): Promise<GoogleAuthStartResult>;
+  completeGoogleRegistration(data: GoogleCompletionData): Promise<AuthUser>;
   logout(): Promise<void>;
   updateProfile(data: UpdateProfileData): Promise<AuthUser>;
   changePassword(data: ChangePasswordData): Promise<void>;

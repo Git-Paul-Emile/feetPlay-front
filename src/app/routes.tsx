@@ -6,6 +6,7 @@ import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { GoogleCompletion } from './pages/GoogleCompletion';
 
 // Admin imports
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -124,6 +125,10 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     Component: Register,
+  },
+  {
+    path: '/register/google-complete',
+    Component: GoogleCompletion,
   },
   // ── Admin ────────────────────────────────────────────────────────────────
   {

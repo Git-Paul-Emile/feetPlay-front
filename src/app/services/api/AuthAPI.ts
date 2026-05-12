@@ -2,6 +2,8 @@ import { backendGateway } from "../backend/gateway";
 import type {
   AuthUser,
   ChangePasswordData,
+  GoogleAuthStartResult,
+  GoogleCompletionData,
   RegisterData,
   UpdateProfileData,
 } from "../backend/types";
@@ -35,5 +37,5 @@ const AuthAPI = {
   },
 };
 
-export type { AuthUser, RegisterData, UpdateProfileData, ChangePasswordData };
+export type { AuthUser, RegisterData, UpdateProfileData, ChangePasswordData, GoogleAuthStartResult, GoogleCompletionData };
 export default AuthAPI;

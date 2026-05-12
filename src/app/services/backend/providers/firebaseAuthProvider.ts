@@ -14,6 +14,7 @@ import {
   deleteFirebaseAccount,
   logoutFirebase,
   signInAndGetUser,
+  signInWithGooglePopup,
   toIsoDate,
 } from "../helpers";
 import type {
@@ -24,6 +25,8 @@ import type {
   RegisterData,
   UpdateProfileData,
 } from "../types";
+
+const PENDING_GOOGLE_TOKEN_KEY = "feetiplay_google_pending_token";
 
 function mapProfile(uid: string, data: Record<string, any>): AuthUser {
   return {
@@ -99,6 +102,58 @@ export const firebaseAuthProvider: AuthProvider = {
     } catch (e) {
       rethrowUserFacing(e);
     }
+  },
+
+  async startGoogleAuth() {
+    const { user, isNewUser } = await signInWithGooglePopup();
+    if (isNewUser) {
+      window.sessionStorage.setItem(PENDING_GOOGLE_TOKEN_KEY, "1");
+      return {
+        requiresCompletion: true,
+        prefill: {
+          name: user.displayName ?? undefined,
+          email: user.email ?? undefined,
+          avatar: user.photoURL ?? null,
+        },
+      };
+    }
+    const profile = await getProfile(user.uid);
+    if (!profile) {
+      throw new Error("Profil utilisateur introuvable");
+    }
+    return { requiresCompletion: false, user: profile };
+  },
+
+  async completeGoogleRegistration(data) {
+    const user = auth.currentUser;
+    const pending = window.sessionStorage.getItem(PENDING_GOOGLE_TOKEN_KEY);
+    if (!user || !pending) {
+      throw new Error("Session Google expirée. Relancez l'inscription Google.");
+    }
+
+    const existing = await getDoc(doc(db, "users", user.uid));
+    if (existing.exists()) {
+      throw new Error("Ce compte existe déjà. Connectez-vous avec Google.");
+    }
+
+    const now = serverTimestamp();
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      name: data.name,
+      email: user.email ?? "",
+      phone: data.phone ?? null,
+      avatar: user.photoURL ?? null,
+      role: data.role ?? "viewer",
+      subscriptionPlan: "free",
+      createdAt: now,
+      updatedAt: now,
+    });
+    await updateFirebaseProfile(user, { displayName: data.name });
+    window.sessionStorage.removeItem(PENDING_GOOGLE_TOKEN_KEY);
+
+    const profile = await getProfile(user.uid);
+    if (!profile) throw new Error("Profil utilisateur introuvable");
+    return profile;
   },
 
   async logout() {

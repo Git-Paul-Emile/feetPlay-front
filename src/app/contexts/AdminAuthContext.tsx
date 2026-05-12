@@ -15,6 +15,8 @@ import { auth } from "../config/firebase";
 import { fetchWithApiFallback } from "../utils/serviceConfig";
 import AdminAPI from "../services/api/AdminAPI";
 
+const ADMIN_TOKEN_KEY = "feetiplay_admin_token";
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type UserRole = "super_admin" | "admin" | "moderator" | "finance" | "marketing";
@@ -104,6 +106,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
+          if (!localStorage.getItem(ADMIN_TOKEN_KEY)) {
+            setUser(null);
+            setIsLoading(false);
+            return;
+          }
           const adminUser = await fetchAdminProfile();
           setUser(adminUser);
         } catch {

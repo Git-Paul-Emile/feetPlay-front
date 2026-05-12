@@ -15,7 +15,26 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID as string,
 };
 
+function clearStaleFirebaseAuthStateIfExpressMode() {
+  const mode = (import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_BACKEND_PROVIDER;
+  if (mode !== "express") return;
+  if (typeof window === "undefined") return;
+
+  // Évite les lookup automatiques sur une session Firebase obsolète
+  // quand l'app tourne en mode backend express.
+  const keysToDelete: string[] = [];
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key) continue;
+    if (key.startsWith("firebase:authUser:") || key.startsWith("firebase:pendingRedirect:")) {
+      keysToDelete.push(key);
+    }
+  }
+  keysToDelete.forEach((key) => window.localStorage.removeItem(key));
+}
+
 // ── Initialisation (évite la double init en HMR) ─────────────────────────────
+clearStaleFirebaseAuthStateIfExpressMode();
 const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 // ── Services ──────────────────────────────────────────────────────────────────

@@ -9,6 +9,8 @@ import {
 import type {
   AuthUser,
   ChangePasswordData,
+  GoogleAuthStartResult,
+  GoogleCompletionData,
   RegisterData,
   UpdateProfileData,
 } from "../services/api/AuthAPI";
@@ -31,6 +33,8 @@ interface AuthContextType {
   token?: string | null;
   login: (email: string, password: string) => Promise<AppUser>;
   register: (data: RegisterData) => Promise<AppUser>;
+  startGoogleAuth: () => Promise<GoogleAuthStartResult>;
+  completeGoogleRegistration: (data: GoogleCompletionData) => Promise<AppUser>;
   logout: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<AppUser>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
@@ -83,6 +87,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const startGoogleAuth = useCallback(async (): Promise<GoogleAuthStartResult> => {
+    const result = await backendGateway.auth.startGoogleAuth();
+    if (result.user) {
+      const appUser = mapToAppUser(result.user);
+      setUser(appUser);
+      return { ...result, user: result.user };
+    }
+    return result;
+  }, []);
+
+  const completeGoogleRegistration = useCallback(async (data: GoogleCompletionData): Promise<AppUser> => {
+    const authUser = await backendGateway.auth.completeGoogleRegistration(data);
+    const appUser = mapToAppUser(authUser);
+    setUser(appUser);
+    return appUser;
+  }, []);
+
   const updateProfile = useCallback(async (data: UpdateProfileData): Promise<AppUser> => {
     const authUser = await backendGateway.auth.updateProfile(data);
     const appUser = mapToAppUser(authUser);
@@ -108,6 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token: null,
         login,
         register,
+        startGoogleAuth,
+        completeGoogleRegistration,
         logout,
         updateProfile,
         changePassword,

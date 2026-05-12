@@ -33,7 +33,7 @@ export const expressEventsProvider: EventsProvider = {
   },
 
   getFavorites() {
-    return legacyApiFetch<StreamingEvent[]>("/events/favorites/me");
+    return legacyApiFetch<StreamingEvent[]>("/events/favorites");
   },
 
   toggleFavorite(eventId: string): Promise<FavoriteToggleResult> {

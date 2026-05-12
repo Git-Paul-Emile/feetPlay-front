@@ -1,6 +1,8 @@
 import { auth } from "../config/firebase";
 
 const API_STORAGE_KEY = "feetiplay_api_base_url";
+const USER_TOKEN_KEY = "feetiplay_token";
+const ADMIN_TOKEN_KEY = "feetiplay_admin_token";
 
 function canUseBrowserStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -65,6 +67,11 @@ async function getFirebaseToken(): Promise<string | null> {
   return null;
 }
 
+function getSessionToken(): string | null {
+  if (!canUseBrowserStorage()) return null;
+  return window.localStorage.getItem(USER_TOKEN_KEY) || window.localStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
 /**
  * Fetch avec URL API normalisee + injection automatique du Firebase ID Token.
  */
@@ -83,7 +90,8 @@ export async function fetchWithApiFallback(
   ];
 
   // Récupération du token Firebase (unique source de vérité)
-  const token = await getFirebaseToken();
+  const sessionToken = getSessionToken();
+  const token = sessionToken ?? (await getFirebaseToken());
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
