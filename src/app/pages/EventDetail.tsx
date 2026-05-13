@@ -337,7 +337,7 @@ export function EventDetail() {
                 >
                   <ExternalLink className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   <span className="font-['SF_Pro',sans-serif] font-normal text-white text-base md:text-lg">
-                    Acheter sur Féeti
+                    Acheter sur Fééti
                   </span>
                 </motion.a>
               )}
