@@ -53,8 +53,8 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <div className="flex items-center justify-between h-14 md:h-16 lg:h-18 xl:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center h-6 md:h-8 lg:h-9 xl:h-[39px] flex-shrink-0 hover:opacity-80 transition-opacity">
-            <img src="/logo blanc.png" alt="Fééti" className="h-full w-auto object-contain" />
+          <Link to="/" className="flex items-center flex-shrink-0 hover:opacity-80 transition-opacity">
+            <img src="/fplay_2.png" alt="Fééti" className="h-[60px] md:h-[70px] lg:h-[80px] xl:h-[100px] w-auto object-contain" />
           </Link>
 
           {/* Navigation Links - Desktop */}
