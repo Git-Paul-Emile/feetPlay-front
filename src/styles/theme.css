@@ -182,6 +182,41 @@
   }
 }
 
+/* ── Scrollbar stylisée — fenêtre principale uniquement ─────────────────── */
+html::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #cdff71, #a3d64c);
+  border-radius: 3px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #de0035, #b0002a);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #cdff71 #1a1a1a;
+}
+
+/* Masquer les scrollbars sur tous les conteneurs internes */
+*:not(html)::-webkit-scrollbar {
+  display: none;
+}
+
+*:not(html) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /* Custom animations for Feeti Play */
 @keyframes pulse {
   0%, 100% {

@@ -178,7 +178,7 @@ export function AdminLogin() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="font-['Inter',sans-serif] text-white/40 text-xs">
-            © 2025 FEETI PLAY. Tous droits réservés.
+            © 2026 Fééti Play , propulsé par Eroiste , Tous droits réservés.
           </p>
         </div>
       </motion.div>

@@ -27,7 +27,7 @@ export function Footer() {
         </div>
         <div className="mt-6 text-center">
           <p className="font-['Inter',sans-serif] text-[#666666] text-xs">
-            © {currentYear} Fééti Play. Tous droits réservés.
+            © {currentYear} Fééti Play , propulsé par Eroiste , Tous droits réservés.
           </p>
         </div>
       </div>
