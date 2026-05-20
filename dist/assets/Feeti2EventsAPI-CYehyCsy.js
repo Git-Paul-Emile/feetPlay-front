@@ -1,1 +1,0 @@
-import{h as e}from"./index-CMoCqo7c.js";const n={getStreamingEvents(){return e.integration.getStreamingEvents()},getLiveEvents(){return e.integration.getLiveEvents()},getReplayEvents(){return e.integration.getReplayEvents()}};export{n as F};

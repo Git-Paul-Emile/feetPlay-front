@@ -13,6 +13,14 @@ import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 
+// Creator imports
+import { CreatorLogin } from './pages/creator/CreatorLogin';
+import { CreatorRegister } from './pages/creator/CreatorRegister';
+import { CreatorLayout } from './pages/creator/CreatorLayout';
+
+// Creator lazy pages
+const CreatorDashboardLazy = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
+
 // Lazy load des pages légales
 const TermsOfServiceLazy = lazy(() => import('./pages/legal/TermsOfService').then(m => ({ default: m.TermsOfService })));
 const PrivacyPolicyLazy  = lazy(() => import('./pages/legal/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
@@ -80,6 +88,7 @@ const CRMPage           = withSuspense(CRMPageLazy);
 const NotificationsPage = withSuspense(NotificationsPageLazy);
 const SettingsPage         = withSuspense(SettingsPageLazy);
 const StreamingAnalytics   = withSuspense(StreamingAnalyticsLazy);
+const CreatorDashboard     = withSuspense(CreatorDashboardLazy);
 
 // Pages légales wrappées
 const TermsOfService = withSuspense(TermsOfServiceLazy);
@@ -129,6 +138,17 @@ export const router = createBrowserRouter([
   {
     path: '/register/google-complete',
     Component: GoogleCompletion,
+  },
+  // ── Creator ──────────────────────────────────────────────────────────────
+  { path: '/creator/login',    Component: CreatorLogin },
+  { path: '/creator/register', Component: CreatorRegister },
+  {
+    path: '/creator',
+    Component: CreatorLayout,
+    children: [
+      { index: true, Component: () => <Navigate to="/creator/dashboard" replace /> },
+      { path: 'dashboard', Component: CreatorDashboard },
+    ],
   },
   // ── Admin ────────────────────────────────────────────────────────────────
   {

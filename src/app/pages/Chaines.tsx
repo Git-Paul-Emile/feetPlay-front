@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Play, Users, Video } from 'lucide-react';
 import ChannelsAPI, { type Channel } from '../services/api/ChannelsAPI';
+import CreatorAPI, { type Creator } from '../services/api/CreatorAPI';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { CreatorCarousel } from '../components/creator/CreatorCarousel';
 import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
 export function Chaines() {
@@ -10,27 +12,32 @@ export function Chaines() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [allCreators, setAllCreators] = useState<Creator[]>([]);
+  const [creatorsLoading, setCreatorsLoading] = useState(true);
+
   useEffect(() => {
     let mounted = true;
-
     ChannelsAPI.getAll()
-      .then((data) => {
-        if (!mounted) return;
-        setChannels(data);
-        setError(null);
-      })
-      .catch((err) => {
-        if (!mounted) return;
-        setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les chaines.'));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
+      .then((data) => { if (!mounted) return; setChannels(data); setError(null); })
+      .catch((err) => { if (!mounted) return; setError(firebaseClientErrorToUserMessage(err, 'Impossible de charger les chaines.')); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    CreatorAPI.getAll()
+      .then((data) => { if (mounted) setAllCreators(data); })
+      .catch(() => {})
+      .finally(() => { if (mounted) setCreatorsLoading(false); });
+    return () => { mounted = false; };
+  }, []);
+
+  const contentCreators = allCreators.filter((c) =>
+    ["Football", "Basketball", "Tennis", "Fitness", "MMA", "Rugby"].includes(c.category)
+  );
+  const recommendedCreators = [...allCreators].sort((a, b) => b.subscriberCount - a.subscriberCount).slice(0, 12);
+  const newCreators = [...allCreators].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 12);
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8">
@@ -56,14 +63,15 @@ export function Chaines() {
           </div>
         )}
 
+        {/* ── Chaînes officielles ───────────────────────────────────────────────── */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
             {Array.from({ length: 4 }, (_, index) => (
               <div key={index} className="aspect-[4/5] rounded-xl bg-white/5 animate-pulse" />
             ))}
           </div>
         ) : channels.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
             {channels.map((channel, index) => (
               <motion.div
                 key={channel.id}
@@ -111,10 +119,52 @@ export function Chaines() {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-12 text-center text-white/70">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-12 text-center text-white/70 mb-16">
             Aucune chaine n est disponible pour le moment.
           </div>
         )}
+
+        {/* ── Chaînes Créateurs Content ──────────────────────────────────────────── */}
+        <div className="border-t border-white/10 pt-12 mb-4">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">
+              Chaînes <span className="text-[#DE0035]">Créateurs</span> Content
+            </h2>
+            <p className="text-gray-400">Des créateurs passionnés de sport qui partagent leurs contenus exclusifs</p>
+          </motion.div>
+          <CreatorCarousel
+            title="Créateurs par discipline"
+            creators={contentCreators.length > 0 ? contentCreators : allCreators.slice(0, 10)}
+            loading={creatorsLoading}
+          />
+        </div>
+
+        {/* ── Créateurs Recommandés ─────────────────────────────────────────────── */}
+        <CreatorCarousel
+          title="Créateurs Recommandés"
+          creators={recommendedCreators}
+          loading={creatorsLoading}
+        />
+
+        {/* ── Nouveaux Créateurs ────────────────────────────────────────────────── */}
+        <CreatorCarousel
+          title="Nouveaux Créateurs"
+          creators={newCreators}
+          loading={creatorsLoading}
+        />
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-16 text-center"
+        >
+          <div className="inline-block px-6 py-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10">
+            <p className="text-gray-400">
+              Plus de chaînes bientôt disponibles ! 🎬
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

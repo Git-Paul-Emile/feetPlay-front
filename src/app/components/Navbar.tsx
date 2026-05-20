@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { Search, User, Menu, X, ChevronDown } from 'lucide-react';
+import { Search, User, Menu, X, ChevronDown, LogOut, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import profileSvgPaths from "../../imports/svg-2f5i9mgwjd";
+import { useAuth } from '../contexts/AuthContext';
+import { useCreatorAuth } from '../contexts/CreatorAuthContext';
 
 const countries = [
   { code: 'CG', name: 'Congo' },
@@ -14,6 +16,37 @@ const countries = [
   { code: 'CD', name: 'RDC' },
 ];
 
+function getInitials(name?: string | null): string {
+  if (!name) return '';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function ProfileAvatar({ avatar, name }: { avatar?: string | null; name?: string | null }) {
+  const [broken, setBroken] = useState(false);
+  const initials = getInitials(name);
+
+  if (avatar && !broken) {
+    return (
+      <img
+        src={avatar}
+        alt={name ?? ''}
+        className="w-7 h-7 rounded-full object-cover"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
+  if (initials) {
+    return (
+      <span className="w-7 h-7 rounded-full bg-[#CDFF71]/20 flex items-center justify-center text-[#CDFF71] font-bold text-xs leading-none">
+        {initials}
+      </span>
+    );
+  }
+  return <User className="w-4 h-4 text-[#CDFF71]" />;
+}
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,8 +54,17 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated: isCreator } = useCreatorAuth();
+
+  const handleLogout = async () => {
+    setProfileMenuOpen(false);
+    await logout();
+    navigate('/');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,13 +76,20 @@ export function Navbar() {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!profileMenuOpen) return;
+    const close = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (!target.closest('[data-profile-menu]')) setProfileMenuOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [profileMenuOpen]);
 
   return (
     <nav
@@ -92,6 +141,14 @@ export function Navbar() {
               className="font-['Inter',sans-serif] text-white text-base 2xl:text-lg font-normal hover:opacity-80 transition-opacity"
             >
               Agenda
+            </Link>
+
+            <Link
+              to={isCreator ? "/creator/dashboard" : "/creator/login"}
+              className="flex items-center gap-1.5 font-['Inter',sans-serif] text-[#CDFF71] text-base 2xl:text-lg font-semibold hover:opacity-80 transition-opacity"
+            >
+              <Video className="w-4 h-4" />
+              Créateurs
             </Link>
           </div>
 
@@ -172,30 +229,40 @@ export function Navbar() {
             </div>
 
             {/* Profile Button */}
-            <div className="relative">
+            <div className="relative" data-profile-menu>
+              {isAuthenticated ? (
+                <button
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="group w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(205,255,113,0.3)]"
+                  style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+                  aria-label="Menu profil"
+                >
+                  <ProfileAvatar avatar={user?.avatar} name={user?.name} />
+                </button>
+              ) : (
               <Link to="/login">
-                <button 
-                  className="group w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(205,255,113,0.3)]" 
+                <button
+                  className="group w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(205,255,113,0.3)]"
                   style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
                   aria-label="Profil"
                 >
                   <div className="w-[17px] h-[18.5px] md:w-[18px] md:h-[19.5px] relative transition-transform duration-300 group-hover:scale-110">
                     <svg className="w-full h-full" fill="none" viewBox="0 0 17.4999 18.5088">
                       {/* Head Circle */}
-                      <path 
-                        d={profileSvgPaths.p23740d80} 
-                        stroke="#CDFF71" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
+                      <path
+                        d={profileSvgPaths.p23740d80}
+                        stroke="#CDFF71"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         strokeWidth="1.5"
                         className="transition-all duration-300 group-hover:stroke-[2] group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,0.8)]"
                       />
                       {/* Body */}
-                      <path 
-                        d={profileSvgPaths.p398fea00} 
-                        stroke="#CDFF71" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
+                      <path
+                        d={profileSvgPaths.p398fea00}
+                        stroke="#CDFF71"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         strokeWidth="1.5"
                         className="transition-all duration-300 group-hover:stroke-[2] group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,0.8)]"
                       />
@@ -203,6 +270,42 @@ export function Navbar() {
                   </div>
                 </button>
               </Link>
+              )}
+
+              {/* Dropdown menu profil (utilisateur connecté) */}
+              <AnimatePresence>
+                {isAuthenticated && profileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full right-0 mt-2 w-52 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/20 rounded-lg shadow-xl overflow-hidden z-50"
+                  >
+                    <div className="px-4 py-3 border-b border-white/10">
+                      <p className="text-white font-semibold text-sm truncate">{user?.name}</p>
+                      <p className="text-[#999999] text-xs truncate">{user?.email}</p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        to={isCreator ? "/creator/dashboard" : "/creator/login"}
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="w-full px-4 py-2.5 text-left text-[#CDFF71] hover:bg-white/10 transition-colors flex items-center gap-2 text-sm"
+                      >
+                        <Video className="w-4 h-4" />
+                        {isCreator ? "Mon espace créateur" : "Devenir créateur"}
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2.5 text-left text-red-400 hover:bg-white/10 transition-colors flex items-center gap-2 text-sm"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Se déconnecter
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             
             {/* Mobile Menu Toggle */}
@@ -258,17 +361,41 @@ export function Navbar() {
               >
                 Agenda
               </Link>
-              
-              {/* Mobile Login Link */}
+              <Link
+                to={isCreator ? "/creator/dashboard" : "/creator/login"}
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 text-[#CDFF71] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2 font-semibold"
+              >
+                <Video className="w-4 h-4" />
+                {isCreator ? "Mon espace créateur" : "Devenir créateur"}
+              </Link>
+
+              {/* Mobile auth section */}
               <div className="border-t border-gray-800 mt-2 pt-2">
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-[#CDFF71] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <User className="w-4 h-4" />
-                  Se connecter
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <div className="px-4 py-2">
+                      <p className="text-white text-sm font-semibold truncate">{user?.name}</p>
+                      <p className="text-[#999999] text-xs truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); void handleLogout(); }}
+                      className="w-full px-4 py-3 text-red-400 hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Se déconnecter
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-3 text-[#CDFF71] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Se connecter
+                  </Link>
+                )}
               </div>
             </div>
           </div>
