@@ -66,7 +66,7 @@ export function About() {
   const milestones = [
     {
       year: '2024',
-      title: 'Lancement de Feeti Play',
+      title: 'Lancement de Fééti Play',
       description: 'Première plateforme de streaming en République du Congo'
     },
     {
@@ -103,7 +103,7 @@ export function About() {
         {/* Hero Section */}
         <div className="text-center mb-20">
           <h1 className="font-['Montserrat',sans-serif] font-bold text-white text-4xl md:text-5xl lg:text-6xl mb-6">
-            À propos de <span className="text-[#CDFF71]">Feeti Play</span>
+            À propos de <span className="text-[#CDFF71]">Fééti Play</span>
           </h1>
           <p className="font-['Inter',sans-serif] text-white/70 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
             La première plateforme de streaming et de divertissement made in Afrique centrale,
@@ -119,7 +119,7 @@ export function About() {
                 Notre Mission
               </h2>
               <p className="text-white/80 text-lg leading-relaxed mb-4">
-                Chez Feeti Play, nous croyons que le divertissement de qualité doit être accessible à tous.
+                Chez Fééti Play, nous croyons que le divertissement de qualité doit être accessible à tous.
                 Notre mission est de créer une plateforme qui connecte les créateurs africains avec leur audience,
                 tout en offrant une expérience de streaming exceptionnelle.
               </p>
@@ -221,7 +221,7 @@ export function About() {
         {/* Stats Section */}
         <section className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl p-8 md:p-12 border border-white/10">
           <h2 className="font-['Montserrat',sans-serif] font-bold text-white text-3xl md:text-4xl mb-12 text-center">
-            Feeti Play en chiffres
+            Fééti Play en chiffres
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -246,7 +246,7 @@ export function About() {
         {/* CTA Section */}
         <section className="mt-16 text-center">
           <h2 className="font-['Montserrat',sans-serif] font-bold text-white text-3xl md:text-4xl mb-6">
-            Rejoignez l'aventure Feeti Play
+            Rejoignez l'aventure Fééti Play
           </h2>
           <p className="text-white/70 text-lg mb-8 max-w-2xl mx-auto">
             Faites partie de la révolution du divertissement en Afrique centrale

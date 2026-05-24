@@ -116,7 +116,7 @@ export function AdminDashboard() {
           Bienvenue, {user?.name} 👋
         </h1>
         <p className="font-['Inter',sans-serif] text-white/60 text-base">
-          Voici un aperçu de votre plateforme FEETI PLAY
+          Voici un aperçu de votre plateforme FÉÉTI PLAY
         </p>
       </div>
 

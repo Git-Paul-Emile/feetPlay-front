@@ -37,7 +37,7 @@ export function PrivacyPolicy() {
         {/* Intro */}
         <div className="bg-purple-600/10 border border-purple-500/30 rounded-xl p-6 mb-8">
           <p className="text-gray-300 leading-relaxed">
-            FeetiPlay accorde une importance primordiale à la protection de vos données personnelles. Cette politique explique
+            Fééti Play accorde une importance primordiale à la protection de vos données personnelles. Cette politique explique
             quelles données nous collectons, comment nous les utilisons et vos droits. Pour toute question :{' '}
             <a href="mailto:privacy@feetiplay.com" className="text-purple-400 hover:underline">privacy@feetiplay.com</a>.
           </p>
@@ -79,7 +79,7 @@ export function PrivacyPolicy() {
         </Section>
 
         <Section title={<><Lock className="w-5 h-5 text-purple-400" /> 3. Sécurité des données</>}>
-          <p>FeetiPlay met en œuvre des mesures techniques et organisationnelles pour protéger vos données :</p>
+          <p>Fééti Play met en œuvre des mesures techniques et organisationnelles pour protéger vos données :</p>
           <ul className="space-y-1 ml-4">
             {['Chiffrement SSL/TLS pour toutes les transmissions', 'Mots de passe hachés avec bcrypt', 'Accès aux données limité au personnel autorisé', 'Audits de sécurité réguliers'].map(item => (
               <li key={item} className="flex items-start gap-2"><span className="text-purple-400 mt-1">•</span><span>{item}</span></li>

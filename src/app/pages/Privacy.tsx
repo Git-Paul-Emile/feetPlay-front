@@ -27,7 +27,7 @@ export function Privacy() {
           </h1>
 
           <div className="text-[#999999] mb-8">
-            <p className="font-['Inter',sans-serif] text-lg mb-2">Protection des Données Personnelles — Feeti Play</p>
+            <p className="font-['Inter',sans-serif] text-lg mb-2">Protection des Données Personnelles — Fééti Play</p>
             <p className="font-['Inter',sans-serif] text-sm">Version 1.0 — En vigueur à compter du 3 avril 2025</p>
             <p className="font-['Inter',sans-serif] text-sm">Eroiste SARL — Brazzaville, République du Congo</p>
           </div>
@@ -42,7 +42,7 @@ export function Privacy() {
                 </h2>
                 <p>
                   Eroiste SARL, société à responsabilité limitée de droit congolais dont le siège social est établi à Brazzaville, République du Congo,
-                  exploitant la plateforme de streaming et de divertissement Feeti Play sous la marque commerciale Feeti, s'engage à protéger la vie privée de ses
+                  exploitant la plateforme de streaming et de divertissement Fééti Play sous la marque commerciale Feeti, s'engage à protéger la vie privée de ses
                   Utilisateurs.
                 </p>
                 <p className="mt-4">

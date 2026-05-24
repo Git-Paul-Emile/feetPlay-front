@@ -53,32 +53,12 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <div className="flex items-center justify-between h-14 md:h-16 lg:h-18 xl:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center h-6 w-18 md:h-8 md:w-24 lg:h-9 lg:w-28 xl:h-[39px] xl:w-[156px] flex-shrink-0">
-            <div className="relative w-full h-full">
-              {/* Féeti Logo */}
-              <svg className="absolute inset-0" fill="none" viewBox="0 0 156 39">
-                <g>
-                  {/* Colored dots */}
-                  <path d={svgPaths.p142ece80} fill="white" />
-                  <path d={svgPaths.p28ea7700} fill="#811AEC" />
-                  <path d={svgPaths.p34f09600} fill="#F1C519" />
-                  <path d={svgPaths.p261cd780} fill="#E43962" />
-                  <path d={svgPaths.p3768dd00} fill="#16BDA0" />
-                  <path d={svgPaths.p5a83700} fill="#811AEC" />
-                  <path d={svgPaths.p1116dfc0} fill="#F1C519" />
-                  <path d={svgPaths.p3f6ce800} fill="#E43962" />
-                  <path d={svgPaths.p206aab00} fill="#16BDA0" />
-                </g>
-                <g transform="translate(44, 3)">
-                  {/* Féeti text */}
-                  <path d={svgPaths.p2d591880} fill="white" />
-                  <path d={svgPaths.p3aaf32c0} fill="white" />
-                  <path d={svgPaths.p87ab6f0} fill="white" />
-                  <path d={svgPaths.p20a2e100} fill="white" />
-                  <path d={svgPaths.p66cf900} fill="white" />
-                </g>
-              </svg>
-            </div>
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <img
+              src="/logo blanc.png"
+              alt="Fééti Play"
+              className="h-7 md:h-8 lg:h-9 xl:h-10 w-auto object-contain"
+            />
           </Link>
 
           {/* Navigation Links - Desktop */}

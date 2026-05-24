@@ -27,7 +27,7 @@ export function CGU() {
           </h1>
 
           <div className="text-[#999999] mb-8">
-            <p className="font-['Inter',sans-serif] text-lg mb-2">Plateforme de streaming et de divertissement Feeti Play</p>
+            <p className="font-['Inter',sans-serif] text-lg mb-2">Plateforme de streaming et de divertissement Fééti Play</p>
             <p className="font-['Inter',sans-serif] text-sm">Version 1.0 — En vigueur à compter du 3 avril 2025</p>
             <p className="font-['Inter',sans-serif] text-sm">Eroiste SARL — Brazzaville, République du Congo</p>
           </div>
@@ -42,9 +42,9 @@ export function CGU() {
                 </h2>
                 <p>
                   Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme de streaming sportif
-                  Feeti Play, exploitée par la société Eroiste SARL, société à responsabilité limitée de droit congolais, dont le siège social est
+                  Fééti Play, exploitée par la société Eroiste SARL, société à responsabilité limitée de droit congolais, dont le siège social est
                   établi à Brazzaville, République du Congo, immatriculée au Registre du Commerce et du Crédit Mobilier (RCCM) de Brazzaville.
-                  Feeti et Feeti Play sont des marques commerciales appartenant à Eroiste SARL.
+                  Feeti et Fééti Play sont des marques commerciales appartenant à Eroiste SARL.
                 </p>
                 <p className="mt-4">
                   En accédant à la Plateforme ou en vous inscrivant, vous acceptez sans réserve les présentes CGU. Si vous n'acceptez pas ces
@@ -58,7 +58,7 @@ export function CGU() {
                   ARTICLE 1 — DÉFINITIONS
                 </h2>
                 <ul className="space-y-2 list-disc list-inside">
-                  <li><strong className="text-white">« Plateforme »</strong> : le service de streaming sportif accessible via le site feeti.com et les applications mobiles Feeti Play (iOS et Android).</li>
+                  <li><strong className="text-white">« Plateforme »</strong> : le service de streaming sportif accessible via le site feeti.com et les applications mobiles Fééti Play (iOS et Android).</li>
                   <li><strong className="text-white">« Utilisateur »</strong> ou <strong className="text-white">« Abonné »</strong> : toute personne physique majeure ou personne morale qui accède à la Plateforme.</li>
                   <li><strong className="text-white">« Contenu »</strong> : l'ensemble des éléments audiovisuels diffusés sur la Plateforme (direct, replay, documentaires, magazines).</li>
                   <li><strong className="text-white">« Abonnement »</strong> : le contrat permettant l'accès aux Contenus en contrepartie d'un prix défini dans le Plan tarifaire choisi.</li>
@@ -74,7 +74,7 @@ export function CGU() {
                   ARTICLE 2 — OBJET ET CHAMP D'APPLICATION
                 </h2>
                 <p>
-                  Les présentes CGU ont pour objet de définir les conditions d'accès à la Plateforme Feeti Play et les droits et obligations
+                  Les présentes CGU ont pour objet de définir les conditions d'accès à la Plateforme Fééti Play et les droits et obligations
                   respectifs des parties. Elles s'appliquent à tous les Utilisateurs, quelle que soit leur localisation.
                 </p>
                 <p className="mt-4">
@@ -117,16 +117,16 @@ export function CGU() {
                 </h2>
 
                 <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl mb-3">4.1 Offres de service</h3>
-                <p>Feeti Play propose différentes formules :</p>
+                <p>Fééti Play propose différentes formules :</p>
                 <ul className="space-y-2 list-disc list-inside mt-2">
                   <li>Accès gratuit avec contenus limités</li>
-                  <li><strong className="text-white">Feeti Essentiel</strong> : accès aux retransmissions sportives de base</li>
-                  <li><strong className="text-white">Feeti Premium</strong> : accès à l'intégralité des Contenus (football, basketball, boxe, compétitions locales et internationales)</li>
+                  <li><strong className="text-white">Fééti Essentiel</strong> : accès aux retransmissions sportives de base</li>
+                  <li><strong className="text-white">Fééti Premium</strong> : accès à l'intégralité des Contenus (football, basketball, boxe, compétitions locales et internationales)</li>
                 </ul>
 
                 <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl mb-3 mt-4">4.2 Streaming en direct et replay</h3>
                 <p>
-                  Feeti Play permet la diffusion en direct (live) et en replay. La disponibilité des replays est limitée dans le temps selon les
+                  Fééti Play permet la diffusion en direct (live) et en replay. La disponibilité des replays est limitée dans le temps selon les
                   droits de diffusion. Tout Contenu dont les droits expirent peut être retiré sans préavis.
                 </p>
 
@@ -190,7 +190,7 @@ export function CGU() {
                 <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl mb-3">7.1 Droits d'Eroiste SARL</h3>
                 <p>
                   La Plateforme et ses éléments (interface, design, logo, code, bases de données) sont protégés par les droits de propriété
-                  intellectuelle, notamment la Convention de Bangui révisée (1999). Les marques FEETI et FEETI PLAY appartiennent à Eroiste SARL.
+                  intellectuelle, notamment la Convention de Bangui révisée (1999). Les marques FÉÉTI et FÉÉTI PLAY appartiennent à Eroiste SARL.
                   Toute reproduction non autorisée est interdite.
                 </p>
 

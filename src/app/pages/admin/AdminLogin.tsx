@@ -60,7 +60,7 @@ export function AdminLogin() {
           <div className="inline-flex items-center gap-3 mb-4">
             <ShieldCheck className="w-12 h-12 text-[#cdff71]" />
             <h1 className="font-['DM_Sans',sans-serif] font-bold text-white text-4xl">
-              FEETI PLAY
+              FÉÉTI PLAY
             </h1>
           </div>
           <p className="font-['Inter',sans-serif] text-white/60 text-sm">
@@ -186,7 +186,7 @@ export function AdminLogin() {
           transition={{ delay: 0.2 }}
           className="text-center text-white/40 text-xs mt-6 font-['Inter',sans-serif]"
         >
-          © 2025 FEETI PLAY - Tous droits réservés
+          © 2025 FÉÉTI PLAY - Tous droits réservés
         </motion.p>
       </div>
     </div>

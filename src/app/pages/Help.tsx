@@ -13,7 +13,7 @@ const faqSections = [
     title: "COMPTE ET INSCRIPTION",
     items: [
       {
-        question: "Comment créer un compte FeetiPlay ?",
+        question: "Comment créer un compte Fééti Play ?",
         answer: "Pour créer un compte, cliquez sur 'Se connecter' en haut à droite, puis sur 'Créer un compte'. Remplissez vos informations (email, mot de passe, nom) et validez. Vous recevrez un email de confirmation."
       },
       {
@@ -69,11 +69,11 @@ const faqSections = [
     items: [
       {
         question: "Quels sont les navigateurs compatibles ?",
-        answer: "FeetiPlay fonctionne sur Chrome, Firefox, Safari et Edge (versions récentes). Pour une expérience optimale, maintenez votre navigateur à jour."
+        answer: "Fééti Play fonctionne sur Chrome, Firefox, Safari et Edge (versions récentes). Pour une expérience optimale, maintenez votre navigateur à jour."
       },
       {
         question: "L'application mobile est-elle disponible ?",
-        answer: "Oui, téléchargez FeetiPlay sur l'App Store (iOS) et Google Play Store (Android)."
+        answer: "Oui, téléchargez Fééti Play sur l'App Store (iOS) et Google Play Store (Android)."
       },
       {
         question: "Pourquoi le lecteur ne se lance pas ?",
@@ -111,7 +111,7 @@ export function Help() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="font-['Montserrat',sans-serif] font-bold text-white text-3xl md:text-4xl lg:text-5xl mb-4">
-            Centre d'aide FeetiPlay
+            Centre d'aide Fééti Play
           </h1>
           <p className="font-['Inter',sans-serif] text-[#999999] text-lg">
             Trouvez des réponses à vos questions les plus fréquentes

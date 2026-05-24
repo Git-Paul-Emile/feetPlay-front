@@ -10,20 +10,20 @@ export function Press() {
   const pressReleases = [
     {
       date: '15 Mai 2026',
-      title: 'Feeti Play lance son système d\'abonnement aux créateurs',
+      title: 'Fééti Play lance son système d\'abonnement aux créateurs',
       description: 'La plateforme de streaming et de divertissement annonce une nouvelle fonctionnalité permettant aux utilisateurs de soutenir leurs créateurs favoris.',
       link: '#'
     },
     {
       date: '3 Avril 2026',
-      title: 'Feeti Play atteint 100 000 utilisateurs actifs',
+      title: 'Fééti Play atteint 100 000 utilisateurs actifs',
       description: 'La plateforme congolaise de streaming connaît une croissance exceptionnelle dans toute l\'Afrique centrale.',
       link: '#'
     },
     {
       date: '12 Mars 2026',
       title: 'Partenariat stratégique avec les plus grands artistes africains',
-      description: 'Feeti Play annonce des partenariats exclusifs pour diffuser les concerts et événements en direct.',
+      description: 'Fééti Play annonce des partenariats exclusifs pour diffuser les concerts et événements en direct.',
       link: '#'
     }
   ];
@@ -69,7 +69,7 @@ export function Press() {
             Espace <span className="text-[#CDFF71]">Presse</span>
           </h1>
           <p className="font-['Inter',sans-serif] text-white/70 text-lg md:text-xl max-w-3xl mx-auto">
-            Toutes les actualités, communiqués de presse et ressources médias de Feeti Play
+            Toutes les actualités, communiqués de presse et ressources médias de Fééti Play
           </p>
         </div>
 
@@ -165,14 +165,14 @@ export function Press() {
           </div>
         </section>
 
-        {/* À propos de Feeti Play */}
+        {/* À propos de Fééti Play */}
         <section className="mt-12 bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 md:p-10">
           <h2 className="font-['Montserrat',sans-serif] font-semibold text-white text-2xl md:text-3xl mb-6">
-            À propos de Feeti Play
+            À propos de Fééti Play
           </h2>
           <div className="space-y-4 text-white/80 leading-relaxed">
             <p>
-              Feeti Play est la première plateforme de streaming et de divertissement d'Afrique centrale,
+              Fééti Play est la première plateforme de streaming et de divertissement d'Afrique centrale,
               développée par Eroiste SARL, une société congolaise basée à Brazzaville, République du Congo.
             </p>
             <p>
@@ -181,7 +181,7 @@ export function Press() {
             </p>
             <p>
               Avec des fonctionnalités innovantes comme le streaming en direct, les replays à la demande,
-              et un système d'abonnement aux créateurs, Feeti Play révolutionne l'industrie du divertissement
+              et un système d'abonnement aux créateurs, Fééti Play révolutionne l'industrie du divertissement
               en Afrique.
             </p>
           </div>

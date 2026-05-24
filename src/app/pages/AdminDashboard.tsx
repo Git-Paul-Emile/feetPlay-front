@@ -83,7 +83,7 @@ export function AdminDashboard() {
             {/* Logo */}
             <div className="p-6 border-b border-white/10">
               <h1 className="font-['DM_Sans',sans-serif] font-bold text-2xl text-white">
-                FEETI <span className="text-[#de0035]">PLAY</span>
+                FÉÉTI <span className="text-[#de0035]">PLAY</span>
               </h1>
               <p className="font-['Inter',sans-serif] text-white/60 text-xs mt-1">Admin Dashboard</p>
             </div>

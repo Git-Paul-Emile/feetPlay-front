@@ -56,7 +56,7 @@ export function AdminLogin() {
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="font-['DM_Sans',sans-serif] font-bold text-4xl text-white mb-2">
-            FEETI <span className="text-[#de0035]">PLAY</span>
+            FÉÉTI <span className="text-[#de0035]">PLAY</span>
           </h1>
           <p className="font-['Inter',sans-serif] text-white/60 text-sm">
             Administration Dashboard
@@ -178,7 +178,7 @@ export function AdminLogin() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="font-['Inter',sans-serif] text-white/40 text-xs">
-            © 2025 FEETI PLAY. Tous droits réservés.
+            © 2025 FÉÉTI PLAY. Tous droits réservés.
           </p>
         </div>
       </motion.div>

@@ -63,7 +63,7 @@ export function ChatButton() {
                 </div>
                 <div>
                   <h3 className="font-['Inter',sans-serif] font-semibold text-white text-base">
-                    Support FeetiPlay
+                    Support Fééti Play
                   </h3>
                   <p className="font-['Inter',sans-serif] text-white/80 text-xs flex items-center gap-1">
                     <span className="w-2 h-2 bg-[#CDFF71] rounded-full animate-pulse" />

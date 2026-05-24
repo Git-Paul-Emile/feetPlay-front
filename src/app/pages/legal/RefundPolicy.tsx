@@ -38,12 +38,12 @@ export function RefundPolicy() {
         <div className="bg-green-600/10 border border-green-500/30 rounded-xl p-6 mb-8">
           <p className="text-gray-300 leading-relaxed">
             Nous comprenons que les imprévus arrivent. Cette politique définit les conditions dans lesquelles vous pouvez
-            obtenir un remboursement pour vos achats sur <strong className="text-green-400">FeetiPlay</strong>, de manière équitable et transparente.
+            obtenir un remboursement pour vos achats sur <strong className="text-green-400">Fééti Play</strong>, de manière équitable et transparente.
           </p>
         </div>
 
         <Section title={<><FileText className="w-5 h-5 text-green-400" /> 1. Principe général</>}>
-          <p>Les tickets et accès achetés sur FeetiPlay sont en principe <strong className="text-white">non remboursables</strong> une fois la transaction finalisée, sauf dans les cas expressément prévus ci-dessous.</p>
+          <p>Les tickets et accès achetés sur Fééti Play sont en principe <strong className="text-white">non remboursables</strong> une fois la transaction finalisée, sauf dans les cas expressément prévus ci-dessous.</p>
         </Section>
 
         <Section title={<><CheckCircle className="w-5 h-5 text-green-400" /> 2. Cas donnant droit à un remboursement intégral</>}>
@@ -56,7 +56,7 @@ export function RefundPolicy() {
             <p>Si l'événement est reporté à plus de 30 jours ou si des éléments essentiels changent, vous avez <strong className="text-white">72 heures</strong> à compter de la notification pour demander un remboursement.</p>
           </div>
           <div>
-            <h3 className="font-semibold text-white mb-2">2.3 Problème technique imputable à FeetiPlay</h3>
+            <h3 className="font-semibold text-white mb-2">2.3 Problème technique imputable à Fééti Play</h3>
             <p>Si une panne technique de notre plateforme vous empêche d'accéder à un live stream acheté, un remboursement ou un avoir vous sera proposé après vérification.</p>
           </div>
         </Section>
@@ -89,7 +89,7 @@ export function RefundPolicy() {
 
         <Section title={<><MessageSquare className="w-5 h-5 text-green-400" /> 4. Procédure de demande</>}>
           <ol className="list-decimal list-inside space-y-2 ml-4">
-            <li>Accédez à la rubrique "Mes Tickets" de votre compte FeetiPlay</li>
+            <li>Accédez à la rubrique "Mes Tickets" de votre compte Fééti Play</li>
             <li>Sélectionnez le ticket concerné et cliquez sur "Demander un remboursement"</li>
             <li>Décrivez le motif de votre demande</li>
             <li>Notre équipe vous répond dans un délai de <strong className="text-white">3 jours ouvrables</strong></li>
@@ -103,7 +103,7 @@ export function RefundPolicy() {
               'Le remboursement est effectué via le même moyen de paiement utilisé lors de l\'achat',
               'Mobile money : remboursement sous 3 à 7 jours ouvrables',
               'Carte bancaire : remboursement sous 5 à 10 jours ouvrables',
-              'FeetiPlay peut proposer un avoir d\'une valeur équivalente comme alternative',
+              'Fééti Play peut proposer un avoir d\'une valeur équivalente comme alternative',
             ].map(item => (
               <li key={item} className="flex items-start gap-2"><span className="text-green-400 mt-1">•</span><span>{item}</span></li>
             ))}

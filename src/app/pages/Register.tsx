@@ -44,14 +44,7 @@ export function Register() {
           <div className="bg-black rounded-2xl p-8 md:p-10 max-h-[90vh] overflow-y-auto">
             {/* Logo */}
             <div className="flex justify-center mb-8">
-              <div className="flex items-center gap-2">
-                <h1 className="font-['Montserrat',sans-serif] font-bold text-white text-[32px] md:text-[36px]">
-                  Féeti
-                </h1>
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 30 30">
-                  <path d={svgPaths.p185cb180} stroke="#CDFF71" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-                </svg>
-              </div>
+              <img src="/logo blanc.png" alt="Fééti Play" className="h-10 w-auto object-contain" />
             </div>
 
             {/* Title */}

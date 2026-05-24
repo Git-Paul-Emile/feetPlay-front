@@ -120,7 +120,7 @@ export function AdminLayout() {
                 exit={{ opacity: 0 }}
               >
                 <h1 className="font-['DM_Sans',sans-serif] font-bold text-white text-lg">
-                  FEETI PLAY
+                  FÉÉTI PLAY
                 </h1>
                 <p className="text-xs text-white/60">Admin Panel</p>
               </motion.div>

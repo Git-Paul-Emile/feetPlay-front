@@ -27,7 +27,7 @@ export function Cookies() {
           </h1>
 
           <div className="text-[#999999] mb-6">
-            <p className="font-['Inter',sans-serif] text-lg mb-2">Gestion des cookies et technologies de traçage — Feeti Play</p>
+            <p className="font-['Inter',sans-serif] text-lg mb-2">Gestion des cookies et technologies de traçage — Fééti Play</p>
             <p className="font-['Inter',sans-serif] text-sm">Version 1.0 — En vigueur à compter du 3 avril 2025</p>
             <p className="font-['Inter',sans-serif] text-sm">Eroiste SARL — Brazzaville, République du Congo</p>
           </div>
@@ -41,7 +41,7 @@ export function Cookies() {
                 </h2>
                 <p>
                   La présente Politique de Cookies décrit l'utilisation des cookies et technologies similaires (pixels, web beacons, local storage) sur la
-                  plateforme Feeti Play, exploitée par Eroiste SARL, société à responsabilité limitée dont le siège social est à Brazzaville, République du Congo.
+                  plateforme Fééti Play, exploitée par Eroiste SARL, société à responsabilité limitée dont le siège social est à Brazzaville, République du Congo.
                 </p>
                 <p className="mt-4">
                   Elle est rédigée conformément au RGPD (Règlement UE 2016/679), à la Directive ePrivacy (2002/58/CE) et aux lignes directrices des autorités
@@ -59,7 +59,7 @@ export function Cookies() {
                   application mobile. Il permet de reconnaître votre appareil lors de vos visites ultérieures et de stocker des informations relatives à votre
                   navigation.
                 </p>
-                <p className="mt-4">Feeti Play peut également utiliser :</p>
+                <p className="mt-4">Fééti Play peut également utiliser :</p>
                 <ul className="space-y-2 list-disc list-inside mt-2">
                   <li><strong className="text-white">Les pixels traceurs :</strong> images invisibles mesurant l'ouverture d'emails ou de pages</li>
                   <li><strong className="text-white">Le stockage local :</strong> (localStorage/sessionStorage) pour conserver des préférences dans votre navigateur</li>
@@ -117,7 +117,7 @@ export function Cookies() {
                 <ul className="space-y-2 list-disc list-inside mt-2">
                   <li>Le panneau "Gérer mes cookies" en pied de page</li>
                   <li>Les paramètres de votre navigateur</li>
-                  <li>Les paramètres de l'application mobile Feeti Play</li>
+                  <li>Les paramètres de l'application mobile Fééti Play</li>
                 </ul>
               </section>
 

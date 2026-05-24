@@ -54,7 +54,7 @@ const eventsData: Record<string, EventDetailData> = {
     isLive: true,
     price: 3000,
     duration: '2h30',
-    organizer: 'FEETI Productions',
+    organizer: 'FÉÉTI Productions',
     capacity: '500 places'
   },
   '2': {

@@ -38,13 +38,13 @@ export function TermsOfService() {
         <div className="bg-blue-600/10 border border-blue-500/30 rounded-xl p-6 mb-8">
           <p className="text-gray-300 leading-relaxed">
             Les présentes Conditions Générales d'Utilisation (CGU) définissent les règles encadrant votre utilisation de la plateforme{' '}
-            <strong className="text-blue-400">FeetiPlay</strong>. En vous inscrivant ou en utilisant nos services, vous acceptez ces conditions.
+            <strong className="text-blue-400">Fééti Play</strong>. En vous inscrivant ou en utilisant nos services, vous acceptez ces conditions.
             Pour toute question : <a href="mailto:support@feetiplay.com" className="text-blue-400 hover:underline">support@feetiplay.com</a>.
           </p>
         </div>
 
-        <Section title={<><FileText className="w-5 h-5 text-blue-400" /> 1. Présentation de FeetiPlay</>}>
-          <p>FeetiPlay est une plateforme numérique de streaming d'événements live dédiée au bassin du Congo et à l'Afrique. Elle vous permet de :</p>
+        <Section title={<><FileText className="w-5 h-5 text-blue-400" /> 1. Présentation de Fééti Play</>}>
+          <p>Fééti Play est une plateforme numérique de streaming d'événements live dédiée au bassin du Congo et à l'Afrique. Elle vous permet de :</p>
           <ul className="space-y-1 ml-4">
             {['Regarder des événements en direct (concerts, sport, cinéma, conférences) depuis chez vous', 'Accéder à des replays et contenus exclusifs', 'Acheter des tickets numériques pour les événements payants', 'Suivre des chaînes de créateurs de contenu'].map(item => (
               <li key={item} className="flex items-start gap-2"><span className="text-blue-400 mt-1">•</span><span>{item}</span></li>
@@ -82,7 +82,7 @@ export function TermsOfService() {
         </Section>
 
         <Section title={<><Video className="w-5 h-5 text-blue-400" /> 4. Accès aux streams et tickets numériques</>}>
-          <p>En achetant un ticket ou un accès à un stream sur FeetiPlay :</p>
+          <p>En achetant un ticket ou un accès à un stream sur Fééti Play :</p>
           <ul className="space-y-1 ml-4">
             {['Vous bénéficiez d\'un accès personnel et non transférable au contenu', 'Il est strictement interdit d\'enregistrer, copier ou redistribuer ce contenu', 'L\'accès peut être révoqué sans remboursement en cas de violation', 'Un QR code unique est généré par ticket — ne le partagez pas avant l\'événement'].map(item => (
               <li key={item} className="flex items-start gap-2"><span className="text-blue-400 mt-1">•</span><span>{item}</span></li>
@@ -91,11 +91,11 @@ export function TermsOfService() {
         </Section>
 
         <Section title={<><Scale className="w-5 h-5 text-blue-400" /> 5. Propriété intellectuelle</>}>
-          <p>Tout le contenu de FeetiPlay (logo, design, textes, code, vidéos) est la propriété exclusive de FeetiPlay ou de ses partenaires. Toute reproduction sans autorisation écrite préalable est interdite.</p>
+          <p>Tout le contenu de Fééti Play (logo, design, textes, code, vidéos) est la propriété exclusive de Fééti Play ou de ses partenaires. Toute reproduction sans autorisation écrite préalable est interdite.</p>
         </Section>
 
         <Section title={<><XCircle className="w-5 h-5 text-red-400" /> 6. Suspension et résiliation</>}>
-          <p className="font-medium text-white">FeetiPlay peut suspendre ou résilier votre compte en cas de :</p>
+          <p className="font-medium text-white">Fééti Play peut suspendre ou résilier votre compte en cas de :</p>
           <ul className="space-y-1 ml-4">
             {['Violation de ces CGU', 'Comportement frauduleux avéré', 'Non-paiement de sommes dues', 'Inactivité prolongée (plus de 24 mois)'].map(item => (
               <li key={item} className="flex items-start gap-2"><span className="text-blue-400 mt-1">•</span><span>{item}</span></li>

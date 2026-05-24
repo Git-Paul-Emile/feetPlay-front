@@ -37,14 +37,14 @@ export function CookiePolicy() {
         {/* Intro */}
         <div className="bg-amber-600/10 border border-amber-500/30 rounded-xl p-6 mb-8">
           <p className="text-gray-300 leading-relaxed">
-            FeetiPlay utilise des cookies et technologies similaires pour améliorer votre expérience de streaming.
+            Fééti Play utilise des cookies et technologies similaires pour améliorer votre expérience de streaming.
             La gestion de votre consentement est assurée par notre partenaire{' '}
             <strong className="text-amber-400">CookieYes</strong>, qui vous permet de contrôler facilement vos préférences.
           </p>
         </div>
 
         <Section title={<><Cookie className="w-5 h-5 text-amber-400" /> 1. Qu'est-ce qu'un cookie ?</>}>
-          <p>Un cookie est un petit fichier texte déposé sur votre appareil lorsque vous visitez un site web. Les cookies permettent à FeetiPlay de vous reconnaître, de mémoriser vos préférences et de vous offrir une expérience personnalisée.</p>
+          <p>Un cookie est un petit fichier texte déposé sur votre appareil lorsque vous visitez un site web. Les cookies permettent à Fééti Play de vous reconnaître, de mémoriser vos préférences et de vous offrir une expérience personnalisée.</p>
         </Section>
 
         <Section title={<><Settings className="w-5 h-5 text-amber-400" /> 2. Cookies strictement nécessaires</>}>
@@ -74,7 +74,7 @@ export function CookiePolicy() {
 
         <Section title={<><BarChart2 className="w-5 h-5 text-amber-400" /> 3. Cookies analytiques</>}>
           <p className="text-gray-400 text-sm italic mb-3">Soumis à votre consentement via CookieYes</p>
-          <p>Ces cookies nous aident à comprendre comment vous utilisez FeetiPlay, afin d'améliorer nos services :</p>
+          <p>Ces cookies nous aident à comprendre comment vous utilisez Fééti Play, afin d'améliorer nos services :</p>
           <ul className="space-y-2 ml-4 mt-3">
             {[
               ['Statistiques de visionnage', 'Nombre de vues, durée d\'écoute, taux d\'abandon'],
@@ -122,7 +122,7 @@ export function CookiePolicy() {
               </div>
               <div>
                 <div className="font-semibold text-white text-sm">Paramètres navigateur</div>
-                <div className="text-gray-400 text-sm">Vous pouvez bloquer ou supprimer les cookies via les paramètres de votre navigateur. Note : certaines fonctionnalités de FeetiPlay pourraient ne plus fonctionner correctement.</div>
+                <div className="text-gray-400 text-sm">Vous pouvez bloquer ou supprimer les cookies via les paramètres de votre navigateur. Note : certaines fonctionnalités de Fééti Play pourraient ne plus fonctionner correctement.</div>
               </div>
             </div>
           </div>
