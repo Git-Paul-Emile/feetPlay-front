@@ -186,7 +186,7 @@ export function AdminLogin() {
           transition={{ delay: 0.2 }}
           className="text-center text-white/40 text-xs mt-6 font-['Inter',sans-serif]"
         >
-          © 2026 Fééti Play , propulsé par Eroiste , Tous droits réservés.
+          © 2025 FEETI PLAY - Tous droits réservés
         </motion.p>
       </div>
     </div>

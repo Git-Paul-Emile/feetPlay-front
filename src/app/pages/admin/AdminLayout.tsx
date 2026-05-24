@@ -14,7 +14,6 @@ import {
   X,
   ShieldCheck,
   Wallet,
-  Radio,
 } from 'lucide-react';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { useState } from 'react';
@@ -64,12 +63,6 @@ export function AdminLayout() {
       name: 'CRM & Analytics',
       icon: BarChart3,
       path: '/admin/crm',
-      permission: 'manage_crm',
-    },
-    {
-      name: 'Analytics Streaming',
-      icon: Radio,
-      path: '/admin/analytics/streaming',
       permission: 'manage_crm',
     },
     {

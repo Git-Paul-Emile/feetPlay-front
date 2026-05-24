@@ -5,15 +5,20 @@ import { AdminAuthProvider } from './contexts/AdminAuthContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { AppProvider } from './contexts/AppContext';
 import { CreatorAuthProvider } from './contexts/CreatorAuthContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
-// FEETI PLAY - Plateforme de streaming sportif
+// FEETI PLAY - Plateforme de streaming et de divertissement
 export default function App() {
   return (
     <AuthProvider>
       <AppProvider>
         <AdminAuthProvider>
           <CreatorAuthProvider>
-            <RouterProvider router={router} />
+            <FavoritesProvider>
+              <SubscriptionProvider>
+                <RouterProvider router={router} />
+              </SubscriptionProvider>
+            </FavoritesProvider>
           </CreatorAuthProvider>
         </AdminAuthProvider>
       </AppProvider>

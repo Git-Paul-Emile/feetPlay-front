@@ -3,7 +3,12 @@ import { useState, useEffect } from 'react';
 import svgPaths from "../../imports/svg-s9aj5k89tw";
 import imgRectangle42 from "figma:asset/31a63f55d67c21dfc7dd601b567f5841965a32bb.png";
 
-// Banner slides data
+// Import additional replay images
+import imgRectangle11251 from "figma:asset/6f6beb2a2738b5e06d6523651c97ac18e9f5ae4d.png";
+import imgRectangle11252 from "figma:asset/ffba1ec7509ea330744bbca8b25ba7293ca299f1.png";
+import imgRectangle11253 from "figma:asset/2cdcd8e28ce45013666b2c6a1ccbf6e59db24a0c.png";
+
+// Banner slides data with different images
 const replaySlides = [
   {
     id: 1,
@@ -14,21 +19,21 @@ const replaySlides = [
   },
   {
     id: 2,
-    image: imgRectangle42,
+    image: imgRectangle11251,
     title: 'Disponible en Replay actuellement !',
     subtitle: 'CONCERT ORKIDA POUR | DIM 20.10.25 |',
     location: 'Stade de Kinshasa'
   },
   {
     id: 3,
-    image: imgRectangle42,
+    image: imgRectangle11252,
     title: 'Disponible en Replay actuellement !',
     subtitle: 'FESTIVAL AFROBEAT | VEN 25.11.25 |',
     location: 'Palais du Peuple'
   },
   {
     id: 4,
-    image: imgRectangle42,
+    image: imgRectangle11253,
     title: 'Disponible en Replay actuellement !',
     subtitle: 'CONCERT LIVE JAZZ | SAM 05.12.25 |',
     location: 'Centre Culturel'

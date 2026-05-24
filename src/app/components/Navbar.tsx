@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { Search, User, Menu, X, ChevronDown, LogOut, Video } from 'lucide-react';
+import { Search, User, Menu, X, ChevronDown, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
-import profileSvgPaths from "../../imports/svg-2f5i9mgwjd";
-import { useAuth } from '../contexts/AuthContext';
-import { useCreatorAuth } from '../contexts/CreatorAuthContext';
+import { NotificationCenter } from './NotificationCenter';
 
 const countries = [
   { code: 'CG', name: 'Congo' },
@@ -16,37 +14,6 @@ const countries = [
   { code: 'CD', name: 'RDC' },
 ];
 
-function getInitials(name?: string | null): string {
-  if (!name) return '';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-}
-
-function ProfileAvatar({ avatar, name }: { avatar?: string | null; name?: string | null }) {
-  const [broken, setBroken] = useState(false);
-  const initials = getInitials(name);
-
-  if (avatar && !broken) {
-    return (
-      <img
-        src={avatar}
-        alt={name ?? ''}
-        className="w-7 h-7 rounded-full object-cover"
-        onError={() => setBroken(true)}
-      />
-    );
-  }
-  if (initials) {
-    return (
-      <span className="w-7 h-7 rounded-full bg-[#CDFF71]/20 flex items-center justify-center text-[#CDFF71] font-bold text-xs leading-none">
-        {initials}
-      </span>
-    );
-  }
-  return <User className="w-4 h-4 text-[#CDFF71]" />;
-}
-
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -54,17 +21,8 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
-  const { isAuthenticated: isCreator } = useCreatorAuth();
-
-  const handleLogout = async () => {
-    setProfileMenuOpen(false);
-    await logout();
-    navigate('/');
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,20 +34,13 @@ export function Navbar() {
   };
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (!profileMenuOpen) return;
-    const close = (e: MouseEvent) => {
-      const target = e.target as Element;
-      if (!target.closest('[data-profile-menu]')) setProfileMenuOpen(false);
-    };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, [profileMenuOpen]);
 
   return (
     <nav
@@ -102,8 +53,32 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         <div className="flex items-center justify-between h-14 md:h-16 lg:h-18 xl:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center flex-shrink-0 hover:opacity-80 transition-opacity">
-            <img src="/fplay_2.png" alt="Fééti" className="h-[60px] md:h-[70px] lg:h-[80px] xl:h-[100px] w-auto object-contain" />
+          <Link to="/" className="flex items-center h-6 w-18 md:h-8 md:w-24 lg:h-9 lg:w-28 xl:h-[39px] xl:w-[156px] flex-shrink-0">
+            <div className="relative w-full h-full">
+              {/* Féeti Logo */}
+              <svg className="absolute inset-0" fill="none" viewBox="0 0 156 39">
+                <g>
+                  {/* Colored dots */}
+                  <path d={svgPaths.p142ece80} fill="white" />
+                  <path d={svgPaths.p28ea7700} fill="#811AEC" />
+                  <path d={svgPaths.p34f09600} fill="#F1C519" />
+                  <path d={svgPaths.p261cd780} fill="#E43962" />
+                  <path d={svgPaths.p3768dd00} fill="#16BDA0" />
+                  <path d={svgPaths.p5a83700} fill="#811AEC" />
+                  <path d={svgPaths.p1116dfc0} fill="#F1C519" />
+                  <path d={svgPaths.p3f6ce800} fill="#E43962" />
+                  <path d={svgPaths.p206aab00} fill="#16BDA0" />
+                </g>
+                <g transform="translate(44, 3)">
+                  {/* Féeti text */}
+                  <path d={svgPaths.p2d591880} fill="white" />
+                  <path d={svgPaths.p3aaf32c0} fill="white" />
+                  <path d={svgPaths.p87ab6f0} fill="white" />
+                  <path d={svgPaths.p20a2e100} fill="white" />
+                  <path d={svgPaths.p66cf900} fill="white" />
+                </g>
+              </svg>
+            </div>
           </Link>
 
           {/* Navigation Links - Desktop */}
@@ -128,62 +103,43 @@ export function Navbar() {
               <Link to="/replay" className="text-white">Replay</Link>
               <ChevronDown className="w-4 h-4" />
             </button>
-            
+
             <Link
-              to="/chaines"
+              to="/createurs"
               className="font-['Inter',sans-serif] text-white text-base 2xl:text-lg font-normal hover:opacity-80 transition-opacity"
             >
-              Chaines
+              Créateurs
             </Link>
-            
+
             <Link
               to="/agenda"
               className="font-['Inter',sans-serif] text-white text-base 2xl:text-lg font-normal hover:opacity-80 transition-opacity"
             >
               Agenda
             </Link>
-
-            <Link
-              to={isCreator ? "/creator/dashboard" : "/creator/login"}
-              className="flex items-center gap-1.5 font-['Inter',sans-serif] text-[#CDFF71] text-base 2xl:text-lg font-semibold hover:opacity-80 transition-opacity"
-            >
-              <Video className="w-4 h-4" />
-              Créateurs
-            </Link>
           </div>
 
           {/* Right Icons */}
           <div className="flex items-center gap-3 md:gap-4 lg:gap-5">
             {/* Search Button */}
-            <button 
+            <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-transform" 
-              style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+              className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20"
+              style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
               aria-label="Rechercher"
             >
-              <div className="w-4 h-4 md:w-4 md:h-4">
-                <svg className="w-full h-full" fill="none" viewBox="0 0 10.3888 10.2499">
-                  <path d={svgPaths.p23740d80} stroke="#CDFF71" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                </svg>
-              </div>
+              <Search className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,1)]" strokeWidth={2.5} />
             </button>
 
             {/* Flag/Location Button with Dropdown */}
             <div className="relative hidden md:block">
               <button
-                className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-transform"
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+                className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] border border-white/20"
+                style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%))" }}
                 onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
                 aria-label="Sélectionner un pays"
               >
-                <div className="w-3 h-3 md:w-4 md:h-4">
-                  <svg className="w-full h-full" fill="none" viewBox="0 0 16.4287 23.2858">
-                    <g>
-                      <path d="M0.50011 0.50011V22.7858" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d={svgPaths.pd909fc0} stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                    </g>
-                  </svg>
-                </div>
+                <MapPin className="w-5 h-5 text-white transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,1)]" strokeWidth={2.5} />
               </button>
 
               {/* Country Dropdown Menu */}
@@ -200,7 +156,7 @@ export function Navbar() {
                       {countries.map((country) => (
                         <button
                           key={country.code}
-                          className={`w-full px-4 py-2.5 text-left hover:bg-white/10 transition-colors flex items-center gap-3 ${
+                          className={`w-full px-4 py-2.5 text-left hover:bg-white/10 transition-colors flex items-center gap-3 rounded-lg ${
                             selectedCountry.code === country.code ? 'bg-white/10 text-[#CDFF71]' : 'text-white'
                           }`}
                           onClick={() => {
@@ -208,12 +164,7 @@ export function Navbar() {
                             setCountryDropdownOpen(false);
                           }}
                         >
-                          <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 16.4287 23.2858">
-                            <g>
-                              <path d="M0.50011 0.50011V22.7858" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d={svgPaths.pd909fc0} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                            </g>
-                          </svg>
+                          <MapPin className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
                           <span className="font-['Inter',sans-serif] text-sm">{country.name}</span>
                           {selectedCountry.code === country.code && (
                             <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,84 +179,22 @@ export function Navbar() {
               </AnimatePresence>
             </div>
 
+            {/* Notification Center */}
+            <div className="hidden md:block">
+              <NotificationCenter />
+            </div>
+
             {/* Profile Button */}
-            <div className="relative" data-profile-menu>
-              {isAuthenticated ? (
-                <button
-                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="group w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(205,255,113,0.3)]"
-                  style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
-                  aria-label="Menu profil"
-                >
-                  <ProfileAvatar avatar={user?.avatar} name={user?.name} />
-                </button>
-              ) : (
+            <div className="relative">
               <Link to="/login">
                 <button
-                  className="group w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(205,255,113,0.3)]"
-                  style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+                  className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20"
+                  style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
                   aria-label="Profil"
                 >
-                  <div className="w-[17px] h-[18.5px] md:w-[18px] md:h-[19.5px] relative transition-transform duration-300 group-hover:scale-110">
-                    <svg className="w-full h-full" fill="none" viewBox="0 0 17.4999 18.5088">
-                      {/* Head Circle */}
-                      <path
-                        d={profileSvgPaths.p23740d80}
-                        stroke="#CDFF71"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        className="transition-all duration-300 group-hover:stroke-[2] group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,0.8)]"
-                      />
-                      {/* Body */}
-                      <path
-                        d={profileSvgPaths.p398fea00}
-                        stroke="#CDFF71"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="1.5"
-                        className="transition-all duration-300 group-hover:stroke-[2] group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,0.8)]"
-                      />
-                    </svg>
-                  </div>
+                  <User className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,1)]" strokeWidth={2.5} />
                 </button>
               </Link>
-              )}
-
-              {/* Dropdown menu profil (utilisateur connecté) */}
-              <AnimatePresence>
-                {isAuthenticated && profileMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 mt-2 w-52 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/20 rounded-lg shadow-xl overflow-hidden z-50"
-                  >
-                    <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-white font-semibold text-sm truncate">{user?.name}</p>
-                      <p className="text-[#999999] text-xs truncate">{user?.email}</p>
-                    </div>
-                    <div className="py-1">
-                      <Link
-                        to={isCreator ? "/creator/dashboard" : "/creator/login"}
-                        onClick={() => setProfileMenuOpen(false)}
-                        className="w-full px-4 py-2.5 text-left text-[#CDFF71] hover:bg-white/10 transition-colors flex items-center gap-2 text-sm"
-                      >
-                        <Video className="w-4 h-4" />
-                        {isCreator ? "Mon espace créateur" : "Devenir créateur"}
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full px-4 py-2.5 text-left text-red-400 hover:bg-white/10 transition-colors flex items-center gap-2 text-sm"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Se déconnecter
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
             
             {/* Mobile Menu Toggle */}
@@ -348,11 +237,11 @@ export function Navbar() {
                 Replay
               </Link>
               <Link
-                to="/chaines"
+                to="/createurs"
                 onClick={() => setMobileMenuOpen(false)}
                 className="px-4 py-3 text-gray-300 hover:bg-white/5 rounded-lg transition-colors"
               >
-                Chaines
+                Créateurs
               </Link>
               <Link
                 to="/agenda"
@@ -361,41 +250,17 @@ export function Navbar() {
               >
                 Agenda
               </Link>
-              <Link
-                to={isCreator ? "/creator/dashboard" : "/creator/login"}
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-3 text-[#CDFF71] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2 font-semibold"
-              >
-                <Video className="w-4 h-4" />
-                {isCreator ? "Mon espace créateur" : "Devenir créateur"}
-              </Link>
-
-              {/* Mobile auth section */}
+              
+              {/* Mobile Login Link */}
               <div className="border-t border-gray-800 mt-2 pt-2">
-                {isAuthenticated ? (
-                  <>
-                    <div className="px-4 py-2">
-                      <p className="text-white text-sm font-semibold truncate">{user?.name}</p>
-                      <p className="text-[#999999] text-xs truncate">{user?.email}</p>
-                    </div>
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); void handleLogout(); }}
-                      className="w-full px-4 py-3 text-red-400 hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2 text-sm"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Se déconnecter
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    to="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 text-[#CDFF71] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    Se connecter
-                  </Link>
-                )}
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 text-[#CDFF71] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Se connecter
+                </Link>
               </div>
             </div>
           </div>

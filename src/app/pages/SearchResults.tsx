@@ -4,105 +4,30 @@ import { SortFilter, SortOption } from '../components/SortFilter';
 import { sortEvents } from '../utils/sortEvents';
 import { ArrowLeft, Search } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
-
-// Import event images
-import imgImage14 from "figma:asset/8e5f3463a14418977bae5067abd0af0b3a184d6f.png";
-import imgImage15 from "figma:asset/13c8f478c4ac182bcae3355ddc4fb0742396f2b3.png";
-import imgImage16 from "figma:asset/af4f8497cd796b01f6c149bd2d388e5f991489ff.png";
-import imgImage17 from "figma:asset/9b779636dff8669a8ebe0146669ac311e330cc4e.png";
-import imgImage18 from "figma:asset/6a8c591a36a76b0ae46f649c9870fe44bce470e7.png";
-import imgImage19 from "figma:asset/2bfa3e53c40b7bc1dddd06c6eaef1de790eeeb00.png";
-
-const allEvents = [
-  {
-    id: 1,
-    image: imgImage14,
-    title: 'Dadju - concert Montreal',
-    location: 'Salle Savorgnon - IFC',
-    date: '20.12.2025',
-    category: 'Concert',
-    keywords: ['dadju', 'concert', 'montreal', 'musique', 'live'],
-    isFree: true,
-    hasStreaming: true,
-  },
-  {
-    id: 2,
-    image: imgImage15,
-    title: 'Fally Ipupa - Live Paris',
-    location: 'Accor Arena - Paris',
-    date: '15.01.2026',
-    category: 'Concert',
-    keywords: ['fally', 'ipupa', 'paris', 'concert', 'musique'],
-    isFree: true,
-    hasStreaming: true,
-  },
-  {
-    id: 3,
-    image: imgImage16,
-    title: 'Match Football - CAN 2026',
-    location: 'Stade Omnisport - Yaoundé',
-    date: '05.02.2026',
-    category: 'Sport',
-    keywords: ['football', 'can', 'sport', 'match', 'cameroun'],
-    isLive: true,
-    isFree: true,
-    hasStreaming: true,
-  },
-  {
-    id: 4,
-    image: imgImage17,
-    title: 'Werrason - Concert Kinshasa',
-    location: 'Stade des Martyrs - Kinshasa',
-    date: '28.02.2026',
-    category: 'Concert',
-    keywords: ['werrason', 'concert', 'kinshasa', 'rdc', 'musique'],
-    isFree: true,
-    hasStreaming: true,
-  },
-  {
-    id: 5,
-    image: imgImage18,
-    title: 'Koffi Olomide - Show Live',
-    location: 'Palais des Sports - Brazzaville',
-    date: '12.03.2026',
-    category: 'Concert',
-    keywords: ['koffi', 'olomide', 'brazzaville', 'congo', 'show'],
-    isFree: true,
-    hasStreaming: true,
-  },
-  {
-    id: 6,
-    image: imgImage19,
-    title: 'Festival Afro Beat',
-    location: 'Parc de la Musique - Libreville',
-    date: '25.03.2026',
-    category: 'Festival',
-    keywords: ['festival', 'afrobeat', 'gabon', 'musique', 'libreville'],
-    isFree: true,
-    hasStreaming: true,
-  },
-];
+import { useState, useEffect } from 'react';
+import EventsAPI from '../services/api/EventsAPI';
 
 export function SearchResults() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  // Filter events based on search query
-  const filteredEvents = query
-    ? allEvents.filter((event) => {
-        const searchLower = query.toLowerCase();
-        return (
-          event.title.toLowerCase().includes(searchLower) ||
-          event.location.toLowerCase().includes(searchLower) ||
-          event.category.toLowerCase().includes(searchLower) ||
-          event.keywords.some((keyword) => keyword.includes(searchLower))
-        );
-      })
-    : allEvents;
-
-  // State for sorting
+  const [filteredEvents, setFilteredEvents] = useState<Array<{ id: string; image: string; title: string; location: string; date: string; category: string; isLive?: boolean; isFree?: boolean; hasStreaming?: boolean }>>([]);
   const [sortOption, setSortOption] = useState<SortOption>('date-asc');
+
+  useEffect(() => {
+    const request = query ? EventsAPI.search(query) : EventsAPI.getAll();
+    request.then(events => setFilteredEvents(events.map(e => ({
+      id: e.id,
+      image: e.image,
+      title: e.title,
+      location: e.location ?? '',
+      date: e.date,
+      category: e.category,
+      isLive: e.isLive,
+      isFree: e.isFree,
+      hasStreaming: true,
+    })))).catch(() => {});
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-[#080808] py-8 md:py-12">

@@ -4,11 +4,11 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = [
-    { label: 'GCU', href: '/gcu' },
-    { label: 'Politique de confidentialités', href: '/privacy' },
-    { label: 'Termes & Conditions', href: '/terms' },
+    { label: 'CGU', href: '/cgu' },
+    { label: 'Politique de confidentialité', href: '/privacy' },
+    { label: 'Conditions générales', href: '/terms' },
     { label: "Besoin d'aide ?", href: '/help' },
-    { label: 'Nous connaître', href: '/about' },
+    { label: 'Press', href: '/press' },
   ];
 
   return (
@@ -27,7 +27,7 @@ export function Footer() {
         </div>
         <div className="mt-6 text-center">
           <p className="font-['Inter',sans-serif] text-[#666666] text-xs">
-            © {currentYear} Fééti Play , propulsé par Eroiste , Tous droits réservés.
+            © {currentYear} Féeti.io, propulsé par Eroiste, Tous droits réservés.
           </p>
         </div>
       </div>

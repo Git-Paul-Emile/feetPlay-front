@@ -1,0 +1,204 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+type FAQItem = {
+  question: string;
+  answer: string;
+};
+
+const faqSections = [
+  {
+    title: "COMPTE ET INSCRIPTION",
+    items: [
+      {
+        question: "Comment créer un compte FeetiPlay ?",
+        answer: "Pour créer un compte, cliquez sur 'Se connecter' en haut à droite, puis sur 'Créer un compte'. Remplissez vos informations (email, mot de passe, nom) et validez. Vous recevrez un email de confirmation."
+      },
+      {
+        question: "J'ai oublié mon mot de passe, que faire ?",
+        answer: "Cliquez sur 'Mot de passe oublié ?' sur la page de connexion. Entrez votre email et suivez les instructions reçues par email pour réinitialiser votre mot de passe."
+      },
+      {
+        question: "Puis-je modifier mes informations personnelles ?",
+        answer: "Oui, rendez-vous dans votre profil (icône utilisateur en haut à droite), puis 'Paramètres du compte' pour modifier vos informations."
+      }
+    ]
+  },
+  {
+    title: "ABONNEMENTS ET PAIEMENTS",
+    items: [
+      {
+        question: "Quels sont les moyens de paiement acceptés ?",
+        answer: "Nous acceptons les paiements par carte bancaire, Mobile Money (Orange, Airtel, Vodafone) et les cartes africaines via Paystack."
+      },
+      {
+        question: "Comment annuler mon abonnement ?",
+        answer: "Allez dans 'Mon compte' > 'Abonnement' > 'Gérer mon abonnement' et cliquez sur 'Annuler l'abonnement'. L'annulation prendra effet à la fin de la période en cours."
+      },
+      {
+        question: "Puis-je obtenir un remboursement ?",
+        answer: "Les remboursements sont possibles dans les 48h suivant l'achat si vous n'avez pas visionné le contenu. Contactez notre service client pour toute demande."
+      }
+    ]
+  },
+  {
+    title: "STREAMING ET LECTURE",
+    items: [
+      {
+        question: "Comment regarder un événement en direct ?",
+        answer: "Accédez à la page de l'événement et cliquez sur 'Regarder maintenant'. Si l'événement est payant, vous devrez d'abord acheter un ticket d'accès."
+      },
+      {
+        question: "Puis-je regarder les replays ?",
+        answer: "Oui, tous les événements passés sont disponibles en replay dans la section 'Replay' ou sur la page de l'événement concerné."
+      },
+      {
+        question: "Sur combien d'appareils puis-je regarder simultanément ?",
+        answer: "Le nombre d'écrans simultanés dépend de votre formule d'abonnement : 1 écran pour l'abonnement Essentiel, 3 écrans pour Premium."
+      },
+      {
+        question: "Problèmes de qualité vidéo ou buffering ?",
+        answer: "Vérifiez votre connexion internet. Nous recommandons une connexion de 5 Mbps minimum pour le HD. Vous pouvez aussi réduire manuellement la qualité dans les paramètres du lecteur."
+      }
+    ]
+  },
+  {
+    title: "TECHNIQUE",
+    items: [
+      {
+        question: "Quels sont les navigateurs compatibles ?",
+        answer: "FeetiPlay fonctionne sur Chrome, Firefox, Safari et Edge (versions récentes). Pour une expérience optimale, maintenez votre navigateur à jour."
+      },
+      {
+        question: "L'application mobile est-elle disponible ?",
+        answer: "Oui, téléchargez FeetiPlay sur l'App Store (iOS) et Google Play Store (Android)."
+      },
+      {
+        question: "Pourquoi le lecteur ne se lance pas ?",
+        answer: "Désactivez vos bloqueurs de publicités, videz le cache de votre navigateur, ou essayez un autre navigateur. Assurez-vous que JavaScript est activé."
+      }
+    ]
+  }
+];
+
+export function Help() {
+  const [openIndex, setOpenIndex] = useState<string | null>(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const toggleFAQ = (index: string) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#080808] pt-24 pb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+        {/* Back Button */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-[#CDFF71] hover:text-[#b8e65a] transition-colors mb-8"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="font-['Inter',sans-serif]">Retour à l'accueil</span>
+        </Link>
+
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="font-['Montserrat',sans-serif] font-bold text-white text-3xl md:text-4xl lg:text-5xl mb-4">
+            Centre d'aide FeetiPlay
+          </h1>
+          <p className="font-['Inter',sans-serif] text-[#999999] text-lg">
+            Trouvez des réponses à vos questions les plus fréquentes
+          </p>
+        </div>
+
+        {/* FAQ Sections */}
+        <div className="space-y-8">
+          {faqSections.map((section, sectionIndex) => (
+            <div key={sectionIndex}>
+              <h2 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl md:text-2xl mb-4">
+                {section.title}
+              </h2>
+              <div className="space-y-3">
+                {section.items.map((item, itemIndex) => {
+                  const faqKey = `${sectionIndex}-${itemIndex}`;
+                  const isOpen = openIndex === faqKey;
+
+                  return (
+                    <div
+                      key={faqKey}
+                      className="bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden"
+                    >
+                      <button
+                        onClick={() => toggleFAQ(faqKey)}
+                        className="w-full flex items-center justify-between p-4 md:p-5 text-left hover:bg-white/5 transition-colors"
+                      >
+                        <span className="font-['Inter',sans-serif] font-medium text-white text-base md:text-lg pr-4">
+                          {item.question}
+                        </span>
+                        {isOpen ? (
+                          <ChevronUp className="w-5 h-5 text-[#CDFF71] flex-shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-[#999999] flex-shrink-0" />
+                        )}
+                      </button>
+
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 md:p-5 pt-0 font-['Inter',sans-serif] text-[#dfe1e4] text-sm md:text-base leading-relaxed">
+                              {item.answer}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact Support */}
+        <div className="mt-12 bg-gradient-to-r from-[#DE0035]/20 to-[#CDFF71]/20 border border-white/20 rounded-xl p-6 md:p-8">
+          <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl md:text-2xl mb-3">
+            Vous ne trouvez pas de réponse ?
+          </h3>
+          <p className="font-['Inter',sans-serif] text-[#dfe1e4] mb-5">
+            Notre équipe support est disponible pour vous aider. Contactez-nous par email ou via le chat en direct.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <a
+              href="mailto:support@feeti.com"
+              className="inline-flex items-center gap-2 bg-[#DE0035] hover:bg-[#c5002f] text-white font-['Inter',sans-serif] px-6 py-3 rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              support@feeti.com
+            </a>
+            <button className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-['Inter',sans-serif] px-6 py-3 rounded-lg transition-colors border border-white/20">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Chat en direct
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
