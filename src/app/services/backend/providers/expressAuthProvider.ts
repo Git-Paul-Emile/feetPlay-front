@@ -9,7 +9,7 @@ import {
   deleteUser as deleteFirebaseUser,
 } from "firebase/auth";
 import { auth } from "../../../config/firebase";
-import { legacyApiFetch } from "../legacyApi";
+import { legacyApiFetch, BackendApiError } from "../legacyApi";
 import { signInWithGooglePopup } from "../helpers";
 import { firebaseClientErrorToUserMessage } from "../../../utils/firebaseUserFacingError";
 import type {
@@ -164,25 +164,34 @@ export const expressAuthProvider: AuthProvider = {
   async startGoogleAuth() {
     clearAccessToken();
     const result = await signInWithGooglePopup();
+    const prefill = {
+      name: result.user.displayName ?? undefined,
+      email: result.user.email ?? undefined,
+      avatar: result.user.photoURL ?? null,
+    };
+
     if (result.isNewUser) {
       window.sessionStorage.setItem(PENDING_GOOGLE_TOKEN_KEY, result.idToken);
       window.sessionStorage.setItem(GOOGLE_COMPLETION_FLAG_KEY, "1");
-      return {
-        requiresCompletion: true,
-        prefill: {
-          name: result.user.displayName ?? undefined,
-          email: result.user.email ?? undefined,
-          avatar: result.user.photoURL ?? null,
-        },
-      };
+      return { requiresCompletion: true, prefill };
     }
 
-    const payload = await legacyApiFetch<AuthApiPayload>("/auth/firebase/login", {
-      method: "POST",
-      body: JSON.stringify({ idToken: result.idToken }),
-    });
-    storeAccessToken(payload.accessToken);
-    return { requiresCompletion: false, user: normalizeUser(payload.user) };
+    try {
+      const payload = await legacyApiFetch<AuthApiPayload>("/auth/firebase/login", {
+        method: "POST",
+        body: JSON.stringify({ idToken: result.idToken }),
+      });
+      storeAccessToken(payload.accessToken);
+      return { requiresCompletion: false, user: normalizeUser(payload.user) };
+    } catch (err) {
+      if (err instanceof BackendApiError && err.status === 404) {
+        // Profil backend absent (inscription précédemment abandonnée)
+        window.sessionStorage.setItem(PENDING_GOOGLE_TOKEN_KEY, result.idToken);
+        window.sessionStorage.setItem(GOOGLE_COMPLETION_FLAG_KEY, "1");
+        return { requiresCompletion: true, prefill };
+      }
+      throw err;
+    }
   },
 
   async completeGoogleRegistration(data) {

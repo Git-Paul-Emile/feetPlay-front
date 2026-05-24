@@ -19,6 +19,7 @@ export function Register() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<'viewer' | 'streamer'>('viewer');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -82,7 +83,7 @@ export function Register() {
         email,
         phone,
         password,
-        role: 'viewer'
+        role,
       });
       navigate('/');
     } catch (err: unknown) {
@@ -237,6 +238,27 @@ export function Register() {
                   className="w-full h-[56px] bg-transparent border border-[#3a3a3a] rounded-full px-12 text-white placeholder:text-[#666666] font-['Inter',sans-serif] text-sm focus:outline-none focus:border-[#CDFF71] transition-colors"
                   required
                 />
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <p className="font-['Inter',sans-serif] text-[#999999] text-sm mb-3">Je suis :</p>
+                <div className="flex gap-3">
+                  {(['viewer', 'streamer'] as const).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`flex-1 h-[56px] rounded-full font-['Inter',sans-serif] text-sm font-medium transition-colors ${
+                        role === r
+                          ? 'bg-[#CDFF71] text-black'
+                          : 'border border-[#3a3a3a] text-[#999999] hover:border-[#CDFF71] hover:text-white'
+                      }`}
+                    >
+                      {r === 'viewer' ? 'Spectateur' : 'Streamer'}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Error Message */}

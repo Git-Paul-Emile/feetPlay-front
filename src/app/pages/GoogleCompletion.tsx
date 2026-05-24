@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { firebaseClientErrorToUserMessage } from "../utils/firebaseUserFacingError";
@@ -10,6 +10,12 @@ export function GoogleCompletion() {
   const location = useLocation();
   const { completeGoogleRegistration } = useAuth();
   const prefill = (location.state as { prefill?: Prefill } | null)?.prefill;
+
+  useEffect(() => {
+    if (!window.sessionStorage.getItem("feetiplay_google_pending_token")) {
+      navigate("/register", { replace: true });
+    }
+  }, [navigate]);
 
   const [name, setName] = useState(prefill?.name ?? "");
   const [phone, setPhone] = useState("");
