@@ -1,0 +1,1 @@
+import{G as n}from"./index-Bt2zYfFC.js";const r={getAll(){return n.channels.getAll()},getById(e){return n.channels.getById(e)},getBySlug(e){return n.channels.getBySlug(e)},getByCategory(e){return n.channels.getByCategory(e)},search(e){return n.channels.search(e)}};export{r as C};

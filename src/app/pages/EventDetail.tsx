@@ -1,10 +1,15 @@
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { X, Ticket, Heart, Calendar, Clock, Tag, MapPin, Users, Share2 } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { PurchaseModal, PurchaseData } from '../components/PurchaseModal';
 import { DigitalTicket } from '../components/DigitalTicket';
+import { MuxPlayer } from '../components/MuxPlayer';
+import StreamingAPI from '../services/api/StreamingAPI';
+import EventsAPI from '../services/api/EventsAPI';
+import type { StreamingEvent } from '../services/api/EventsAPI';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 
 // Import event images
@@ -19,124 +24,75 @@ import imgImage18 from "figma:asset/ec899bdbbbe994047f36c763e04f1455d001377c.png
 import imgImage19 from "figma:asset/75045cfe4cb9a585ca1b0274032b51485c28f5f7.png";
 import imgImage20 from "figma:asset/4fbcabd8a9fe9270a8dfafbfe0191ac3d1016beb.png";
 
-interface EventDetailData {
-  id: string;
-  title: string;
-  image: string;
-  location: string;
-  date: string;
-  time?: string;
-  category: string;
-  categories?: string[];
-  description: string;
-  reference: string;
-  isLive?: boolean;
-  isFree?: boolean;
-  price?: number;
-  duration?: string;
-  organizer?: string;
-  capacity?: string;
-}
-
-// Mock event data - En production, ces données viendraient d'une API
-const eventsData: Record<string, EventDetailData> = {
-  '1': {
-    id: '1',
-    title: 'Yaye Padura',
-    image: imgCardImg,
-    location: 'Salle Savorgnon - IFC, Brazzaville',
-    date: '20 Nov',
-    time: '19h00',
-    category: 'Concert',
-    categories: ['Concert', 'Musique Live', 'Rumba'],
-    description: 'Découvrez Yaye Padura dans une soirée exceptionnelle de rumba congolaise. Un événement musical incontournable qui célèbre la richesse de notre patrimoine musical avec les plus grands artistes de la scène locale. Ambiance garantie et show spectaculaire au programme !',
-    reference: 'F25L11-30',
-    isLive: true,
-    price: 3000,
-    duration: '2h30',
-    organizer: 'FÉÉTI Productions',
-    capacity: '500 places'
-  },
-  '2': {
-    id: '2',
-    title: 'Festival Mbote - Edition 2025',
-    image: imgCardImg1,
-    location: 'Stade des Martyrs, Kinshasa',
-    date: '25 Nov',
-    time: '14h00',
-    category: 'Festival',
-    categories: ['Festival', 'Musique', 'Culture'],
-    description: 'Le plus grand festival de musique d\'Afrique Centrale revient pour une édition mémorable ! Découvrez les meilleurs artistes de la scène africaine dans une ambiance festive et conviviale. Un événement gratuit et ouvert à tous, célébrant la diversité culturelle et musicale.',
-    reference: 'F25M01-15',
-    isLive: true,
-    isFree: true,
-    duration: '6h00',
-    organizer: 'Festival Mbote Org',
-    capacity: '10,000 places'
-  },
-  '3': {
-    id: '3',
-    title: 'Concert Live Jazz',
-    image: imgCardImg2,
-    location: 'Chez Ntemba, Kinshasa',
-    date: '28 Nov',
-    time: '20h00',
-    category: 'Concert',
-    categories: ['Jazz', 'Concert', 'Musique Live'],
-    description: 'Soirée jazz intimiste dans le cadre élégant de Chez Ntemba. Les meilleurs musiciens de jazz de la région se réunissent pour une performance acoustique exceptionnelle. Un moment de pure élégance musicale à ne pas manquer.',
-    reference: 'F25J02-08',
-    price: 8000,
-    duration: '3h00',
-    organizer: 'Jazz Club Kinshasa',
-    capacity: '150 places'
-  },
-  '4': {
-    id: '4',
-    title: 'Spectacle Comédie',
-    image: imgCardImg3,
-    location: 'Pullman Hotel, Kinshasa',
-    date: '5 Dec',
-    time: '21h00',
-    category: 'Comedy',
-    categories: ['Comédie', 'Humour', 'Stand-up'],
-    description: 'Une soirée d\'humour et de rires avec les meilleurs comédiens de la ville ! Stand-up, sketchs et improvisation au programme. Venez vous détendre et profiter d\'un moment de pure comédie dans une ambiance chaleureuse.',
-    reference: 'F25C03-12',
-    price: 12000,
-    duration: '2h00',
-    organizer: 'Comedy Club 243',
-    capacity: '200 places'
-  },
-  '5': {
-    id: '5',
-    title: 'Soirée Danse Afro',
-    image: imgCardImg4,
-    location: 'Fleuve Congo Hotel, Kinshasa',
-    date: '10 Dec',
-    time: '18h00',
-    category: 'Danse',
-    categories: ['Danse', 'Afro', 'Workshop'],
-    description: 'Participez à une soirée danse afro exceptionnelle ! Ateliers de danse, performances et DJ sets afro pour une ambiance électrique. Événement gratuit ouvert à tous les passionnés de danse et de culture africaine.',
-    reference: 'F25D04-20',
-    isFree: true,
-    duration: '4h00',
-    organizer: 'Afro Dance Collective',
-    capacity: '300 places'
-  },
+type EventDetailData = StreamingEvent & {
+  reference?: string;
 };
+
+
 
 export function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
 
+  const { isAuthenticated } = useAuth();
+  const [eventData, setEventData] = useState<EventDetailData | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchaseData, setPurchaseData] = useState<PurchaseData | null>(null);
   const [showTicket, setShowTicket] = useState(false);
+  const [isWatchOpen, setIsWatchOpen] = useState(false);
+  const [watchLoading, setWatchLoading] = useState(false);
+  const [watchError, setWatchError] = useState<string | null>(null);
+  const [muxPlaybackId, setMuxPlaybackId] = useState<string | null>(null);
+  const [muxToken, setMuxToken] = useState<string | null>(null);
+  const [watchStartTime, setWatchStartTime] = useState<number | undefined>(undefined);
 
-  // Get event data
-  const event = id ? eventsData[id] : null;
+  const resolvedEvent = eventData;
+  const event = resolvedEvent;
 
-  if (!event) {
+  useEffect(() => {
+    if (!id) return;
+
+    let canceled = false;
+    setIsFetching(true);
+    setFetchError(null);
+
+    EventsAPI.getById(id)
+      .then((data) => {
+        if (canceled) return;
+        if (data) {
+          setEventData({ ...data, reference: data.reference ?? data.id });
+        } else {
+          setFetchError('Événement introuvable.');
+        }
+      })
+      .catch(() => {
+        if (canceled) return;
+        setFetchError('Événement introuvable.');
+      })
+      .finally(() => {
+        if (!canceled) setIsFetching(false);
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [id]);
+
+  if (isFetching && !resolvedEvent) {
+    return (
+      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-6 w-48 mx-auto mb-4 bg-white/10 rounded-full animate-pulse" />
+          <p className="text-white/60">Chargement de l'événement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!resolvedEvent) {
     return (
       <div className="min-h-screen bg-[#080808] flex items-center justify-center">
         <div className="text-center">
@@ -152,20 +108,20 @@ export function EventDetail() {
     );
   }
 
-  const isInFavorites = isFavorite(event.id);
+  const isInFavorites = isFavorite(resolvedEvent.id);
 
   const handleToggleFavorite = () => {
     toggleFavorite({
-      id: event.id,
-      title: event.title,
-      image: event.image,
-      location: event.location,
-      date: event.date,
-      time: event.time,
-      category: event.category,
-      isLive: event.isLive,
-      isFree: event.isFree,
-      price: event.price,
+      id: resolvedEvent.id,
+      title: resolvedEvent.title,
+      image: resolvedEvent.image,
+      location: resolvedEvent.location,
+      date: resolvedEvent.date,
+      time: resolvedEvent.time,
+      category: resolvedEvent.category,
+      isLive: resolvedEvent.isLive,
+      isFree: resolvedEvent.isFree,
+      price: resolvedEvent.price,
     });
   };
 
@@ -177,23 +133,72 @@ export function EventDetail() {
 
   const handleOpenPurchaseModal = () => {
     setIsPurchaseModalOpen(true);
-    setPurchaseData({
-      eventId: event.id,
-      eventName: event.title,
-      eventImage: event.image,
-      eventLocation: event.location,
-      eventDate: event.date,
-      eventTime: event.time,
-      eventCategory: event.category,
-      isLive: event.isLive,
-      isFree: event.isFree,
-      price: event.price,
-    });
   };
 
   const handleClosePurchaseModal = () => {
     setIsPurchaseModalOpen(false);
     setPurchaseData(null);
+  };
+
+  const clearWatchState = () => {
+    setIsWatchOpen(false);
+    setMuxPlaybackId(null);
+    setMuxToken(null);
+    setWatchLoading(false);
+  };
+
+  useEffect(() => {
+    clearWatchState();
+    setWatchError(null);
+    setWatchStartTime(undefined);
+
+    if (!id || !isAuthenticated) return;
+    StreamingAPI.getWatchHistory('me')
+      .then(history => {
+        const entry = history.find(h => h.eventId === id);
+        if (!entry || entry.progress >= 95 || !entry.duration) return;
+        const hMatch = entry.duration.match(/(\d+)h/);
+        const mMatch = entry.duration.match(/(\d+)m/);
+        const sMatch = entry.duration.match(/(\d+)s/);
+        const totalSec =
+          (hMatch ? parseInt(hMatch[1]) * 3600 : 0) +
+          (mMatch ? parseInt(mMatch[1]) * 60 : 0) +
+          (sMatch ? parseInt(sMatch[1]) : 0);
+        if (totalSec > 0) {
+          setWatchStartTime(Math.floor((entry.progress / 100) * totalSec));
+        }
+      })
+      .catch(() => {});
+  }, [id, isAuthenticated]);
+
+  const handleWatchEvent = async () => {
+    if (!resolvedEvent) return;
+    if (!isAuthenticated) {
+      setWatchError('Connectez-vous pour accéder au streaming.');
+      navigate('/login');
+      return;
+    }
+
+    setWatchLoading(true);
+    setWatchError(null);
+
+    try {
+      const { token, playbackId } = await StreamingAPI.getMuxToken(resolvedEvent.id);
+      setMuxPlaybackId(playbackId);
+      setMuxToken(token);
+      setIsWatchOpen(true);
+    } catch (error: any) {
+      const message =
+        error?.message ||
+        (error?.response?.data?.message as string) ||
+        'Impossible de récupérer le flux vidéo.';
+      setWatchError(message);
+      if (!resolvedEvent.isFree) {
+        setIsPurchaseModalOpen(true);
+      }
+    } finally {
+      setWatchLoading(false);
+    }
   };
 
   return (
@@ -329,15 +334,17 @@ export function EventDetail() {
                 </motion.button>
               )}
 
-              {/* View Announcement Button */}
+              {/* Watch Button */}
               <motion.button
-                className="bg-[#de0035] hover:bg-[#de0035]/90 flex items-center gap-3 px-6 md:px-8 py-3 rounded-sm transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                onClick={handleWatchEvent}
+                disabled={watchLoading}
+                className="bg-[#de0035] hover:bg-[#de0035]/90 flex items-center gap-3 px-6 md:px-8 py-3 rounded-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                whileHover={{ scale: watchLoading ? 1 : 1.05 }}
+                whileTap={{ scale: watchLoading ? 1 : 0.95 }}
               >
                 <Ticket className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 <span className="font-['SF_Pro',sans-serif] font-normal text-white text-base md:text-lg">
-                  Voir l'annonce
+                  {watchLoading ? 'Chargement...' : event.isLive ? 'Regarder en direct' : 'Regarder le replay'}
                 </span>
               </motion.button>
 
@@ -358,6 +365,14 @@ export function EventDetail() {
           </div>
         </div>
       </div>
+
+      {watchError && (
+        <div className="max-w-[1211px] mx-auto px-4 md:px-8 lg:px-24 py-4">
+          <div className="rounded-[12px] border border-[#DE0035]/30 bg-[#2d121d] p-4 text-[#ffccd4]">
+            {watchError}
+          </div>
+        </div>
+      )}
 
       {/* Additional Event Details Section */}
       <div className="bg-[#0D0D0D] px-4 md:px-8 lg:px-24 py-12 md:py-16 lg:py-20">
@@ -470,6 +485,45 @@ export function EventDetail() {
           price: event.price,
         }}
       />
+
+      {/* Watch Modal */}
+      <AnimatePresence>
+        {isWatchOpen && muxPlaybackId && (
+          <motion.div
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-xl px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="relative w-full max-w-[1100px] h-[80vh] bg-black rounded-[24px] overflow-hidden"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+            >
+              <button
+                onClick={() => setIsWatchOpen(false)}
+                className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <MuxPlayer
+                playbackId={muxPlaybackId}
+                muxToken={muxToken}
+                streamType={event.isLive ? 'live' : 'on-demand'}
+                title={event.title}
+                poster={event.image}
+                autoPlay={true}
+                startTime={watchStartTime}
+                eventId={event.id}
+                eventTitle={event.title}
+                className="w-full h-full"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Digital Ticket */}
       <DigitalTicket

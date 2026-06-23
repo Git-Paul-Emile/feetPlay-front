@@ -19,7 +19,9 @@ import { CreatorRegister } from './pages/creator/CreatorRegister';
 import { CreatorLayout } from './pages/creator/CreatorLayout';
 
 // Creator lazy pages
-const CreatorDashboardLazy       = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
+const CreatorDashboardLazy = lazy(() => import('./pages/creator/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
+const CreatorVideosLazy      = lazy(() => import('./pages/creator/CreatorVideos').then(m => ({ default: m.CreatorVideos })));
+const CreatorSettingsLazy    = lazy(() => import('./pages/creator/CreatorSettings').then(m => ({ default: m.CreatorSettings })));
 const CreatorDashboardPublicLazy = lazy(() => import('./pages/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 
 // Lazy load des pages légales
@@ -40,6 +42,10 @@ const EventDetailLazy      = lazy(() => import('./pages/EventDetail').then(m => 
 const EventListLazy        = lazy(() => import('./pages/EventList').then(m => ({ default: m.EventList })));
 const SearchResultsLazy    = lazy(() => import('./pages/SearchResults').then(m => ({ default: m.SearchResults })));
 const WatchHistoryLazy     = lazy(() => import('./pages/WatchHistory').then(m => ({ default: m.WatchHistory })));
+const MyTicketsLazy        = lazy(() => import('./pages/MyTickets').then(m => ({ default: m.MyTickets })));
+const ProfileLazy          = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const ChannelDetailLazy    = lazy(() => import('./pages/ChannelDetail').then(m => ({ default: m.ChannelDetail })));
+const VideoPlayerLazy      = lazy(() => import('./pages/VideoPlayer').then(m => ({ default: m.VideoPlayer })));
 // Pages v2 — nouvelles / mises à jour
 const CreateursLazy         = lazy(() => import('./pages/Createurs').then(m => ({ default: m.Createurs })));
 const CreatorDetailLazy     = lazy(() => import('./pages/CreatorDetail').then(m => ({ default: m.CreatorDetail })));
@@ -60,6 +66,7 @@ const FinancesPageLazy       = lazy(() => import('./pages/admin/FinancesPage').t
 const CRMPageLazy            = lazy(() => import('./pages/admin/CRMPage').then(m => ({ default: m.CRMPage })));
 const NotificationsPageLazy  = lazy(() => import('./pages/admin/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
 const SettingsPageLazy       = lazy(() => import('./pages/admin/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const ModerationPageLazy     = lazy(() => import('./pages/admin/ModerationPage').then(m => ({ default: m.ModerationPage })));
 const StreamingAnalyticsLazy = lazy(() => import('./pages/admin/StreamingAnalytics').then(m => ({ default: m.StreamingAnalytics })));
 
 // Spinner de chargement commun
@@ -92,6 +99,10 @@ const EventDetail           = withSuspense(EventDetailLazy);
 const EventList             = withSuspense(EventListLazy);
 const SearchResults         = withSuspense(SearchResultsLazy);
 const WatchHistory          = withSuspense(WatchHistoryLazy);
+const MyTickets             = withSuspense(MyTicketsLazy);
+const Profile               = withSuspense(ProfileLazy);
+const ChannelDetail         = withSuspense(ChannelDetailLazy);
+const VideoPlayer           = withSuspense(VideoPlayerLazy);
 const Createurs             = withSuspense(CreateursLazy);
 const CreatorDetail         = withSuspense(CreatorDetailLazy);
 const CreatorProfile        = withSuspense(CreatorProfileLazy);
@@ -109,8 +120,11 @@ const FinancesPage          = withSuspense(FinancesPageLazy);
 const CRMPage               = withSuspense(CRMPageLazy);
 const NotificationsPage     = withSuspense(NotificationsPageLazy);
 const SettingsPage          = withSuspense(SettingsPageLazy);
+const ModerationPage        = withSuspense(ModerationPageLazy);
 const StreamingAnalytics    = withSuspense(StreamingAnalyticsLazy);
 const CreatorDashboard      = withSuspense(CreatorDashboardLazy);
+const CreatorVideos         = withSuspense(CreatorVideosLazy);
+const CreatorSettings       = withSuspense(CreatorSettingsLazy);
 const CreatorDashboardPublic = withSuspense(CreatorDashboardPublicLazy);
 
 // Pages légales wrappées
@@ -140,6 +154,10 @@ export const router = createBrowserRouter([
       { path: 'event/:id',            Component: EventDetail },
       { path: 'search',               Component: SearchResults },
       { path: 'watch-history',        Component: WatchHistory },
+      { path: 'my-tickets',           Component: MyTickets },
+      { path: 'profile',              Component: Profile },
+      { path: 'chaines/:slug',        Component: ChannelDetail },
+      { path: 'video/:id',            Component: VideoPlayer },
       // Pages v2
       { path: 'createurs',            Component: Createurs },
       { path: 'creator/:id',          Component: CreatorDetail },
@@ -183,6 +201,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: () => <Navigate to="/creator/dashboard" replace /> },
       { path: 'dashboard', Component: CreatorDashboard },
+      { path: 'videos',    Component: CreatorVideos },
+      { path: 'settings',  Component: CreatorSettings },
     ],
   },
   // ── Admin ────────────────────────────────────────────────────────────────
@@ -204,6 +224,7 @@ export const router = createBrowserRouter([
       { path: 'finances',            Component: FinancesPage },
       { path: 'settings',            Component: SettingsPage },
       { path: 'analytics/streaming', Component: StreamingAnalytics },
+      { path: 'moderation',          Component: ModerationPage },
     ],
   },
 ]);

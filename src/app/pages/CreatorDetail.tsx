@@ -1,153 +1,67 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, Star, MapPin, Users, Play, Mic, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { CreatorContentCard } from '../components/CreatorContentCard';
+import CreatorAPI from '../services/api/CreatorAPI';
 
 type ContentTab = 'videos' | 'podcasts' | 'autres';
 
 export function CreatorDetail() {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState<ContentTab>('videos');
+  const [creator, setCreator] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data - in real app, fetch from API based on id
-  const creator = {
-    id: id,
-    name: 'Ethan Caldwell',
-    category: 'Football',
-    followers: 15420,
-    rating: 4.8,
-    reviews: 142,
-    location: 'Congo, Brazzaville',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop',
-    bio: 'Créateur de contenu passionné par le football avec plus de 20 ans d\'expérience dans le commentaire et l\'analyse sportive. Spécialisé dans la couverture des championnats africains et européens.',
-  };
-
-  // Mock content data
-  const videos = [
-    {
-      id: '1',
-      image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop',
-      title: 'Analyse Tactique: TP Mazembe vs AS Vita Club',
-      date: '15 Mai 2026',
-      duration: '45:30',
-      views: '12.5K',
-      type: 'video' as const
-    },
-    {
-      id: '2',
-      image: 'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=600&h=400&fit=crop',
-      title: 'Les meilleurs buts de la semaine en Ligue 1',
-      date: '14 Mai 2026',
-      duration: '15:20',
-      views: '25.3K',
-      type: 'video' as const
-    },
-    {
-      id: '3',
-      image: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&h=400&fit=crop',
-      title: 'Interview exclusive: Samuel Eto\'o',
-      date: '12 Mai 2026',
-      duration: '1:05:45',
-      views: '45.8K',
-      type: 'video' as const
-    },
-    {
-      id: '4',
-      image: 'https://images.unsplash.com/photo-1459865264687-595d652de67e?w=600&h=400&fit=crop',
-      title: 'Coulisses: Entraînement des Léopards',
-      date: '10 Mai 2026',
-      duration: '22:15',
-      views: '18.2K',
-      type: 'video' as const
-    },
-    {
-      id: '5',
-      image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop',
-      title: 'Top 10 des jeunes talents africains à suivre',
-      date: '8 Mai 2026',
-      duration: '32:40',
-      views: '33.7K',
-      type: 'video' as const
-    },
-    {
-      id: '6',
-      image: 'https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=600&h=400&fit=crop',
-      title: 'Histoire du football congolais',
-      date: '5 Mai 2026',
-      duration: '58:12',
-      views: '28.9K',
-      type: 'video' as const
-    }
-  ];
-
-  const podcasts = [
-    {
-      id: '1',
-      image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=400&fit=crop',
-      title: 'Le Mercato Africain: Épisode 15',
-      date: '16 Mai 2026',
-      duration: '52:30',
-      views: '8.5K',
-      type: 'podcast' as const
-    },
-    {
-      id: '2',
-      image: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600&h=400&fit=crop',
-      title: 'Débat: Meilleur joueur africain 2026?',
-      date: '13 Mai 2026',
-      duration: '1:15:20',
-      views: '15.3K',
-      type: 'podcast' as const
-    },
-    {
-      id: '3',
-      image: 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=600&h=400&fit=crop',
-      title: 'Invité: Didier Drogba',
-      date: '9 Mai 2026',
-      duration: '1:25:45',
-      views: '42.8K',
-      type: 'podcast' as const
-    }
-  ];
-
-  const autres = [
-    {
-      id: '1',
-      image: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&h=400&fit=crop',
-      title: 'Guide: Comment analyser un match comme un pro',
-      date: '11 Mai 2026',
-      duration: '10 min',
-      views: '6.2K',
-      type: 'other' as const
-    },
-    {
-      id: '2',
-      image: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=600&h=400&fit=crop',
-      title: 'Infographie: Statistiques CAN 2023',
-      date: '7 Mai 2026',
-      duration: '5 min',
-      views: '9.8K',
-      type: 'other' as const
-    }
-  ];
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    // On suppose que l'id dans l'URL (ex: /creator/ethan-caldwell) correspond au slug
+    CreatorAPI.getBySlug(id)
+      .then((data) => {
+        setCreator(data);
+        setError(null);
+      })
+      .catch((err) => setError(err.message || "Erreur lors du chargement du créateur"))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const getActiveContent = () => {
+    if (!creator) return [];
+    // Filtrage basique en fonction de la catégorie si le backend renvoie toutes les vidéos dans creator.videos
     switch (activeTab) {
       case 'videos':
-        return videos;
+        return creator.videos?.filter((v: any) => v.category === 'video' || !v.category) || [];
       case 'podcasts':
-        return podcasts;
+        return creator.videos?.filter((v: any) => v.category === 'podcast') || [];
       case 'autres':
-        return autres;
+        return creator.videos?.filter((v: any) => v.category !== 'video' && v.category !== 'podcast' && v.category) || [];
+      default:
+        return [];
     }
   };
 
   const tabs = [
-    { id: 'videos' as ContentTab, label: 'Vidéos', icon: Play, count: videos.length },
-    { id: 'podcasts' as ContentTab, label: 'Podcasts', icon: Mic, count: podcasts.length },
-    { id: 'autres' as ContentTab, label: 'Autres', icon: FileText, count: autres.length }
+    { id: 'videos' as ContentTab, label: 'Vidéos', icon: Play, count: creator?.videos?.filter((v: any) => v.category === 'video' || !v.category).length || 0 },
+    { id: 'podcasts' as ContentTab, label: 'Podcasts', icon: Mic, count: creator?.videos?.filter((v: any) => v.category === 'podcast').length || 0 },
+    { id: 'autres' as ContentTab, label: 'Autres', icon: FileText, count: creator?.videos?.filter((v: any) => v.category !== 'video' && v.category !== 'podcast' && v.category).length || 0 }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black pt-20 pb-20 flex justify-center items-center">
+        <div className="text-white">Chargement...</div>
+      </div>
+    );
+  }
+
+  if (error || !creator) {
+    return (
+      <div className="min-h-screen bg-black pt-20 pb-20 flex justify-center items-center">
+        <div className="text-white">{error || 'Créateur introuvable'}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black pt-20 pb-20">
@@ -176,7 +90,7 @@ export function CreatorDetail() {
             {/* Creator Image */}
             <div className="relative w-full md:w-64 aspect-square md:aspect-auto md:h-64 rounded-2xl overflow-hidden flex-shrink-0">
               <img
-                src={creator.image}
+                src={creator.avatar || creator.coverImage || 'https://via.placeholder.com/400'}
                 alt={creator.name}
                 className="w-full h-full object-cover"
               />
@@ -197,10 +111,10 @@ export function CreatorDetail() {
                     <div className="flex items-center gap-2">
                       <Star className="w-5 h-5 text-[#CDFF71] fill-[#CDFF71]" />
                       <span className="font-['Inter',sans-serif] text-white font-semibold">
-                        {creator.rating.toFixed(1)}
+                        4.8
                       </span>
                       <span className="font-['Inter',sans-serif] text-white/50 text-sm">
-                        ({creator.reviews} avis)
+                        (142 avis)
                       </span>
                     </div>
                   </div>
@@ -216,7 +130,7 @@ export function CreatorDetail() {
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-[#CDFF71]" />
                   <span className="font-['Inter',sans-serif] text-white font-semibold">
-                    {creator.followers.toLocaleString()}
+                    {creator.subscriberCount?.toLocaleString() || 0}
                   </span>
                   <span className="font-['Inter',sans-serif] text-white/50 text-sm">
                     abonnés
@@ -226,7 +140,7 @@ export function CreatorDetail() {
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-white/70" />
                   <span className="font-['Inter',sans-serif] text-white/70 text-sm">
-                    {creator.location}
+                    {creator.location || 'Localisation non renseignée'}
                   </span>
                 </div>
               </div>
@@ -300,7 +214,9 @@ export function CreatorDetail() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <CreatorContentCard {...content} />
+              <Link to={`/video/${content.id}`}>
+                <CreatorContentCard {...content} />
+              </Link>
             </motion.div>
           ))}
         </motion.div>

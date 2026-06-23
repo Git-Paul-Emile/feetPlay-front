@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { Search, User, Menu, X, ChevronDown, MapPin } from 'lucide-react';
+import { Search, User, Menu, X, ChevronDown, MapPin, Ticket, Clock, Heart, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import { NotificationCenter } from './NotificationCenter';
+import { useAuth } from '../contexts/AuthContext';
+import { useLocationContext, ALL_COUNTRIES } from '../contexts/LocationContext';
 
 const countries = [
+  ALL_COUNTRIES,
   { code: 'CG', name: 'Congo' },
   { code: 'GA', name: 'Gabon' },
   { code: 'CM', name: 'Cameroun' },
@@ -20,9 +23,11 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const { selectedCountry, setSelectedCountry } = useLocationContext();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,15 +171,64 @@ export function Navbar() {
 
             {/* Profile Button */}
             <div className="relative">
-              <Link to="/login">
-                <button
-                  className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20"
-                  style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
-                  aria-label="Profil"
-                >
-                  <User className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,1)]" strokeWidth={2.5} />
-                </button>
-              </Link>
+              {isAuthenticated && user ? (
+                <>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20 overflow-hidden"
+                    style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
+                    aria-label="Menu utilisateur"
+                  >
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 text-[#CDFF71]" strokeWidth={2.5} />
+                    )}
+                  </button>
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        className="absolute right-0 top-full mt-2 w-52 bg-[#111] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                      >
+                        <div className="px-4 py-3 border-b border-white/10">
+                          <p className="text-white text-sm font-semibold truncate">{user.name}</p>
+                          <p className="text-white/40 text-xs truncate">{user.email}</p>
+                        </div>
+                        {[
+                          { to: '/profile', icon: User, label: 'Mon profil' },
+                          { to: '/my-tickets', icon: Ticket, label: 'Mes tickets' },
+                          { to: '/favorites', icon: Heart, label: 'Favoris' },
+                          { to: '/watch-history', icon: Clock, label: 'Historique' },
+                        ].map(item => (
+                          <Link key={item.to} to={item.to} onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/5 hover:text-white text-sm transition-colors">
+                            <item.icon className="w-4 h-4" />{item.label}
+                          </Link>
+                        ))}
+                        <button
+                          onClick={async () => { await logout(); setUserMenuOpen(false); navigate('/'); }}
+                          className="flex items-center gap-3 w-full px-4 py-3 text-[#DE0035] hover:bg-white/5 text-sm transition-colors border-t border-white/10"
+                        >
+                          <LogOut className="w-4 h-4" />Déconnexion
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <Link to="/login">
+                  <button
+                    className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20"
+                    style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
+                    aria-label="Profil"
+                  >
+                    <User className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,1)]" strokeWidth={2.5} />
+                  </button>
+                </Link>
+              )}
             </div>
             
             {/* Mobile Menu Toggle */}

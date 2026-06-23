@@ -10,8 +10,6 @@ import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacing
 
 const ROLE_CONFIG = [
   { key: 'viewer',     label: 'Visiteurs',   color: '#6b7280' },
-  { key: 'premium',   label: 'Premium',     color: '#fcc434' },
-  { key: 'streamer',  label: 'Streamers',   color: '#a855f7' },
   { key: 'admin',     label: 'Admins',      color: '#cdff71' },
   { key: 'super_admin', label: 'Super Admin', color: '#de0035' },
 ];

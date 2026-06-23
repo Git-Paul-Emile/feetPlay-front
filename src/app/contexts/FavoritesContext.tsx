@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import EventsAPI, { type StreamingEvent } from '../services/api/EventsAPI';
+import { useAuth } from './AuthContext';
 
 interface FavoriteEvent {
   id: string;
@@ -19,6 +21,7 @@ interface FavoriteEvent {
 
 interface FavoritesContextType {
   favorites: FavoriteEvent[];
+  loading: boolean;
   addFavorite: (event: Omit<FavoriteEvent, 'addedAt'>) => void;
   removeFavorite: (eventId: string) => void;
   isFavorite: (eventId: string) => boolean;
@@ -28,48 +31,77 @@ interface FavoritesContextType {
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
+function mapStreamingEvent(e: StreamingEvent): FavoriteEvent {
+  return {
+    id: e.id,
+    title: e.title,
+    image: e.image,
+    location: e.location ?? e.channelName,
+    date: e.date,
+    time: e.time,
+    category: e.category,
+    isLive: e.isLive,
+    isFree: e.isFree,
+    price: e.price,
+    hasStreaming: true,
+    duration: e.duration,
+    fullDate: e.date,
+    addedAt: Date.now(),
+  };
+}
+
 export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [favorites, setFavorites] = useState<FavoriteEvent[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Load favorites from localStorage on mount
-  useEffect(() => {
-    const storedFavorites = localStorage.getItem('feeti-favorites');
-    if (storedFavorites) {
-      try {
-        const parsed = JSON.parse(storedFavorites);
-        setFavorites(parsed);
-      } catch (error) {
-        console.error('Error loading favorites:', error);
-      }
+  const loadFavorites = useCallback(async () => {
+    if (!isAuthenticated) {
+      setFavorites([]);
+      return;
     }
-    setIsLoaded(true);
-  }, []);
 
-  // Save favorites to localStorage whenever they change
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('feeti-favorites', JSON.stringify(favorites));
+    setLoading(true);
+    try {
+      const events = await EventsAPI.getFavorites();
+      setFavorites(events.map(mapStreamingEvent));
+    } catch {
+      setFavorites([]);
+    } finally {
+      setLoading(false);
     }
-  }, [favorites, isLoaded]);
+  }, [isAuthenticated]);
+
+  useEffect(() => { loadFavorites(); }, [loadFavorites]);
+
+  useEffect(() => {
+    // Aucune persistance locale des favoris sans être connecté
+  }, [favorites, isAuthenticated]);
 
   const addFavorite = (event: Omit<FavoriteEvent, 'addedAt'>) => {
-    const newFavorite: FavoriteEvent = {
-      ...event,
-      addedAt: Date.now(),
-    };
-    setFavorites(prev => [newFavorite, ...prev]);
+    setFavorites(prev => [{ ...event, addedAt: Date.now() }, ...prev.filter(f => f.id !== event.id)]);
   };
 
   const removeFavorite = (eventId: string) => {
     setFavorites(prev => prev.filter(fav => fav.id !== eventId));
   };
 
-  const isFavorite = (eventId: string): boolean => {
-    return favorites.some(fav => fav.id === eventId);
-  };
+  const isFavorite = (eventId: string): boolean => favorites.some(fav => fav.id === eventId);
 
-  const toggleFavorite = (event: Omit<FavoriteEvent, 'addedAt'>) => {
+  const toggleFavorite = async (event: Omit<FavoriteEvent, 'addedAt'>) => {
+    if (isAuthenticated) {
+      try {
+        const result = await EventsAPI.toggleFavorite(event.id);
+        if (result.isFavorited) {
+          addFavorite(event);
+        } else {
+          removeFavorite(event.id);
+        }
+        return;
+      } catch {
+        // fallback local
+      }
+    }
     if (isFavorite(event.id)) {
       removeFavorite(event.id);
     } else {
@@ -77,20 +109,11 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearAllFavorites = () => {
-    setFavorites([]);
-  };
+  const clearAllFavorites = () => setFavorites([]);
 
   return (
     <FavoritesContext.Provider
-      value={{
-        favorites,
-        addFavorite,
-        removeFavorite,
-        isFavorite,
-        toggleFavorite,
-        clearAllFavorites,
-      }}
+      value={{ favorites, loading, addFavorite, removeFavorite, isFavorite, toggleFavorite, clearAllFavorites }}
     >
       {children}
     </FavoritesContext.Provider>

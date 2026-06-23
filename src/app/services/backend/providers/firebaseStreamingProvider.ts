@@ -71,7 +71,7 @@ export const firebaseStreamingProvider: StreamingProvider = {
 
     const userSnap = await getDoc(doc(db, "users", user.uid));
     const role = userSnap.exists() ? String(userSnap.data().role ?? "viewer") : "viewer";
-    if (["premium", "vip", "streamer", "admin", "super_admin"].includes(role)) {
+    if (["admin", "super_admin"].includes(role)) {
       return { hasAccess: true, reason: "subscription", streamUrl: event.streamUrl ?? null };
     }
 

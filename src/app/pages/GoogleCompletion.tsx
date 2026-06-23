@@ -10,6 +10,7 @@ export function GoogleCompletion() {
   const location = useLocation();
   const { completeGoogleRegistration } = useAuth();
   const prefill = (location.state as { prefill?: Prefill } | null)?.prefill;
+  const googleName = prefill?.name ?? window.sessionStorage.getItem("feetiplay_google_pending_name") ?? "";
 
   useEffect(() => {
     if (!window.sessionStorage.getItem("feetiplay_google_pending_token")) {
@@ -17,9 +18,9 @@ export function GoogleCompletion() {
     }
   }, [navigate]);
 
-  const [name, setName] = useState(prefill?.name ?? "");
+  const [name, setName] = useState(googleName);
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<"viewer" | "streamer">("viewer");
+  const role = "viewer" as const;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -62,15 +63,6 @@ export function GoogleCompletion() {
           placeholder="Téléphone (optionnel)"
           className="w-full h-12 rounded-xl bg-transparent border border-[#3a3a3a] px-4"
         />
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as "viewer" | "streamer")}
-          className="w-full h-12 rounded-xl bg-transparent border border-[#3a3a3a] px-4"
-        >
-          <option value="viewer" className="text-black">Spectateur</option>
-          <option value="streamer" className="text-black">Streamer</option>
-        </select>
-
         {error ? <p className="text-sm text-red-400">{error}</p> : null}
 
         <button

@@ -5,6 +5,7 @@ import { CalendarEventCard } from '../components/CalendarEventCard';
 import { EventPlayerModal } from '../components/EventPlayerModal';
 import { Heart, Trash2, Calendar, Filter } from 'lucide-react';
 import { SortFilter, SortOption } from '../components/SortFilter';
+import { sortEvents } from '../utils/sortEvents';
 
 export function Favorites() {
   const { favorites, clearAllFavorites } = useFavorites();
@@ -31,26 +32,12 @@ export function Favorites() {
     }
 
     // Apply sort
-    filtered.sort((a, b) => {
-      switch (sortOption) {
-        case 'date-asc':
-          return a.addedAt - b.addedAt;
-        case 'date-desc':
-          return b.addedAt - a.addedAt;
-        case 'name-asc':
-          return a.title.localeCompare(b.title);
-        case 'name-desc':
-          return b.title.localeCompare(a.title);
-        case 'price-asc':
-          return (a.price || 0) - (b.price || 0);
-        case 'price-desc':
-          return (b.price || 0) - (a.price || 0);
-        default:
-          return 0;
-      }
-    });
+    const mappedForSort = filtered.map(e => ({
+      ...e,
+      date: e.fullDate ? `${e.fullDate} ${e.time ? e.time.replace('h', ':') : ''}` : (e.date || e.time)
+    }));
 
-    return filtered;
+    return sortEvents(mappedForSort, sortOption) as typeof filtered;
   };
 
   const handleEventPlay = (event: any) => {

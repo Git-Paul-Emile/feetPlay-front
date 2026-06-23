@@ -22,7 +22,7 @@ export const firebaseCheckoutProvider: CheckoutProvider = {
       orderId: event.id,
       accessCode: event.qrCode,
       paymentId: `firebase_${auth.currentUser?.uid ?? "guest"}_${Date.now()}`,
-      paymentProvider: input.paymentMethod === "mobile-money" ? "mobile_money" : "stripe",
+      paymentProvider: input.paymentMethod === "mobile-money" ? "mobile_money" : input.paymentMethod === "paystack" ? "paystack" : "stripe",
       emailSent: false,
     };
   },

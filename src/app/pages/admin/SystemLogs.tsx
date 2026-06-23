@@ -2,34 +2,19 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { FileText, Search, Filter, Download, AlertCircle, CheckCircle, Info, AlertTriangle } from 'lucide-react';
 
-interface Log {
-  id: string;
-  action: string;
-  description: string;
-  user: string;
-  role: string;
-  timestamp: string;
-  level: 'info' | 'warning' | 'error' | 'success';
-}
+import AdminAPI, { SystemLogItem } from '../../services/api/AdminAPI';
 
 export function SystemLogs() {
-  const [logs, setLogs] = useState<Log[]>([]);
+  const [logs, setLogs] = useState<SystemLogItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterLevel, setFilterLevel] = useState('all');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Charger les logs depuis localStorage
-    const storedLogs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
-    
-    // Enrichir avec des niveaux de log
-    const enrichedLogs = storedLogs.map((log: any) => ({
-      ...log,
-      level: log.action === 'login' ? 'success' : 
-             log.action === 'logout' ? 'info' :
-             log.action === 'error' ? 'error' : 'info'
-    }));
-    
-    setLogs(enrichedLogs);
+    AdminAPI.getLogs({ limit: 100 })
+      .then(res => setLogs(res.logs))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   const levelConfig = {
@@ -62,7 +47,7 @@ export function SystemLogs() {
   const filteredLogs = logs.filter(log => {
     const matchesSearch = 
       log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.adminName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.action.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterLevel === 'all' || log.level === filterLevel;
     return matchesSearch && matchesFilter;
@@ -257,16 +242,16 @@ export function SystemLogs() {
                     <td className="px-6 py-4">
                       <div>
                         <p className="font-['Inter',sans-serif] text-white text-sm">
-                          {log.user}
+                          {log.adminName}
                         </p>
                         <p className="font-['Inter',sans-serif] text-white/60 text-xs">
-                          {log.role}
+                          {log.adminRole}
                         </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-['Inter',sans-serif] text-white/60 text-sm font-mono">
-                        {formatDate(log.timestamp)}
+                        {formatDate(log.createdAt)}
                       </span>
                     </td>
                   </motion.tr>

@@ -1,234 +1,181 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import {
-  Plus,
-  Search,
-  Filter,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  MapPin,
-  DollarSign,
-  Users,
-} from 'lucide-react';
+import { Calendar, Copy, Eye, Radio, RefreshCw, Search, Square, Trash2 } from 'lucide-react';
+import AdminAPI, { type AdminEventItem } from '../../services/api/AdminAPI';
+import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
+import { useAdminAuth } from '../../contexts/AdminAuthContext';
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  category: string;
-  price: number;
-  status: 'draft' | 'published' | 'live' | 'ended';
-  attendees: number;
-  image: string;
+type MuxResult = Awaited<ReturnType<typeof AdminAPI.createMuxLiveStream>>;
+
+function statusLabel(event: AdminEventItem) {
+  if (event.isLive) return 'En direct';
+  if (event.isReplay) return 'Replay';
+  return 'Planifie';
 }
 
 export function EventsManagement() {
+  const { hasPermission } = useAdminAuth();
+  const canEdit = hasPermission('manage_events');
+  const [events, setEvents] = useState<AdminEventItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionId, setActionId] = useState<string | null>(null);
+  const [muxResult, setMuxResult] = useState<MuxResult | null>(null);
 
-  // Mock data
-  const [events] = useState<Event[]>([
-    {
-      id: '1',
-      title: 'CHAN 2025 - Finale',
-      date: '15 Mars 2025',
-      time: '15:00',
-      location: 'Stade Alphonse Massamba-Débat, Brazzaville',
-      category: 'Football',
-      price: 15000,
-      status: 'live',
-      attendees: 45234,
-      image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400',
-    },
-    {
-      id: '2',
-      title: 'Match Amical - Congo vs Cameroun',
-      date: '18 Mars 2025',
-      time: '17:00',
-      location: 'Stade de la Concorde, Pointe-Noire',
-      category: 'Football',
-      price: 10000,
-      status: 'published',
-      attendees: 8234,
-      image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400',
-    },
-    {
-      id: '3',
-      title: 'Championnat National - J15',
-      date: '20 Mars 2025',
-      time: '14:00',
-      location: 'Stade Massamba-Débat',
-      category: 'Football',
-      price: 5000,
-      status: 'published',
-      attendees: 3421,
-      image: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400',
-    },
-    {
-      id: '4',
-      title: 'Tournoi de Basketball U21',
-      date: '25 Mars 2025',
-      time: '10:00',
-      location: 'Palais des Sports, Brazzaville',
-      category: 'Basketball',
-      price: 3000,
-      status: 'draft',
-      attendees: 0,
-      image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400',
-    },
-  ]);
-
-  const statusColors = {
-    draft: 'bg-gray-500/20 text-gray-400',
-    published: 'bg-blue-500/20 text-blue-400',
-    live: 'bg-red-500/20 text-red-400',
-    ended: 'bg-green-500/20 text-green-400',
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    AdminAPI.getRecentEvents(100)
+      .then(setEvents)
+      .catch((err) => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des evenements.')))
+      .finally(() => setLoading(false));
   };
 
-  const statusLabels = {
-    draft: 'Brouillon',
-    published: 'Publié',
-    live: 'En direct',
-    ended: 'Terminé',
+  useEffect(load, []);
+
+  const filteredEvents = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return events;
+    return events.filter((event) =>
+      [event.title, event.category, event.channel?.name].some((value) => value?.toLowerCase().includes(query)),
+    );
+  }, [events, searchQuery]);
+
+  const createMux = async (event: AdminEventItem) => {
+    setActionId(event.id);
+    setError(null);
+    try {
+      const result = await AdminAPI.createMuxLiveStream({ title: event.title, eventId: event.id });
+      setMuxResult(result);
+      load();
+    } catch (err) {
+      setError(firebaseClientErrorToUserMessage(err, 'Impossible de creer le live stream Mux.'));
+    } finally {
+      setActionId(null);
+    }
   };
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || event.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+  const disableMux = async (event: AdminEventItem) => {
+    if (!event.muxStreamId) return;
+    if (!confirm(`Desactiver le live stream Mux de "${event.title}" ?`)) return;
+    setActionId(event.id);
+    try {
+      await AdminAPI.disableMuxLiveStream(event.muxStreamId);
+      load();
+    } catch (err) {
+      setError(firebaseClientErrorToUserMessage(err, 'Impossible de desactiver le live stream Mux.'));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const deleteEvent = async (event: AdminEventItem) => {
+    if (!confirm(`Supprimer "${event.title}" ?`)) return;
+    setActionId(event.id);
+    try {
+      await AdminAPI.deleteEvent(event.id);
+      setEvents((prev) => prev.filter((item) => item.id !== event.id));
+    } catch (err) {
+      setError(firebaseClientErrorToUserMessage(err, 'Impossible de supprimer cet evenement.'));
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const copy = (value: string) => navigator.clipboard?.writeText(value).catch(() => undefined);
 
   return (
     <div className="p-6 md:p-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-['DM_Sans',sans-serif] font-bold text-white text-3xl mb-2">
-            Gestion des événements
-          </h1>
-          <p className="font-['Inter',sans-serif] text-white/60 text-base">
-            Créez, modifiez et gérez tous vos événements sportifs
-          </p>
+          <h1 className="font-['DM_Sans',sans-serif] font-bold text-white text-3xl mb-2">Gestion des evenements</h1>
+          <p className="font-['Inter',sans-serif] text-white/60 text-base">Evenements reels, diffusion Mux et moderation operationnelle</p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-4 md:mt-0 flex items-center gap-2 bg-[#cdff71] text-black px-6 py-3 rounded-lg font-['Inter',sans-serif] font-semibold hover:bg-[#cdff71]/90 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Nouvel événement
-        </motion.button>
+        <button onClick={load} className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white px-4 py-2.5 rounded-lg transition-colors">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        {/* Search */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
-          <input
-            type="text"
-            placeholder="Rechercher un événement..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#cdff71] transition-colors"
-          />
-        </div>
+      {error && <div className="mb-6 rounded-xl border border-[#DE0035]/30 bg-[#DE0035]/10 px-4 py-3 text-sm text-white">{error}</div>}
 
-        {/* Status filter */}
-        <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white outline-none focus:border-[#cdff71] transition-colors appearance-none cursor-pointer min-w-[200px]"
-          >
-            <option value="all">Tous les statuts</option>
-            <option value="draft">Brouillon</option>
-            <option value="published">Publié</option>
-            <option value="live">En direct</option>
-            <option value="ended">Terminé</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredEvents.map((event, index) => (
-          <motion.div
-            key={event.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-[rgba(255,255,255,0.05)] backdrop-blur-[20px] border border-white/10 rounded-[12px] overflow-hidden hover:border-[#cdff71]/50 transition-colors group"
-          >
-            {/* Image */}
-            <div className="relative h-48 overflow-hidden">
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold ${statusColors[event.status]}`}>
-                {statusLabels[event.status]}
-              </div>
+      {muxResult && (
+        <div className="mb-6 rounded-xl border border-[#CDFF71]/30 bg-[#CDFF71]/10 p-4 text-sm text-white">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <p className="font-semibold text-[#CDFF71]">Live stream Mux cree</p>
+              <p>Serveur RTMP: <span className="font-mono">{muxResult.rtmpUrl}</span></p>
+              <p>Stream key: <span className="font-mono">{muxResult.streamKey}</span></p>
+              <p>Playback ID: <span className="font-mono">{muxResult.playbackId}</span></p>
             </div>
-
-            {/* Content */}
-            <div className="p-6">
-              <h3 className="font-['DM_Sans',sans-serif] font-bold text-white text-lg mb-3">
-                {event.title}
-              </h3>
-
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <Calendar className="w-4 h-4" />
-                  {event.date} à {event.time}
-                </div>
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <MapPin className="w-4 h-4" />
-                  {event.location}
-                </div>
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <DollarSign className="w-4 h-4" />
-                  {event.price.toLocaleString()} FCFA
-                </div>
-                <div className="flex items-center gap-2 text-white/60 text-sm">
-                  <Users className="w-4 h-4" />
-                  {event.attendees.toLocaleString()} participants
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <button className="flex-1 flex items-center justify-center gap-2 bg-[#cdff71]/10 hover:bg-[#cdff71]/20 text-[#cdff71] px-4 py-2 rounded-lg transition-colors">
-                  <Eye className="w-4 h-4" />
-                  <span className="text-sm font-medium">Voir</span>
-                </button>
-                <button className="flex items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg transition-colors">
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button className="flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Empty state */}
-      {filteredEvents.length === 0 && (
-        <div className="text-center py-16">
-          <Calendar className="w-16 h-16 text-white/20 mx-auto mb-4" />
-          <p className="font-['Inter',sans-serif] text-white/60 text-lg">
-            Aucun événement trouvé
-          </p>
+            <button onClick={() => copy(`${muxResult.rtmpUrl}\n${muxResult.streamKey}`)} className="p-2 rounded-lg bg-white/10 hover:bg-white/15">
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
+
+      <div className="relative mb-6">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+        <input
+          type="text"
+          placeholder="Rechercher un evenement..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#cdff71] transition-colors"
+        />
+      </div>
+
+      <div className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[12px] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-white/5 border-b border-white/10">
+              <tr>
+                <th className="text-left px-5 py-4 text-white/80 text-sm">Evenement</th>
+                <th className="text-left px-5 py-4 text-white/80 text-sm">Date</th>
+                <th className="text-left px-5 py-4 text-white/80 text-sm">Statut</th>
+                <th className="text-left px-5 py-4 text-white/80 text-sm">Ventes</th>
+                <th className="text-right px-5 py-4 text-white/80 text-sm">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i}><td colSpan={5} className="px-5 py-4"><div className="h-5 bg-white/5 rounded animate-pulse" /></td></tr>
+              )) : filteredEvents.map((event, index) => (
+                <motion.tr key={event.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.02 }} className="border-b border-white/5 hover:bg-white/5">
+                  <td className="px-5 py-4">
+                    <p className="text-white font-semibold text-sm">{event.title}</p>
+                    <p className="text-white/45 text-xs">{event.channel?.name ?? event.category ?? 'Chaine'} {event.muxStreamId ? `- Mux ${event.muxStreamId}` : ''}</p>
+                  </td>
+                  <td className="px-5 py-4 text-white/60 text-sm">
+                    <span className="inline-flex items-center gap-2"><Calendar className="w-4 h-4" />{event.date} {event.time}</span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${event.isLive ? 'bg-[#DE0035]/20 text-[#DE0035]' : event.isReplay ? 'bg-blue-500/20 text-blue-300' : 'bg-white/10 text-white/60'}`}>
+                      {statusLabel(event)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-white/60 text-sm">{event._count.tickets} ticket(s) - {event.price?.toLocaleString() ?? 0} {event.currency}</td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <a href={`/event/${event.id}`} className="p-2 rounded-lg bg-white/10 hover:bg-white/15 text-white" title="Voir"><Eye className="w-4 h-4" /></a>
+                      {canEdit && (
+                        <>
+                          <button onClick={() => createMux(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-[#CDFF71]/10 hover:bg-[#CDFF71]/20 text-[#CDFF71] disabled:opacity-40" title="Creer live Mux"><Radio className="w-4 h-4" /></button>
+                          {event.muxStreamId && <button onClick={() => disableMux(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 disabled:opacity-40" title="Desactiver Mux"><Square className="w-4 h-4" /></button>}
+                          <button onClick={() => deleteEvent(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-[#DE0035]/10 hover:bg-[#DE0035]/20 text-[#DE0035] disabled:opacity-40" title="Supprimer"><Trash2 className="w-4 h-4" /></button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {!loading && filteredEvents.length === 0 && <div className="py-16 text-center text-white/50">Aucun evenement trouve</div>}
+      </div>
     </div>
   );
 }

@@ -107,3 +107,40 @@ self.addEventListener('fetch', (event) => {
     )
   );
 });
+
+self.addEventListener('push', (event) => {
+  const payload = event.data?.json?.() ?? {
+    title: 'FEETI PLAY',
+    message: event.data?.text?.() ?? 'Nouvelle notification',
+  };
+
+  const title = payload.title ?? 'FEETI PLAY';
+  const options: NotificationOptions = {
+    body: payload.message ?? payload.body ?? '',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-192x192.png',
+    data: {
+      url: payload.url ?? '/',
+      notificationId: payload.id,
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url ?? '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(targetUrl);
+    })
+  );
+});

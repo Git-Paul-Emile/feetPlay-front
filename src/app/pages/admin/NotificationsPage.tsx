@@ -12,7 +12,7 @@ const TYPE_CONFIG = {
   maintenance: { icon: Wrench,        color: 'text-orange-400', bg: 'bg-orange-500/10',  label: 'Maintenance'   },
 } as const;
 
-const AUDIENCE_LABELS = { all: 'Tous les utilisateurs', premium: 'Abonnés Premium+', free: 'Compte gratuit' };
+const AUDIENCE_LABELS = { all: 'Tous les utilisateurs', premium: 'Abonnes a un createur', free: 'Compte gratuit' };
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('fr-FR', {
@@ -31,6 +31,7 @@ const DEFAULT_FORM: SendNotificationInput = {
 
 export function NotificationsPage() {
   const { user } = useAdminAuth();
+  const canDelete = user?.role === 'admin' || user?.role === 'super_admin';
 
   const [notifications, setNotifications] = useState<AdminNotificationItem[]>([]);
   const [total, setTotal]     = useState(0);
@@ -226,13 +227,15 @@ export function NotificationsPage() {
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDelete(notif.id)}
-                          disabled={deleteId === notif.id}
-                          className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors disabled:opacity-40 flex-shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(notif.id)}
+                            disabled={deleteId === notif.id}
+                            className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors disabled:opacity-40 flex-shrink-0"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   );

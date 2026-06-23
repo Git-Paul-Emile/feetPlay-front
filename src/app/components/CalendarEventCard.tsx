@@ -8,6 +8,7 @@ export interface CalendarEventCardProps {
   image: string;
   title: string;
   location: string;
+  country?: string | null;
   time: string;
   duration: string;
   category: string;

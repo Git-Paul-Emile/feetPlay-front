@@ -6,15 +6,22 @@ import { SearchBar } from '../components/SearchBar';
 import { useState, useRef, useEffect } from 'react';
 import EventsAPI from '../services/api/EventsAPI';
 import { motion } from 'motion/react';
+import { LayoutGrid } from 'lucide-react';
 import categorySvgPaths from "../../imports/svg-ckb5lqxig6";
 import svgPaths from "../../imports/svg-z30khrsoqy";
+import { useLocationContext } from '../contexts/LocationContext';
 
 
 // Categories identiques à la page Live
 const categories = [
   { 
-    name: 'Cinema', 
+    name: 'Tous', 
     active: true,
+    icon: <LayoutGrid className="w-full h-full text-[#000441] stroke-[1.5]" />
+  },
+  { 
+    name: 'Cinema', 
+    active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
         <path d={categorySvgPaths.p1adf5980} stroke="#000441" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.3" />
@@ -139,7 +146,7 @@ const categories = [
 ];
 
 
-type ReplayCardData = { image: string; title: string; location: string; date: string; duration: string; category: string };
+type ReplayCardData = { image: string; title: string; location: string; country?: string | null; date: string; duration: string; category: string };
 
 export function Replay() {
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
@@ -153,12 +160,27 @@ export function Replay() {
   const [lastMonthReplays, setLastMonthReplays] = useState<ReplayCardData[]>([]);
   const [topReplays, setTopReplays] = useState<ReplayCardData[]>([]);
 
+  const { filterEvents } = useLocationContext();
+
+  const getFilteredEvents = (events: any[]) => {
+    let filtered = filterEvents(events);
+    if (searchTerm) {
+      filtered = filtered.filter(e => e.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    if (activeCategory > 0) {
+      const catName = categories[activeCategory].name;
+      filtered = filtered.filter(e => e.category?.toLowerCase() === catName.toLowerCase());
+    }
+    return sortEvents(filtered, sortOption);
+  };
+
   useEffect(() => {
     EventsAPI.getReplays().then(events => {
       const mapped = events.map(e => ({
         image: e.image,
         title: e.title,
         location: e.location ?? '',
+        country: e.country ?? null,
         date: e.date,
         duration: e.duration,
         category: e.category,
@@ -269,7 +291,7 @@ export function Replay() {
             </div>
           </div>
           <div className="flex gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={recentRef}>
-            {recentReplays.map((event, index) => (
+            {getFilteredEvents(recentReplays).map((event, index) => (
               <div key={index} className="flex-shrink-0">
                 <ReplayCard {...event} onClick={() => handleReplayClick(event)} />
               </div>
@@ -307,7 +329,7 @@ export function Replay() {
             </div>
           </div>
           <div className="flex gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={thisMonthRef}>
-            {thisMonthReplays.map((event, index) => (
+            {getFilteredEvents(thisMonthReplays).map((event, index) => (
               <div key={index} className="flex-shrink-0">
                 <ReplayCard {...event} onClick={() => handleReplayClick(event)} />
               </div>
@@ -345,7 +367,7 @@ export function Replay() {
             </div>
           </div>
           <div className="flex gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={lastMonthRef}>
-            {lastMonthReplays.map((event, index) => (
+            {getFilteredEvents(lastMonthReplays).map((event, index) => (
               <div key={index} className="flex-shrink-0">
                 <ReplayCard {...event} onClick={() => handleReplayClick(event)} />
               </div>
@@ -383,7 +405,7 @@ export function Replay() {
             </div>
           </div>
           <div className="flex gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={topRef}>
-            {topReplays.map((event, index) => (
+            {getFilteredEvents(topReplays).map((event, index) => (
               <div key={index} className="flex-shrink-0">
                 <ReplayCard {...event} onClick={() => handleReplayClick(event)} />
               </div>

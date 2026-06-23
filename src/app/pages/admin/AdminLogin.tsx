@@ -36,9 +36,7 @@ export function AdminLogin() {
   const credentials = [
     { role: 'Super Admin', email: 'superadmin@feetiplay.com', password: 'Super@123' },
     { role: 'Admin', email: 'admin@feetiplay.com', password: 'Admin@123' },
-    { role: 'Modérateur', email: 'moderator@feetiplay.com', password: 'Mod@123' },
     { role: 'Finance', email: 'finance@feetiplay.com', password: 'Finance@123' },
-    { role: 'Marketing', email: 'marketing@feetiplay.com', password: 'Marketing@123' },
   ];
 
   return (

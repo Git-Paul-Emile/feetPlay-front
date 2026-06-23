@@ -1,13 +1,14 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import AdminAPI from '../services/api/AdminAPI';
 
-export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'finance' | 'marketing';
+export type UserRole = 'super_admin' | 'admin' | 'finance' | 'moderator' | 'marketing';
 
 export interface AdminUser {
   id: string;
   email: string;
   name: string;
   role: UserRole;
-  avatar?: string;
+  avatar?: string | null;
   permissions: string[];
 }
 
@@ -22,7 +23,9 @@ interface AdminAuthContextType {
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
-// Permissions par rôle
+const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
+const ADMIN_USER_KEY = 'feetiplay_admin_user';
+
 const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   super_admin: [
     'view_dashboard',
@@ -35,21 +38,24 @@ const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'manage_backup',
     'manage_monitoring',
     'manage_roles',
+    'manage_admins',
     'view_finances',
+    'view_users',
+    'view_settings',
+    'view_events',
+    'view_streaming',
+    'moderate_content',
   ],
   admin: [
     'view_dashboard',
     'manage_events',
-    'manage_users',
+    'view_users',
     'manage_crm',
     'send_notifications',
     'view_logs',
-  ],
-  moderator: [
-    'view_dashboard',
-    'manage_events',
-    'view_users',
-    'view_logs',
+    'view_settings',
+    'view_events',
+    'moderate_content',
   ],
   finance: [
     'view_dashboard',
@@ -58,113 +64,84 @@ const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'view_users',
     'view_logs',
   ],
+  moderator: [
+    'view_dashboard',
+    'view_streaming',
+    'view_users',
+    'view_logs',
+    'moderate_content',
+  ],
   marketing: [
     'view_dashboard',
     'manage_crm',
     'send_notifications',
+    'view_streaming',
     'view_events',
     'view_users',
   ],
 };
 
-// Mock users pour démonstration (À remplacer par une vraie API)
-const MOCK_USERS: Array<AdminUser & { password: string }> = [
-  {
-    id: '1',
-    email: 'superadmin@feetiplay.com',
-    password: 'Super@123',
-    name: 'Super Administrateur',
-    role: 'super_admin',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=superadmin',
-    permissions: ROLE_PERMISSIONS.super_admin,
-  },
-  {
-    id: '2',
-    email: 'admin@feetiplay.com',
-    password: 'Admin@123',
-    name: 'Administrateur',
-    role: 'admin',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-    permissions: ROLE_PERMISSIONS.admin,
-  },
-  {
-    id: '3',
-    email: 'moderator@feetiplay.com',
-    password: 'Mod@123',
-    name: 'Modérateur',
-    role: 'moderator',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=moderator',
-    permissions: ROLE_PERMISSIONS.moderator,
-  },
-  {
-    id: '4',
-    email: 'finance@feetiplay.com',
-    password: 'Finance@123',
-    name: 'Responsable Finance',
-    role: 'finance',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=finance',
-    permissions: ROLE_PERMISSIONS.finance,
-  },
-  {
-    id: '5',
-    email: 'marketing@feetiplay.com',
-    password: 'Marketing@123',
-    name: 'Responsable Marketing',
-    role: 'marketing',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=marketing',
-    permissions: ROLE_PERMISSIONS.marketing,
-  },
-];
+function normalizeAdmin(raw: AdminUser): AdminUser {
+  return {
+    ...raw,
+    permissions: raw.permissions?.length ? raw.permissions : ROLE_PERMISSIONS[raw.role] ?? [],
+  };
+}
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Vérifier la session au chargement
   useEffect(() => {
-    const storedUser = localStorage.getItem('admin_user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Erreur parsing user:', error);
-        localStorage.removeItem('admin_user');
-      }
+    const storedUser = localStorage.getItem(ADMIN_USER_KEY);
+    const storedToken = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (!storedUser || !storedToken) return;
+
+    try {
+      const parsedUser = normalizeAdmin(JSON.parse(storedUser));
+      setUser(parsedUser);
+      setIsAuthenticated(true);
+    } catch {
+      localStorage.removeItem(ADMIN_USER_KEY);
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+      return;
     }
+
+    AdminAPI.getMe()
+      .then((freshUser) => {
+        const normalized = normalizeAdmin(freshUser as AdminUser);
+        setUser(normalized);
+        setIsAuthenticated(true);
+        localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(normalized));
+      })
+      .catch(() => {
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem(ADMIN_USER_KEY);
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+      });
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulation d'une requête API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const foundUser = MOCK_USERS.find(
-      u => u.email === email && u.password === password
-    );
-
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
+    try {
+      const { admin, accessToken } = await AdminAPI.login(email, password);
+      const normalized = normalizeAdmin(admin as AdminUser);
+      localStorage.setItem(ADMIN_TOKEN_KEY, accessToken);
+      localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(normalized));
+      setUser(normalized);
       setIsAuthenticated(true);
-      localStorage.setItem('admin_user', JSON.stringify(userWithoutPassword));
-      
-      // Log de connexion
-      logAction('login', `${foundUser.name} s'est connecté`);
-      
       return true;
+    } catch {
+      return false;
     }
-
-    return false;
   };
 
   const logout = () => {
-    if (user) {
-      logAction('logout', `${user.name} s'est déconnecté`);
-    }
+    AdminAPI.logout().catch(() => undefined);
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('admin_user');
+    localStorage.removeItem(ADMIN_USER_KEY);
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
   };
 
   const hasPermission = (permission: string): boolean => {
@@ -174,38 +151,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   const hasRole = (role: UserRole | UserRole[]): boolean => {
     if (!user) return false;
-    if (Array.isArray(role)) {
-      return role.includes(user.role);
-    }
-    return user.role === role;
-  };
-
-  // Fonction helper pour logger les actions
-  const logAction = (action: string, description: string) => {
-    const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
-    logs.unshift({
-      id: Date.now().toString(),
-      action,
-      description,
-      user: user?.name || 'Unknown',
-      role: user?.role || 'unknown',
-      timestamp: new Date().toISOString(),
-    });
-    // Garder seulement les 1000 derniers logs
-    localStorage.setItem('admin_logs', JSON.stringify(logs.slice(0, 1000)));
+    return Array.isArray(role) ? role.includes(user.role) : user.role === role;
   };
 
   return (
-    <AdminAuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        login,
-        logout,
-        hasPermission,
-        hasRole,
-      }}
-    >
+    <AdminAuthContext.Provider value={{ user, isAuthenticated, login, logout, hasPermission, hasRole }}>
       {children}
     </AdminAuthContext.Provider>
   );
@@ -219,5 +169,4 @@ export function useAdminAuth() {
   return context;
 }
 
-// Export des permissions pour référence
 export { ROLE_PERMISSIONS };

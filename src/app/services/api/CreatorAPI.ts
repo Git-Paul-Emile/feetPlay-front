@@ -1,5 +1,6 @@
 import { fetchWithApiFallback } from "../../utils/serviceConfig";
 
+// Utilisez une clé différente pour éviter d'écraser le token viewer
 export const CREATOR_TOKEN_KEY = "feetiplay_creator_token";
 
 export interface Creator {
@@ -34,9 +35,19 @@ export interface CreatorVideo {
   viewCount: number;
   isPublished: boolean;
   isLive: boolean;
+  isReplay?: boolean;
   streamUrl?: string | null;
+  muxStreamId?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreatorStreamConfig {
+  streamKey: string;
+  rtmpUrl: string;
+  muxStreamId?: string | null;
+  playbackId?: string | null;
+  hint?: string;
 }
 
 export interface CreatorRegisterData {
@@ -61,6 +72,22 @@ export interface CreatorUpdateProfileData {
   coverImage?: string | null;
   category?: string;
   channelName?: string;
+  channelSlug?: string;
+}
+
+export interface CreatorVideoInput {
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  duration?: string;
+  category?: string;
+  isPublished?: boolean;
+  isLive?: boolean;
+  isReplay?: boolean;
+  streamUrl?: string;
+  requiresSubscription?: boolean;
+  subscriptionPrice?: number;
 }
 
 export interface CreatorDashboardStats {
@@ -118,41 +145,87 @@ const CreatorAPI = {
     return creatorFetch("/dashboard");
   },
 
+  async getStreamConfig(): Promise<CreatorStreamConfig> {
+    return creatorFetch("/me/stream-config");
+  },
+
+  async regenerateStreamKey(): Promise<CreatorStreamConfig> {
+    return creatorFetch("/me/stream-config/regenerate", { method: "POST" });
+  },
+
   async getAll(category?: string): Promise<Creator[]> {
     const qs = category ? `?category=${encodeURIComponent(category)}` : "";
-    return creatorFetch(`/${qs}`);
+    const response = await fetchWithApiFallback(`/creators${qs}`);
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data as Creator[];
   },
 
   async getBySlug(slug: string): Promise<Creator & { videos: CreatorVideo[] }> {
-    return creatorFetch(`/${slug}`);
+    const response = await fetchWithApiFallback(`/creators/${slug}`);
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data as Creator & { videos: CreatorVideo[] };
   },
 
-  async subscribe(creatorId: string): Promise<{ subscribed: boolean }> {
-    return creatorFetch(`/${creatorId}/subscribe`, { method: "POST" });
+  async subscribe(creatorId: string, plan: "free" | "paid" = "paid"): Promise<{ subscribed: boolean }> {
+    const response = await fetchWithApiFallback(`/creators/${creatorId}/subscribe`, {
+      method: "POST",
+      body: JSON.stringify({ plan }),
+    });
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data as { subscribed: boolean };
   },
 
   async unsubscribe(creatorId: string): Promise<{ subscribed: boolean }> {
-    return creatorFetch(`/${creatorId}/subscribe`, { method: "DELETE" });
+    const response = await fetchWithApiFallback(`/creators/${creatorId}/subscribe`, { method: "DELETE" });
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data as { subscribed: boolean };
   },
 
   async getSubscriptionStatus(creatorId: string): Promise<{ subscribed: boolean }> {
-    return creatorFetch(`/${creatorId}/subscription`);
+    const response = await fetchWithApiFallback(`/creators/${creatorId}/subscription`);
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data as { subscribed: boolean };
   },
 
   async getMyVideos(): Promise<CreatorVideo[]> {
     return creatorFetch("/me/videos");
   },
 
-  async createVideo(data: Partial<CreatorVideo>): Promise<CreatorVideo> {
+  async createVideo(data: CreatorVideoInput): Promise<CreatorVideo> {
     return creatorFetch("/me/videos", { method: "POST", body: JSON.stringify(data) });
   },
 
-  async updateVideo(videoId: string, data: Partial<CreatorVideo>): Promise<CreatorVideo> {
+  async updateVideo(videoId: string, data: Partial<CreatorVideoInput>): Promise<CreatorVideo> {
     return creatorFetch(`/me/videos/${videoId}`, { method: "PATCH", body: JSON.stringify(data) });
   },
 
   async deleteVideo(videoId: string): Promise<void> {
-    return creatorFetch(`/me/videos/${videoId}`, { method: "DELETE" });
+    await creatorFetch(`/me/videos/${videoId}`, { method: "DELETE" });
+  },
+
+  // ── Public Videos ──
+
+  async getVideoById(videoId: string): Promise<CreatorVideo & { creator: { id: string; channelName: string; channelSlug: string; avatar: string | null } }> {
+    const response = await fetchWithApiFallback(`/creators/videos/${videoId}`);
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data;
+  },
+
+  async checkVideoAccess(videoId: string): Promise<{ hasAccess: boolean; reason: string }> {
+    const response = await fetchWithApiFallback(`/creators/videos/${videoId}/access`, {
+      headers: {
+        Authorization: `Bearer ${window.localStorage.getItem("feetiplay_token") ?? ""}`,
+      },
+    });
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data;
   },
 };
 

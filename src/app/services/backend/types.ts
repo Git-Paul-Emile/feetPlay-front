@@ -6,7 +6,7 @@ export interface AuthUser {
   email: string;
   phone?: string | null;
   avatar?: string | null;
-  role: "viewer" | "premium" | "streamer" | "admin" | "super_admin";
+  role: "viewer" | "admin" | "super_admin";
   subscriptionPlan?: "free" | "basic" | "premium" | "vip";
   createdAt: string;
   updatedAt: string;
@@ -17,13 +17,13 @@ export interface RegisterData {
   email: string;
   phone?: string;
   password: string;
-  role?: "viewer" | "streamer";
+  role?: "viewer";
 }
 
 export interface GoogleCompletionData {
   name: string;
   phone?: string;
-  role?: "viewer" | "streamer";
+  role?: "viewer";
 }
 
 export interface GoogleAuthStartResult {
@@ -71,6 +71,10 @@ export interface StreamingEvent {
   hasTicket?: boolean;
   streamUrl?: string | null;
   location?: string | null;
+  country?: string | null;
+  creatorId?: string | null;
+  requiresSubscription?: boolean;
+  subscriptionPrice?: number | null;
   createdAt: string;
   isFavorite?: boolean;
   watchProgress?: number;
@@ -159,7 +163,7 @@ export interface CheckoutPurchaseInput {
   holderName: string;
   holderEmail: string;
   holderPhone: string;
-  paymentMethod: "card" | "mobile-money" | null;
+  paymentMethod: "card" | "mobile-money" | "paystack" | null;
   mobileOperator?: "mtn" | "orange" | "airtel";
 }
 
@@ -183,6 +187,7 @@ export interface AuthProvider {
   startGoogleAuth(): Promise<GoogleAuthStartResult>;
   completeGoogleRegistration(data: GoogleCompletionData): Promise<AuthUser>;
   logout(): Promise<void>;
+  loginFromFeeti2SSO(token: string): Promise<AuthUser>;
   updateProfile(data: UpdateProfileData): Promise<AuthUser>;
   changePassword(data: ChangePasswordData): Promise<void>;
   deleteAccount(password: string): Promise<void>;

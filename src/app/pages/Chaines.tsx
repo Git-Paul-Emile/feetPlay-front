@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Play, Users, Video } from 'lucide-react';
@@ -39,8 +40,8 @@ export function Chaines() {
         {/* Channels Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {channelsData.map((channel, index) => (
+            <Link key={channel.id} to={`/chaines/${channel.creator}`}>
             <motion.div
-              key={channel.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -85,6 +86,7 @@ export function Chaines() {
                 </div>
               </div>
             </motion.div>
+            </Link>
           ))}
         </div>
 

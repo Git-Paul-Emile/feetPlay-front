@@ -1,140 +1,29 @@
 import { ReplayBanner } from '../components/ReplayBanner';
 import { EventCard } from '../components/EventCard';
-import { SortFilter, SortOption } from '../components/SortFilter';
-import { sortEvents } from '../utils/sortEvents';
 import { ReplayCard } from '../components/ReplayCard';
-import { BannerSlider } from '../components/BannerSlider';
 import { PromoSlider } from '../components/PromoSlider';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
-import { Eye, X } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { useNavigate } from 'react-router';
-
-// Import SVG paths
+import { useLocationContext } from '../contexts/LocationContext';
 import svgPaths from "../../imports/svg-on6vk22quy";
 import categorySvgPaths from "../../imports/svg-ckb5lqxig6";
-
-// Figma assets kept for static banners
-import imgImage16 from "figma:asset/49fa43eb1358f314a712031188cb5e36b4e29a94.png";
-import imgImage18 from "figma:asset/ec899bdbbbe994047f36c763e04f1455d001377c.png";
-import imgRectangle11251 from "figma:asset/6f6beb2a2738b5e06d6523651c97ac18e9f5ae4d.png";
 import EventsAPI from '../services/api/EventsAPI';
+import SettingsAPI, { type PromoOffer } from '../services/api/SettingsAPI';
 
 
-// Banner slider data with different content
-const mainBanners = [
-  {
-    id: 1,
-    type: 'live' as const,
-    title: 'Match NBA en Direct',
-    subtitle: 'Lakers vs Celtics - Finale',
-    description: 'Ne manquez pas le match décisif de la finale NBA en direct depuis le TD Garden',
-    location: 'TD Garden, Boston',
-    date: 'Aujourd\'hui',
-    time: '21:00',
-    image: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=1200&h=600&fit=crop',
-    ctaText: 'Regarder en direct',
-    ctaAction: () => {},
-    gradient: 'bg-gradient-to-r from-[#1a1a2e] via-[#16537e] to-transparent',
-  },
-  {
-    id: 2,
-    type: 'replay' as const,
-    title: 'Concert Afrobeat',
-    subtitle: 'Festival Culturel 2025',
-    description: 'Revivez le concert exceptionnel avec les plus grandes stars de la musique africaine',
-    location: 'Stade de Kinshasa',
-    date: 'SAM 20.12.2025',
-    time: '20:00',
-    image: imgImage16,
-    ctaText: 'Voir le replay',
-    ctaAction: () => {},
-    gradient: 'bg-gradient-to-r from-[#03033b] via-[#16bda0] to-transparent',
-  },
-  {
-    id: 3,
-    type: 'upcoming' as const,
-    title: 'Événement à venir',
-    subtitle: 'Soirée Jazz Live Premium',
-    description: 'Réservez dès maintenant vos places pour une soirée jazz exceptionnelle dans un cadre intimiste',
-    location: 'Centre Culturel Français',
-    date: 'VEN 05.06.2026',
-    time: '19:30',
-    image: imgImage18,
-    ctaText: 'Réserver maintenant',
-    ctaAction: () => {},
-    gradient: 'bg-gradient-to-r from-[#0a1929] via-[#1565c0] to-transparent',
-  },
-  {
-    id: 4,
-    type: 'promo' as const,
-    title: 'Offre spéciale',
-    subtitle: '-40% sur tous les replays',
-    description: 'Profitez de notre promotion exceptionnelle ce week-end sur l\'ensemble du catalogue replay',
-    date: 'Valable jusqu\'au 25 Mai',
-    image: imgRectangle11251,
-    ctaText: 'Voir les offres',
-    ctaAction: () => {},
-    gradient: 'bg-gradient-to-r from-[#4a148c] via-[#7b1fa2] to-transparent',
-  },
-];
 
-// Promo offers with different content
-const promoOffers = [
-  {
-    id: 1,
-    icon: 'star' as const,
-    title: 'Abonnement Premium',
-    discount: '-30%',
-    description: 'Accès illimité à tous les événements en direct et en replay',
-    validUntil: '31 Mai 2026',
-    backgroundColor: 'bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]',
-    accentColor: 'text-yellow-400',
-    ctaText: 'S\'abonner',
-    ctaAction: () => {},
-  },
-  {
-    id: 2,
-    icon: 'gift' as const,
-    title: 'Pack Famille',
-    discount: '-40%',
-    description: 'Jusqu\'à 5 profils simultanés pour toute la famille',
-    validUntil: '15 Juin 2026',
-    backgroundColor: 'bg-gradient-to-br from-[#16BDA0] to-[#0d9488]',
-    accentColor: 'text-pink-400',
-    ctaText: 'Découvrir',
-    ctaAction: () => {},
-  },
-  {
-    id: 3,
-    icon: 'zap' as const,
-    title: 'Week-end sportif',
-    discount: '-25%',
-    description: 'Tous les événements sportifs du week-end à prix réduit',
-    validUntil: '20 Mai 2026',
-    backgroundColor: 'bg-gradient-to-br from-[#dc2626] to-[#991b1b]',
-    accentColor: 'text-orange-400',
-    ctaText: 'Profiter',
-    ctaAction: () => {},
-  },
-  {
-    id: 4,
-    icon: 'star' as const,
-    title: 'Premium Annuel',
-    discount: '-50%',
-    description: 'Un an d\'accès complet avec contenus exclusifs et avant-premières',
-    validUntil: '30 Juin 2026',
-    backgroundColor: 'bg-gradient-to-br from-[#7c3aed] to-[#6d28d9]',
-    accentColor: 'text-yellow-300',
-    ctaText: 'S\'abonner',
-    ctaAction: () => {},
-  },
-];
 
 const categories = [
+  { 
+    name: 'Tous', 
+    active: true,
+    icon: <LayoutGrid className="w-full h-full text-[#000441] stroke-[1.5]" />
+  },
   {
     name: 'Cinema',
-    active: true,
+    active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
         <path d={categorySvgPaths.p1adf5980} stroke="#000441" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.3" />
@@ -258,20 +147,28 @@ const categories = [
   },
 ];
 
-type HeroSlide = { id: string | number; image: string; title: string; location: string; date: string; description: string; price?: number; isFree?: boolean };
-type EventCardData = { id?: string; image: string; title: string; location: string; date: string; category: string; isLive?: boolean; isFree?: boolean; price?: number; hasStreaming?: boolean };
-type ReplayCardData = { image: string; title: string; location: string; date: string; duration?: string; category?: string };
+type HeroSlide = { id: string | number; image: string; title: string; location: string; country?: string | null; date: string; description: string; price?: number; isFree?: boolean };
+type EventCardData = { id?: string; image: string; title: string; location: string; country?: string | null; date: string; category: string; isLive?: boolean; isFree?: boolean; price?: number; hasStreaming?: boolean };
+type ReplayCardData = { image: string; title: string; location: string; country?: string | null; date: string; duration?: string; category?: string };
 
 export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeCategory, setActiveCategory] = useState(0);
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<EventCardData[]>([]);
   const [liveStreamingEvents, setLiveStreamingEvents] = useState<EventCardData[]>([]);
   const [freeEvents, setFreeEvents] = useState<EventCardData[]>([]);
   const [replayEvents, setReplayEvents] = useState<ReplayCardData[]>([]);
+  const [promoOffers, setPromoOffers] = useState<PromoOffer[]>([]);
+
+  const { filterEvents } = useLocationContext();
+
+  const getFilteredEvents = (events: any[]) => {
+    if (activeCategory === 0) return events;
+    const catName = categories[activeCategory].name;
+    return events.filter(e => e.category?.toLowerCase() === catName.toLowerCase());
+  };
 
   useEffect(() => {
     EventsAPI.getFeatured().then(events => setHeroSlides(events.slice(0, 4).map(e => ({
@@ -279,6 +176,7 @@ export function Home() {
       image: e.image,
       title: e.title.toUpperCase(),
       location: e.location ?? '',
+      country: e.country ?? null,
       date: e.date,
       description: e.description,
       price: e.price,
@@ -287,27 +185,31 @@ export function Home() {
 
     EventsAPI.getAll().then(events => {
       const upcoming = events.filter(e => !e.isLive && !e.isReplay).map(e => ({
-        id: e.id, image: e.image, title: e.title, location: e.location ?? '',
+        id: e.id, image: e.image, title: e.title, location: e.location ?? '', country: e.country ?? null,
         date: e.date, category: e.category, isFree: e.isFree, price: e.price, hasStreaming: true,
       }));
       setUpcomingEvents(upcoming.slice(0, 8));
 
       const free = events.filter(e => e.isFree).map(e => ({
-        id: e.id, image: e.image, title: e.title, location: e.location ?? '',
+        id: e.id, image: e.image, title: e.title, location: e.location ?? '', country: e.country ?? null,
         date: e.date, category: e.category, isFree: true, price: e.price, hasStreaming: true,
       }));
       setFreeEvents(free.slice(0, 8));
     }).catch(() => {});
 
     EventsAPI.getLive().then(events => setLiveStreamingEvents(events.slice(0, 8).map(e => ({
-      id: e.id, image: e.image, title: e.title, location: e.location ?? '',
+      id: e.id, image: e.image, title: e.title, location: e.location ?? '', country: e.country ?? null,
       date: e.time || e.date, category: e.category, isLive: true, isFree: e.isFree, price: e.price, hasStreaming: true,
     })))).catch(() => {});
 
     EventsAPI.getReplays().then(events => setReplayEvents(events.slice(0, 5).map(e => ({
-      image: e.image, title: e.title, location: e.location ?? '',
+      image: e.image, title: e.title, location: e.location ?? '', country: e.country ?? null,
       date: e.date, duration: e.duration, category: e.category,
     })))).catch(() => {});
+
+    SettingsAPI.getPublicSettings()
+      .then(settings => { if (settings.PROMO_OFFERS?.length) setPromoOffers(settings.PROMO_OFFERS); })
+      .catch(() => {});
   }, []);
 
   // Refs for carousel scrolling
@@ -340,7 +242,8 @@ export function Home() {
   };
 
   const navigate = useNavigate();
-  const slide = heroSlides[currentSlide];
+  const filteredHeroSlides = filterEvents(heroSlides);
+  const slide = filteredHeroSlides.length > 0 ? filteredHeroSlides[currentSlide % filteredHeroSlides.length] : undefined;
 
   return (
     <div className="relative bg-[#080808] min-h-screen">
@@ -476,7 +379,7 @@ export function Home() {
 
         {/* Slider Indicators - Enhanced */}
         <div className="absolute bottom-6 md:bottom-7 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-3 md:gap-4 lg:gap-5 z-10">
-          {heroSlides.map((_, index) => (
+          {filteredHeroSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
@@ -494,14 +397,11 @@ export function Home() {
       {/* Main Content */}
       <div className="relative">
         {/* Nouveaux Sliders avec contenus différents */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 lg:pt-16">
-          <BannerSlider banners={mainBanners} />
-        </section>
-
-        {/* Slider de promotions */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-          <PromoSlider promos={promoOffers} />
-        </section>
+        {promoOffers.length > 0 && (
+          <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 lg:pt-16">
+            <PromoSlider promos={promoOffers.map(p => ({ ...p, ctaAction: () => navigate(p.ctaLink) }))} />
+          </section>
+        )}
 
         {/* Category Filter */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 lg:pt-12 pb-3 md:pb-4 lg:pb-6">
@@ -561,7 +461,7 @@ export function Home() {
 
           {/* Event Cards Carousel */}
           <div className="flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={upcomingRef}>
-            {upcomingEvents.map((event, index) => (
+            {getFilteredEvents(filterEvents(upcomingEvents)).map((event, index) => (
               <motion.div
                 key={index}
                 onClick={() => navigate(`/event/${event.id}`)}
@@ -660,7 +560,7 @@ export function Home() {
 
           {/* Live Event Cards with EventCard component */}
           <div className="flex gap-3 md:gap-4 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={liveStreamRef}>
-            {liveStreamingEvents.map((event, index) => (
+            {getFilteredEvents(filterEvents(liveStreamingEvents)).map((event, index) => (
               <div key={index} className="flex-shrink-0 w-[240px] sm:w-[260px] md:w-[280px]">
                 <EventCard {...event} />
               </div>
@@ -704,7 +604,7 @@ export function Home() {
           </div>
 
           <div className="flex gap-3 md:gap-4 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={freeEventsRef}>
-            {freeEvents.map((event, index) => (
+            {getFilteredEvents(filterEvents(freeEvents)).map((event, index) => (
               <div key={index} className="flex-shrink-0 w-[240px] sm:w-[260px] md:w-[280px]">
                 <EventCard {...event} />
               </div>
@@ -749,7 +649,7 @@ export function Home() {
 
           {/* Replay Cards Carousel */}
           <div className="flex gap-4 md:gap-5 lg:gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={replayRef}>
-            {replayEvents.map((event, index) => (
+            {getFilteredEvents(filterEvents(replayEvents)).map((event, index) => (
               <div key={index} className="flex-shrink-0">
                 <ReplayCard {...event} />
               </div>
@@ -758,86 +658,7 @@ export function Home() {
         </section>
       </div>
 
-      {/* Video Modal Popup */}
-      <AnimatePresence>
-        {videoModalOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/90 backdrop-blur-md z-50"
-              onClick={() => setVideoModalOpen(false)}
-            />
 
-            {/* Modal Content */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 50 }}
-              transition={{ duration: 0.3, type: "spring", damping: 25 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 lg:p-8 pointer-events-none"
-            >
-              <div className="relative w-full max-w-5xl bg-[#1a1a1a] rounded-xl overflow-hidden shadow-2xl pointer-events-auto">
-                {/* Close Button */}
-                <button
-                  onClick={() => setVideoModalOpen(false)}
-                  className="absolute top-4 right-4 z-10 w-10 h-10 md:w-12 md:h-12 bg-[#de0035] rounded-full flex items-center justify-center hover:bg-[#c5002f] transition-colors group"
-                  aria-label="Fermer"
-                >
-                  <X className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
-                </button>
-
-                {/* Video Player */}
-                <div className="relative w-full aspect-video bg-black">
-                  <video
-                    className="w-full h-full"
-                    controls
-                    autoPlay
-                    poster={slide?.image}
-                  >
-                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-                    Votre navigateur ne supporte pas la lecture de vidéos.
-                  </video>
-                </div>
-
-                {/* Video Info */}
-                <div className="p-4 md:p-6 lg:p-8">
-                  <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl md:text-2xl lg:text-3xl mb-2">
-                    {slide?.title}
-                  </h3>
-                  <p className="font-['DM_Sans',sans-serif] text-[#dfe1e4] text-sm md:text-base mb-4">
-                    {slide?.description}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-5" fill="none" viewBox="0 0 30 40">
-                        <g>
-                          <path d={svgPaths.p185cb180} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                          <path d={svgPaths.p188be600} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                        </g>
-                      </svg>
-                      <span className="font-['DM_Sans',sans-serif] text-white text-sm md:text-base">
-                        {slide?.location}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 31 34">
-                        <path d={svgPaths.p23bf7380} stroke="#DE0035" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" />
-                      </svg>
-                      <span className="font-['DM_Sans',sans-serif] text-white text-sm md:text-base">
-                        {slide?.date}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Custom scrollbar styles */}
       <style>{`

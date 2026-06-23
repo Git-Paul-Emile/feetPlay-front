@@ -31,6 +31,7 @@ interface CreatorAuthContextType {
     coverImage?: string | null;
     category?: string;
     channelName?: string;
+    channelSlug?: string;
   }) => Promise<Creator>;
 }
 

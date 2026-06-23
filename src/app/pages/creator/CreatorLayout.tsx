@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Link, useNavigate } from "react-router";
+import { Navigate, Outlet, Link, useNavigate, useLocation } from "react-router";
 import { motion } from "motion/react";
 import { LayoutDashboard, Video, Settings, LogOut, User } from "lucide-react";
 import { useCreatorAuth } from "../../contexts/CreatorAuthContext";
@@ -6,13 +6,14 @@ import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
 
 const navItems = [
   { to: "/creator/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/creator/videos", icon: Video, label: "Mes Vidéos" },
+  { to: "/creator/videos", icon: Video, label: "Mes Diffusions" },
   { to: "/creator/settings", icon: Settings, label: "Paramètres" },
 ];
 
 export function CreatorLayout() {
   const { isAuthenticated, isLoading, creator, logout } = useCreatorAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -41,7 +42,7 @@ export function CreatorLayout() {
             <span className="text-xl font-bold bg-gradient-to-r from-[#DE0035] to-[#CDFF71] bg-clip-text text-transparent">
               FéétiPlay
             </span>
-            <span className="text-xs text-gray-500 mt-1">Créateur</span>
+            <span className="text-xs text-gray-500 mt-1">Streamer</span>
           </Link>
         </div>
 
@@ -63,16 +64,23 @@ export function CreatorLayout() {
 
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map(({ to, icon: Icon, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors text-sm"
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </Link>
-          ))}
+          {navItems.map(({ to, icon: Icon, label }) => {
+            const active = location.pathname === to;
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  active
+                    ? "bg-[#DE0035]/15 text-white border border-[#DE0035]/30"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Logout */}

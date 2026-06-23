@@ -1,29 +1,37 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Users, Search, Trash2, Shield, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import AdminAPI, { type AdminUserItem } from '../../services/api/AdminAPI';
+import { Users, Search, Trash2, Shield, Eye, ChevronLeft, ChevronRight, UserCog, Plus } from 'lucide-react';
+import AdminAPI, { type AdminAccountItem, type AdminRole, type AdminUserItem } from '../../services/api/AdminAPI';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { firebaseClientErrorToUserMessage } from '../../utils/firebaseUserFacingError';
 
-const ROLES = ['viewer', 'premium', 'streamer', 'admin', 'super_admin'] as const;
+const ROLES = ['viewer', 'admin', 'super_admin'] as const;
 const ROLE_LABELS: Record<string, string> = {
-  viewer: 'Visiteur', premium: 'Premium', streamer: 'Streamer',
+  viewer: 'Viewer',
   admin: 'Admin', super_admin: 'Super Admin',
 };
 const ROLE_COLORS: Record<string, string> = {
   viewer: 'bg-white/10 text-white/70',
-  premium: 'bg-[#fcc434]/20 text-[#fcc434]',
-  streamer: 'bg-purple-500/20 text-purple-400',
   admin: 'bg-[#cdff71]/20 text-[#cdff71]',
   super_admin: 'bg-[#de0035]/20 text-[#de0035]',
 };
 
 const PAGE_SIZE = 20;
+const ADMIN_ROLES: AdminRole[] = ['super_admin', 'admin', 'finance', 'moderator', 'marketing'];
+const ADMIN_ROLE_LABELS: Record<AdminRole, string> = {
+  super_admin: 'Super Admin',
+  admin: 'Admin',
+  finance: 'Finance',
+  moderator: 'Moderateur',
+  marketing: 'Marketing',
+};
 
 export function UsersManagement() {
-  const { hasPermission } = useAdminAuth();
-  const canEdit   = hasPermission('manage_users');
+  const { user: currentAdmin, hasPermission } = useAdminAuth();
+  const canEdit   = hasPermission('manage_roles');
   const canDelete = hasPermission('manage_users');
+  const canManageAdmins = hasPermission('manage_admins');
+  const [activeTab, setActiveTab] = useState<'users' | 'admins'>('users');
 
   const [users, setUsers]         = useState<AdminUserItem[]>([]);
   const [total, setTotal]         = useState(0);
@@ -33,6 +41,15 @@ export function UsersManagement() {
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [admins, setAdmins] = useState<AdminAccountItem[]>([]);
+  const [adminsLoading, setAdminsLoading] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [adminForm, setAdminForm] = useState<{ name: string; email: string; password: string; role: AdminRole }>({
+    name: '',
+    email: '',
+    password: '',
+    role: 'admin',
+  });
 
   // Modale changement de rôle
   const [roleModal, setRoleModal] = useState<AdminUserItem | null>(null);
@@ -53,6 +70,15 @@ export function UsersManagement() {
   }, [search, roleFilter, page]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (activeTab !== 'admins' || !canManageAdmins) return;
+    setAdminsLoading(true);
+    setAdminError(null);
+    AdminAPI.getAdmins()
+      .then(setAdmins)
+      .catch(err => setAdminError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des administrateurs.')))
+      .finally(() => setAdminsLoading(false));
+  }, [activeTab, canManageAdmins]);
 
   // reset page on filter change
   useEffect(() => { setPage(0); }, [search, roleFilter]);
@@ -87,6 +113,49 @@ export function UsersManagement() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const createAdmin = async () => {
+    if (!adminForm.name.trim() || !adminForm.email.trim() || adminForm.password.length < 8) {
+      setAdminError('Nom, email et mot de passe de 8 caracteres minimum requis.');
+      return;
+    }
+    setActionLoading('create-admin');
+    setAdminError(null);
+    try {
+      const created = await AdminAPI.createAdmin(adminForm);
+      setAdmins(prev => [created, ...prev]);
+      setAdminForm({ name: '', email: '', password: '', role: 'admin' });
+    } catch (err) {
+      setAdminError(firebaseClientErrorToUserMessage(err, 'Impossible de creer cet administrateur.'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const updateAdminRole = async (admin: AdminAccountItem, role: AdminRole) => {
+    setActionLoading(admin.id);
+    try {
+      const updated = await AdminAPI.updateAdminRole(admin.id, role);
+      setAdmins(prev => prev.map(item => item.id === admin.id ? updated : item));
+    } catch (err) {
+      alert(firebaseClientErrorToUserMessage(err, 'Impossible de modifier ce role admin.'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const deleteAdmin = async (admin: AdminAccountItem) => {
+    if (!confirm(`Supprimer l'administrateur ${admin.name} ?`)) return;
+    setActionLoading(admin.id);
+    try {
+      await AdminAPI.deleteAdmin(admin.id);
+      setAdmins(prev => prev.filter(item => item.id !== admin.id));
+    } catch (err) {
+      alert(firebaseClientErrorToUserMessage(err, 'Impossible de supprimer cet administrateur.'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <div className="p-6 md:p-8">
       {/* Header */}
@@ -100,6 +169,85 @@ export function UsersManagement() {
           </p>
         </div>
       </div>
+
+      <div className="flex gap-2 mb-6 border-b border-white/10">
+        <button
+          onClick={() => setActiveTab('users')}
+          className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'users' ? 'border-[#cdff71] text-[#cdff71]' : 'border-transparent text-white/50 hover:text-white'}`}
+        >
+          Spectateurs
+        </button>
+        {canManageAdmins && (
+          <button
+            onClick={() => setActiveTab('admins')}
+            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'admins' ? 'border-[#cdff71] text-[#cdff71]' : 'border-transparent text-white/50 hover:text-white'}`}
+          >
+            Administrateurs
+          </button>
+        )}
+      </div>
+
+      {activeTab === 'admins' && canManageAdmins && (
+        <div className="space-y-6">
+          {adminError && <div className="rounded-xl border border-[#DE0035]/30 bg-[#DE0035]/10 px-4 py-3 text-sm text-white">{adminError}</div>}
+          <div className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[12px] p-5">
+            <h2 className="text-white font-semibold mb-4 flex items-center gap-2"><Plus className="w-4 h-4 text-[#cdff71]" /> Nouvel administrateur</h2>
+            <div className="grid md:grid-cols-5 gap-3">
+              <input value={adminForm.name} onChange={e => setAdminForm(p => ({ ...p, name: e.target.value }))} placeholder="Nom" className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white outline-none focus:border-[#cdff71]" />
+              <input value={adminForm.email} onChange={e => setAdminForm(p => ({ ...p, email: e.target.value }))} placeholder="Email" type="email" className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white outline-none focus:border-[#cdff71]" />
+              <input value={adminForm.password} onChange={e => setAdminForm(p => ({ ...p, password: e.target.value }))} placeholder="Mot de passe" type="password" className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white outline-none focus:border-[#cdff71]" />
+              <select value={adminForm.role} onChange={e => setAdminForm(p => ({ ...p, role: e.target.value as AdminRole }))} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white outline-none focus:border-[#cdff71]">
+                {ADMIN_ROLES.map(role => <option key={role} value={role}>{ADMIN_ROLE_LABELS[role]}</option>)}
+              </select>
+              <button onClick={createAdmin} disabled={actionLoading === 'create-admin'} className="bg-[#cdff71] hover:bg-[#cdff71]/90 text-black font-semibold rounded-lg px-4 py-2.5 disabled:opacity-40">
+                {actionLoading === 'create-admin' ? 'Creation...' : 'Creer'}
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[12px] overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-white/5 border-b border-white/10">
+                <tr>
+                  <th className="text-left px-6 py-4 text-white/80 text-sm">Admin</th>
+                  <th className="text-left px-6 py-4 text-white/80 text-sm">Role</th>
+                  <th className="text-left px-6 py-4 text-white/80 text-sm hidden md:table-cell">Cree le</th>
+                  <th className="text-right px-6 py-4 text-white/80 text-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminsLoading ? Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}><td colSpan={4} className="px-6 py-4"><div className="h-5 bg-white/5 rounded animate-pulse" /></td></tr>
+                )) : admins.map(admin => (
+                  <tr key={admin.id} className="border-b border-white/5 hover:bg-white/5">
+                    <td className="px-6 py-4">
+                      <p className="text-white text-sm font-semibold">{admin.name}</p>
+                      <p className="text-white/50 text-xs">{admin.email}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select value={admin.role} onChange={e => updateAdminRole(admin, e.target.value as AdminRole)} disabled={actionLoading === admin.id} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none">
+                        {ADMIN_ROLES.map(role => <option key={role} value={role}>{ADMIN_ROLE_LABELS[role]}</option>)}
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-white/60 text-sm hidden md:table-cell">{new Date(admin.createdAt).toLocaleDateString('fr-FR')}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end">
+                        <button onClick={() => deleteAdmin(admin)} disabled={admin.id === currentAdmin?.id || actionLoading === admin.id} className="p-2 bg-[#de0035]/10 hover:bg-[#de0035]/20 text-[#de0035] rounded-lg disabled:opacity-40">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!adminsLoading && admins.length === 0 && <div className="text-center py-12 text-white/50"><UserCog className="w-12 h-12 mx-auto mb-3 text-white/20" />Aucun administrateur</div>}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <>
 
       {/* Filtres */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -293,6 +441,8 @@ export function UsersManagement() {
             </div>
           </motion.div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

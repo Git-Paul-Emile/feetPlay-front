@@ -5,7 +5,7 @@ import type { StreamingEvent } from './EventsAPI';
 
 // Le token Firebase est injecté automatiquement par fetchWithApiFallback.
 async function adminFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetchWithApiFallback(`/api/admin${endpoint}`, options);
+  const res = await fetchWithApiFallback(`/api/admin${endpoint}`, { ...options, useAdminToken: true });
   const body = await res.json().catch(() => ({ message: 'Erreur serveur' }));
   if (!res.ok) throw new Error(body.message ?? 'Erreur serveur');
   return body.data as T;
@@ -36,9 +36,27 @@ export interface AdminUserItem {
   _count: { tickets: number; favorites: number; watchHistory: number };
 }
 
+export type AdminRole = 'super_admin' | 'admin' | 'finance' | 'moderator' | 'marketing';
+
+export interface AdminAccountItem {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  avatar: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminLoginResult {
+  admin: AdminAccountItem & { permissions: string[] };
+  accessToken: string;
+}
+
 export interface AdminEventItem {
   id: string;
   title: string;
+  description?: string;
   date: string;
   time: string;
   isLive: boolean;
@@ -48,6 +66,10 @@ export interface AdminEventItem {
   currency: string;
   viewerCount: number;
   image: string;
+  category?: string;
+  location?: string | null;
+  streamUrl?: string | null;
+  muxStreamId?: string | null;
   channel: { name: string };
   _count: { tickets: number };
 }
@@ -132,9 +154,62 @@ export interface SendNotificationInput {
   sentBy: string;
 }
 
+export interface FinanceReportMonth {
+  month: string;
+  revenue: number;
+  ticketCount: number;
+  freeCount: number;
+}
+
+export interface FinanceReportEvent {
+  eventId: string;
+  title: string;
+  category: string;
+  revenue: number;
+  ticketCount: number;
+}
+
+export interface FinanceReport {
+  months: FinanceReportMonth[];
+  topEvents: FinanceReportEvent[];
+}
+
+export interface TicketFilterParams {
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  limit?: number;
+  offset?: number;
+}
+
+
 // ── API methods ───────────────────────────────────────────────────────────
 
 const AdminAPI = {
+  async login(email: string, password: string): Promise<AdminLoginResult> {
+    const response = await fetchWithApiFallback('/admin/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+      useAdminToken: true,
+    });
+    const body = await response.json().catch(() => ({ message: 'Erreur serveur' }));
+    if (!response.ok) throw new Error(body.message ?? 'Erreur serveur');
+    return body.data as AdminLoginResult;
+  },
+
+  async logout(): Promise<void> {
+    await fetchWithApiFallback('/admin/auth/logout', { method: 'POST', useAdminToken: true }).catch(() => undefined);
+  },
+
+  async getMe(): Promise<AdminAccountItem & { permissions: string[] }> {
+    const response = await fetchWithApiFallback('/admin/auth/me', { useAdminToken: true });
+    const body = await response.json().catch(() => ({ message: 'Erreur serveur' }));
+    if (!response.ok) throw new Error(body.message ?? 'Erreur serveur');
+    return body.data as AdminAccountItem & { permissions: string[] };
+  },
+
   async getStats(): Promise<AdminStats> {
     return adminFetch<AdminStats>('/stats');
   },
@@ -145,6 +220,22 @@ const AdminAPI = {
 
   async getRecentTickets(limit = 20): Promise<AdminTicketItem[]> {
     return adminFetch<AdminTicketItem[]>(`/tickets/recent?limit=${limit}`);
+  },
+
+  async getAllTickets(params?: TicketFilterParams): Promise<{ tickets: AdminTicketItem[]; total: number; limit: number; offset: number }> {
+    const qs = new URLSearchParams();
+    if (params?.status)   qs.set('status',   params.status);
+    if (params?.dateFrom) qs.set('dateFrom', params.dateFrom);
+    if (params?.dateTo)   qs.set('dateTo',   params.dateTo);
+    if (params?.minPrice != null) qs.set('minPrice', String(params.minPrice));
+    if (params?.maxPrice != null) qs.set('maxPrice', String(params.maxPrice));
+    if (params?.limit)    qs.set('limit',    String(params.limit));
+    if (params?.offset)   qs.set('offset',   String(params.offset));
+    return adminFetch<{ tickets: AdminTicketItem[]; total: number; limit: number; offset: number }>(`/tickets?${qs}`);
+  },
+
+  async getFinanceReport(): Promise<FinanceReport> {
+    return adminFetch<FinanceReport>('/finance/report');
   },
 
   async getChannels(): Promise<AdminChannel[]> {
@@ -171,6 +262,28 @@ const AdminAPI = {
     await adminFetch(`/users/${userId}`, { method: 'DELETE' });
   },
 
+  async getAdmins(): Promise<AdminAccountItem[]> {
+    return adminFetch<AdminAccountItem[]>('/admins');
+  },
+
+  async createAdmin(data: { name: string; email: string; password: string; role: AdminRole; avatar?: string | null }): Promise<AdminAccountItem> {
+    return adminFetch<AdminAccountItem>('/admins', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateAdminRole(adminId: string, role: AdminRole): Promise<AdminAccountItem> {
+    return adminFetch<AdminAccountItem>(`/admins/${adminId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    });
+  },
+
+  async deleteAdmin(adminId: string): Promise<void> {
+    await adminFetch(`/admins/${adminId}`, { method: 'DELETE' });
+  },
+
   async createEvent(data: AdminEventCreateInput): Promise<StreamingEvent> {
     return adminFetch<StreamingEvent>('/events', {
       method: 'POST',
@@ -187,6 +300,37 @@ const AdminAPI = {
 
   async deleteEvent(eventId: string): Promise<void> {
     await adminFetch(`/events/${eventId}`, { method: 'DELETE' });
+  },
+
+  async createMuxLiveStream(data: { title?: string; eventId?: string }): Promise<{
+    muxStreamId: string;
+    streamKey: string;
+    playbackId: string;
+    rtmpUrl: string;
+    status: string;
+    linkedEventId: string | null;
+    hint: string;
+  }> {
+    return adminFetch('/mux/live-streams', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getMuxLiveStreamStatus(streamId: string): Promise<{ status: string; playbackId: string | null }> {
+    return adminFetch(`/mux/live-streams/${streamId}/status`);
+  },
+
+  async disableMuxLiveStream(streamId: string): Promise<void> {
+    await adminFetch(`/mux/live-streams/${streamId}/disable`, { method: 'POST' });
+  },
+
+  async hideEvent(eventId: string): Promise<void> {
+    await adminFetch(`/events/${eventId}/hide`, { method: 'POST' });
+  },
+
+  async flagEvent(eventId: string): Promise<void> {
+    await adminFetch(`/events/${eventId}/flag`, { method: 'POST' });
   },
 
   async getLogs(params?: { level?: string; search?: string; limit?: number; offset?: number }): Promise<{ logs: SystemLogItem[]; total: number }> {
@@ -221,6 +365,43 @@ const AdminAPI = {
 
   async deleteNotification(id: string): Promise<void> {
     await adminFetch(`/notifications/${id}`, { method: 'DELETE' });
+  },
+
+  async getSettings(): Promise<Record<string, string>> {
+    return adminFetch<Record<string, string>>('/settings');
+  },
+
+  async updateSettings(data: Record<string, string>): Promise<Record<string, string>> {
+    return adminFetch<Record<string, string>>('/settings', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getBackups(): Promise<Array<{ id: string; filename: string; size: number; status: string; createdAt: string }>> {
+    return adminFetch<Array<{ id: string; filename: string; size: number; status: string; createdAt: string }>>('/backups');
+  },
+
+  async createBackup(): Promise<any> {
+    return adminFetch<any>('/backups', { method: 'POST' });
+  },
+
+  async restoreBackup(id: string): Promise<void> {
+    await adminFetch(`/backups/${id}/restore`, { method: 'POST' });
+  },
+
+  async getMonitoring(): Promise<{
+    sentry: { enabled: boolean; dsn: string };
+    metrics: {
+      ram: { total: number; free: number; used: number; usagePercent: number };
+      cpu: { model: string; cores: number; loadAvg: number[] };
+      uptime: number;
+      platform: string;
+      arch: string;
+    };
+    errorLogs: Array<{ id: string; action: string; description: string; level: string; adminName: string; adminRole: string; createdAt: string }>;
+  }> {
+    return adminFetch<any>('/monitoring');
   },
 };
 

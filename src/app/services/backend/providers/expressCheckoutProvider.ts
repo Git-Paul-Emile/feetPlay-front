@@ -32,6 +32,19 @@ export const expressCheckoutProvider: CheckoutProvider = {
       });
       const body = await response.json().catch(() => ({}));
       paymentId = body?.data?.intent_id ?? paymentId;
+    } else if (!isFreeEvent && input.paymentMethod === "paystack") {
+      paymentProvider = "paystack";
+      const response = await legacyApiRaw("/payments/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: input.holderEmail,
+          amount: input.price ?? 0,
+          currency: input.currency,
+        }),
+      });
+      const body = await response.json().catch(() => ({}));
+      paymentId = body?.data?.reference ?? body?.data?.transaction_id ?? paymentId;
     }
 
     const confirmResponse = await legacyApiRaw("/payments/confirm", {

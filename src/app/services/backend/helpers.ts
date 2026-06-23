@@ -224,6 +224,7 @@ export function normalizeStreamingEvent(event: Record<string, any>) {
     hasTicket: Boolean(event.hasTicket),
     streamUrl: event.streamUrl ?? null,
     location: event.location ?? null,
+    country: event.country ?? null,
     createdAt: toIsoDate(event.createdAt),
     isFavorite: event.isFavorite,
     watchProgress: event.watchProgress,

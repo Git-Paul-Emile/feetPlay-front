@@ -44,7 +44,7 @@ export function Createurs() {
       category: c.category,
       followers: c.subscriberCount,
       rating: 4.8,
-      image: c.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop',
+      image: c.avatar || '/images/default-avatar.png',
     })))).catch(() => {});
   }, []);
 

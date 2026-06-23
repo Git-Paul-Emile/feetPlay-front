@@ -3,9 +3,6 @@ import { Upload, X, Loader2 } from 'lucide-react';
 import { fetchWithApiFallback } from '../utils/serviceConfig';
 import { firebaseClientErrorToUserMessage } from '../utils/firebaseUserFacingError';
 
-const ADMIN_TOKEN_KEY = 'feetiplay_admin_token';
-const USER_TOKEN_KEY  = 'feetiplay_token';
-
 interface Props {
   value: string;
   onChange: (url: string) => void;
@@ -27,13 +24,11 @@ export function ImageUpload({ value, onChange, folder = 'feetiplay', label = 'Im
     setError('');
     setUploading(true);
     try {
-      const token = localStorage.getItem(ADMIN_TOKEN_KEY) || localStorage.getItem(USER_TOKEN_KEY);
       const formData = new FormData();
       formData.append('image', file);
 
       const res = await fetchWithApiFallback(`/upload/image?folder=${encodeURIComponent(folder)}`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
       const body = await res.json().catch(() => ({ message: 'Erreur serveur' }));

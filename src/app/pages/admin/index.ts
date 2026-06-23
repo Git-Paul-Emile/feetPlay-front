@@ -4,3 +4,4 @@ export { AdminLayout } from './AdminLayout';
 export { AdminDashboard } from './AdminDashboard';
 export { EventsManagement } from './EventsManagement';
 export { SystemLogs } from './SystemLogs';
+export { ModerationPage } from './ModerationPage';

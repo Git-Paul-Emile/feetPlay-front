@@ -1,13 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { SearchBar } from '../components/SearchBar';
 import { SortFilter, SortOption } from '../components/SortFilter';
+import { sortEvents } from '../utils/sortEvents';
 import { CalendarView } from '../components/CalendarView';
 import { TimelineView } from '../components/TimelineView';
 import { CalendarEventCard, CalendarEventCardProps } from '../components/CalendarEventCard';
 import { EventPlayerModal } from '../components/EventPlayerModal';
 import { ReplayPlayerModal } from '../components/ReplayPlayerModal';
 import { Calendar, List, Clock } from 'lucide-react';
+import EventsAPI from '../services/api/EventsAPI';
+import { useLocationContext } from '../contexts/LocationContext';
 
 // Import event images
 import imgCardImg from "figma:asset/bfa6be3c8aeb7f6fbc82814faf0255da53e42d8a.png";
@@ -241,12 +244,35 @@ export function Agenda() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventCardProps | null>(null);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [isReplayOpen, setIsReplayOpen] = useState(false);
+  const [allEvents, setAllEvents] = useState<(CalendarEventCardProps & { fullDate: string })[]>(generateEvents());
+  const { filterEvents } = useLocationContext();
 
-  const allEvents = generateEvents();
+  useEffect(() => {
+    EventsAPI.getAll()
+      .then(events => {
+        if (events.length === 0) return;
+        setAllEvents(events.map(e => ({
+          id: e.id,
+          image: e.image || imgCardImg,
+          title: e.title,
+          location: e.location ?? e.channelName,
+          time: e.time,
+          duration: e.duration,
+          category: e.category,
+          isLive: e.isLive,
+          isFree: e.isFree,
+          price: e.price,
+          country: e.country,
+          fullDate: e.date.includes('-') ? e.date : `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${e.date.replace(/\./g, '-')}`,
+        })));
+      })
+      .catch(() => {});
+  }, []);
 
   // Filter events for selected date
   const getEventsForDate = (date: Date) => {
-    return allEvents.filter(event => {
+    const eventsToFilter = filterEvents(allEvents);
+    return eventsToFilter.filter(event => {
       const eventDate = new Date(event.fullDate);
       return eventDate.toDateString() === date.toDateString();
     });
@@ -254,7 +280,7 @@ export function Agenda() {
 
   // Get all filtered events
   const getFilteredEvents = () => {
-    let filtered = allEvents;
+    let filtered = filterEvents(allEvents);
 
     if (searchTerm) {
       filtered = filtered.filter(event => 
@@ -264,16 +290,13 @@ export function Agenda() {
       );
     }
 
-    // Sort by date
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.fullDate + 'T' + a.time.replace('h', ':'));
-      const dateB = new Date(b.fullDate + 'T' + b.time.replace('h', ':'));
-      return sortOption === 'date-asc' 
-        ? dateA.getTime() - dateB.getTime() 
-        : dateB.getTime() - dateA.getTime();
-    });
-
-    return filtered;
+    // Sort
+    const mappedForSort = filtered.map(e => ({
+      ...e,
+      date: `${e.fullDate} ${e.time.replace('h', ':')}`
+    }));
+    
+    return sortEvents(mappedForSort, sortOption) as typeof filtered;
   };
 
   const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -396,7 +419,7 @@ export function Agenda() {
                 onDateSelect={setSelectedDate}
                 onMonthChange={handleMonthChange}
                 selectedDate={selectedDate}
-                events={allEvents}
+                events={filterEvents(allEvents)}
               />
             </div>
 

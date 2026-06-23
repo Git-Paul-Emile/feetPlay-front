@@ -218,4 +218,9 @@ export const firebaseAuthProvider: AuthProvider = {
     const user = auth.currentUser;
     return user ? getProfile(user.uid) : null;
   },
+
+  async loginFromFeeti2SSO(token: string) {
+    const AuthAPI = (await import("../../api/AuthAPI")).default;
+    return AuthAPI.ssoFeeti2(token);
+  },
 };

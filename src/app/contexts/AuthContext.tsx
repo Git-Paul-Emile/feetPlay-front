@@ -22,7 +22,7 @@ export interface AppUser {
   email: string;
   phone?: string | null;
   avatar?: string | null;
-  role: "viewer" | "premium" | "streamer" | "admin" | "super_admin";
+  role: "viewer" | "admin" | "super_admin";
   subscriptionPlan?: "free" | "basic" | "premium" | "vip";
 }
 
@@ -36,6 +36,7 @@ interface AuthContextType {
   startGoogleAuth: () => Promise<GoogleAuthStartResult>;
   completeGoogleRegistration: (data: GoogleCompletionData) => Promise<AppUser>;
   logout: () => Promise<void>;
+  loginFromFeeti2SSO: (token: string) => Promise<AppUser>;
   updateProfile: (data: UpdateProfileData) => Promise<AppUser>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
@@ -120,6 +121,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const loginFromFeeti2SSO = useCallback(async (token: string): Promise<AppUser> => {
+    const authUser = await backendGateway.auth.loginFromFeeti2SSO(token);
+    const appUser = mapToAppUser(authUser);
+    setUser(appUser);
+    return appUser;
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -132,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         startGoogleAuth,
         completeGoogleRegistration,
         logout,
+        loginFromFeeti2SSO,
         updateProfile,
         changePassword,
         deleteAccount,

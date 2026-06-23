@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CreditCard, Smartphone, CheckCircle2 } from 'lucide-react';
 
+import StreamingAPI from '../services/api/StreamingAPI';
+import { backendGateway } from '../services/backend/gateway';
+
 // Import SVG paths for the button
 import svgPaths from '../../imports/svg-pirafvy7od';
 
@@ -33,10 +36,11 @@ interface PurchaseModalProps {
     time?: string;
     reference: string;
     price?: number;
+    eventSource?: 'feetiplay' | 'feeti2';
   };
 }
 
-type PaymentMethod = 'mobile-money' | 'card' | null;
+type PaymentMethod = 'mobile-money' | 'card' | 'paystack' | null;
 type PurchaseStep = 'info' | 'payment' | 'processing';
 
 export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: PurchaseModalProps) {
@@ -57,41 +61,91 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
 
   const handlePaymentSubmit = async () => {
     const isFreeEvent = !event.price || event.price === 0;
-    
-    // For free events, no payment method needed
-    // For paid events, payment method is required
-    if (isFreeEvent || paymentMethod) {
-      setLoading(true);
-      setStep('processing');
+    if (!isFreeEvent && !paymentMethod) return;
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    setLoading(true);
+    setStep('processing');
+
+    try {
+      let ticket;
+
+      if (isFreeEvent) {
+        ticket = await StreamingAPI.purchaseTicket({
+          eventId: event.id,
+          eventTitle: event.title,
+          eventDate: event.date,
+          eventTime: event.time || '15:05',
+          channelName: event.location,
+          holderName: formData.userName,
+          holderEmail: formData.userEmail,
+          price: 0,
+          currency: 'FCFA',
+        });
+      } else {
+        await backendGateway.checkout.purchaseAccess({
+          eventId: event.id,
+          eventSource: event.eventSource ?? 'feetiplay',
+          eventTitle: event.title,
+          eventDate: event.date,
+          eventTime: event.time || '15:05',
+          price: event.price,
+          currency: 'FCFA',
+          holderName: formData.userName,
+          holderEmail: formData.userEmail,
+          holderPhone: formData.userPhone,
+          paymentMethod,
+          mobileOperator: 'mtn',
+        });
+        const tickets = await StreamingAPI.getMyTickets('me');
+        ticket = tickets.find(t => t.eventId === event.id) ?? tickets[0];
+        if (!ticket) {
+          ticket = await StreamingAPI.purchaseTicket({
+            eventId: event.id,
+            eventTitle: event.title,
+            eventDate: event.date,
+            eventTime: event.time || '15:05',
+            channelName: event.location,
+            holderName: formData.userName,
+            holderEmail: formData.userEmail,
+            price: event.price ?? 0,
+            currency: 'FCFA',
+          });
+        }
+      }
 
       const purchaseData: PurchaseData = {
-        eventId: event.id,
-        eventTitle: event.title,
+        eventId: ticket.eventId,
+        eventTitle: ticket.eventTitle,
         eventImage: event.image,
         eventLocation: event.location,
-        eventDate: event.date,
-        eventTime: event.time || '15:05',
+        eventDate: ticket.eventDate,
+        eventTime: ticket.eventTime,
         eventReference: event.reference,
-        eventPrice: event.price,
-        ...formData,
+        eventPrice: ticket.price,
+        userName: formData.userName,
+        userEmail: formData.userEmail,
+        userPhone: formData.userPhone,
+        userCity: formData.userCity,
       };
 
       onPurchaseComplete(purchaseData);
+    } catch (err: any) {
+      console.error(err);
+      setStep('payment');
       setLoading(false);
-      
-      // Reset for next use
-      setStep('info');
-      setPaymentMethod(null);
-      setFormData({
-        userName: '',
-        userEmail: '',
-        userPhone: '',
-        userCity: '',
-      });
+      window.alert(err?.message || 'Erreur lors de l’achat du ticket');
+      return;
     }
+
+    setLoading(false);
+    setStep('info');
+    setPaymentMethod(null);
+    setFormData({
+      userName: '',
+      userEmail: '',
+      userPhone: '',
+      userCity: '',
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -451,6 +505,33 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
                             <p className="font-['Inter',sans-serif] text-white/60 text-xs">Visa, Mastercard</p>
                           </div>
                           {paymentMethod === 'card' && (
+                            <CheckCircle2 className="w-6 h-6 text-[#cdff71]" />
+                          )}
+                        </motion.button>
+
+                        <motion.button
+                          type="button"
+                          onClick={() => setPaymentMethod('paystack')}
+                          className={`w-full bg-[rgba(255,255,255,0.1)] border rounded-[8px] p-4 flex items-center gap-4 transition-all ${
+                            paymentMethod === 'paystack'
+                              ? 'border-[#cdff71] bg-[rgba(205,255,113,0.1)]'
+                              : 'border-[#62656a] hover:border-white/40'
+                          }`}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                        >
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                            paymentMethod === 'paystack' ? 'bg-[#cdff71]' : 'bg-white/10'
+                          }`}>
+                            <CreditCard className={`w-6 h-6 ${
+                              paymentMethod === 'paystack' ? 'text-black' : 'text-white'
+                            }`} />
+                          </div>
+                          <div className="flex-1 text-left">
+                            <p className="font-['Inter',sans-serif] font-medium text-white text-base">Paystack</p>
+                            <p className="font-['Inter',sans-serif] text-white/60 text-xs">Carte, mobile money et paiement local</p>
+                          </div>
+                          {paymentMethod === 'paystack' && (
                             <CheckCircle2 className="w-6 h-6 text-[#cdff71]" />
                           )}
                         </motion.button>

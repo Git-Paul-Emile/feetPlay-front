@@ -6,15 +6,22 @@ import { ReplayBanner } from '../components/ReplayBanner';
 import { useState, useRef, useEffect } from 'react';
 import EventsAPI from '../services/api/EventsAPI';
 import { motion } from 'motion/react';
+import { LayoutGrid } from 'lucide-react';
 import categorySvgPaths from "../../imports/svg-ckb5lqxig6";
 import svgPaths from "../../imports/svg-z30khrsoqy";
+import { useLocationContext } from '../contexts/LocationContext';
 
 
 // Categories identiques à la page d'accueil
 const categories = [
   { 
-    name: 'Cinema', 
+    name: 'Tous', 
     active: true,
+    icon: <LayoutGrid className="w-full h-full text-[#000441] stroke-[1.5]" />
+  },
+  { 
+    name: 'Cinema', 
+    active: false,
     icon: (
       <svg className="w-full h-full" fill="none" viewBox="0 0 24 24">
         <path d={categorySvgPaths.p1adf5980} stroke="#000441" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.3" />
@@ -139,7 +146,7 @@ const categories = [
 ];
 
 
-type EventCardData = { id?: string; image: string; title: string; location: string; date: string; category: string; isLive?: boolean; isFree?: boolean; price?: number; hasStreaming?: boolean };
+type EventCardData = { id?: string; image: string; title: string; location: string; country?: string | null; date: string; category: string; isLive?: boolean; isFree?: boolean; price?: number; hasStreaming?: boolean };
 
 export function Live() {
   const [sortOption, setSortOption] = useState<SortOption>('date-asc');
@@ -149,6 +156,20 @@ export function Live() {
   const [upcomingEvents, setUpcomingEvents] = useState<EventCardData[]>([]);
   const [currentMonthEvents, setCurrentMonthEvents] = useState<EventCardData[]>([]);
   const [nextMonthEvents, setNextMonthEvents] = useState<EventCardData[]>([]);
+  
+  const { filterEvents } = useLocationContext();
+
+  const getFilteredEvents = (events: any[]) => {
+    let filtered = filterEvents(events);
+    if (searchTerm) {
+      filtered = filtered.filter(e => e.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    if (activeCategory > 0) {
+      const catName = categories[activeCategory].name;
+      filtered = filtered.filter(e => e.category?.toLowerCase() === catName.toLowerCase());
+    }
+    return sortEvents(filtered, sortOption);
+  };
 
   useEffect(() => {
     EventsAPI.getLive().then(events => setUpcomingEvents(events.slice(0, 5).map(e => ({
@@ -156,6 +177,7 @@ export function Live() {
       image: e.image,
       title: e.title,
       location: e.location ?? '',
+      country: e.country ?? null,
       date: e.time || e.date,
       category: e.category,
       isLive: true,
@@ -170,6 +192,7 @@ export function Live() {
         image: e.image,
         title: e.title,
         location: e.location ?? '',
+        country: e.country ?? null,
         date: e.time || e.date,
         category: e.category,
         isLive: false,
@@ -275,7 +298,7 @@ export function Live() {
             </div>
           </div>
           <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={upcomingRef}>
-            {sortEvents(upcomingEvents, sortOption).map((event, index) => (
+            {getFilteredEvents(upcomingEvents).map((event, index) => (
               <div key={index} className="flex-shrink-0 w-[240px] sm:w-[260px] md:w-[280px]">
                 <EventCard {...event} />
               </div>
@@ -313,7 +336,7 @@ export function Live() {
             </div>
           </div>
           <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={currentMonthRef}>
-            {sortEvents(currentMonthEvents, sortOption).map((event, index) => (
+            {getFilteredEvents(currentMonthEvents).map((event, index) => (
               <div key={index} className="flex-shrink-0 w-[240px] sm:w-[260px] md:w-[280px]">
                 <EventCard {...event} />
               </div>
@@ -351,7 +374,7 @@ export function Live() {
             </div>
           </div>
           <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth" ref={nextMonthRef}>
-            {sortEvents(nextMonthEvents, sortOption).map((event, index) => (
+            {getFilteredEvents(nextMonthEvents).map((event, index) => (
               <div key={index} className="flex-shrink-0 w-[240px] sm:w-[260px] md:w-[280px]">
                 <EventCard {...event} />
               </div>

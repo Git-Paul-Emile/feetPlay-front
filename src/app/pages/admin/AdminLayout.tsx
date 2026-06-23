@@ -13,7 +13,9 @@ import {
   Menu,
   X,
   ShieldCheck,
+  ShieldAlert,
   Wallet,
+  Activity,
 } from 'lucide-react';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { useState } from 'react';
@@ -57,7 +59,7 @@ export function AdminLayout() {
       name: 'Utilisateurs',
       icon: Users,
       path: '/admin/users',
-      permission: 'manage_users',
+      permission: 'view_users',
     },
     {
       name: 'CRM & Analytics',
@@ -84,10 +86,22 @@ export function AdminLayout() {
       permission: 'view_logs',
     },
     {
+      name: 'Modération',
+      icon: ShieldAlert,
+      path: '/admin/moderation',
+      permission: 'moderate_content',
+    },
+    {
+      name: 'Streaming Analytics',
+      icon: Activity,
+      path: '/admin/analytics/streaming',
+      permission: 'view_events', // Or view_streaming, but view_events is in admin role and protects analytics too implicitly. Wait, let's use view_events or view_dashboard to be safe. Let's use view_events.
+    },
+    {
       name: 'Paramètres',
       icon: Settings,
       path: '/admin/settings',
-      permission: 'manage_settings',
+      permission: 'view_settings',
     },
   ];
 
@@ -96,9 +110,9 @@ export function AdminLayout() {
   const roleColors: Record<string, string> = {
     super_admin: 'text-[#de0035]',
     admin: 'text-[#cdff71]',
-    moderator: 'text-[#fcc434]',
     finance: 'text-blue-400',
-    marketing: 'text-purple-400',
+    moderator: 'text-orange-400',
+    marketing: 'text-pink-400',
   };
 
   return (
