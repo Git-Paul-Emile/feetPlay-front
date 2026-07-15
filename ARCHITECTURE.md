@@ -33,7 +33,7 @@
 └─────────────────────────────────────────────────────────────────┘
                               ↕ API REST / GraphQL
 ┌─────────────────────────────────────────────────────────────────┐
-│                      BACKEND (Supabase / Node)                   │
+│                    BACKEND (Express + Prisma/PostgreSQL)         │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
@@ -280,21 +280,21 @@ feeti-play/
 
 ```sql
 ┌──────────────────────────────────────────┐
-│               auth.users                  │
-│  (Supabase Auth - gestion native)        │
+│               Firebase Auth               │
+│  (authentification uniquement — email/   │
+│   mot de passe + Google OAuth)           │
 ├──────────────────────────────────────────┤
-│  id              UUID PRIMARY KEY         │
+│  uid             STRING (Firebase UID)    │
 │  email           TEXT UNIQUE              │
-│  encrypted_pwd   TEXT                     │
-│  created_at      TIMESTAMP                │
+│  (mot de passe géré par Firebase)         │
 └──────────────────┬───────────────────────┘
                    │
-                   │ 1:1
+                   │ 1:1 (via firebaseUid)
                    ↓
 ┌──────────────────────────────────────────┐
-│            user_profiles                  │
-├──────────────────────────────────────��───┤
-│  id              UUID → auth.users(id)    │
+│         User (table Prisma/PostgreSQL)    │
+├──────────────────────────────────────────┤
+│  id              UUID → référence firebaseUid │
 │  role            TEXT (super_admin...)    │
 │  full_name       TEXT                     │
 │  avatar_url      TEXT                     │
@@ -395,39 +395,9 @@ feeti-play/
 
 ---
 
-## 🔒 Row Level Security (RLS)
+## 🔒 Contrôle d'accès par rôle
 
-```sql
--- Exemple : events table
-
--- Super Admin : Tout faire
-CREATE POLICY "super_admin_all"
-  ON events FOR ALL
-  USING (
-    auth.jwt() ->> 'role' = 'super_admin'
-  );
-
--- Admin/Moderator : CRUD
-CREATE POLICY "admin_crud"
-  ON events FOR ALL
-  USING (
-    auth.jwt() ->> 'role' IN ('admin', 'moderator')
-  );
-
--- Finance : Read only
-CREATE POLICY "finance_read"
-  ON events FOR SELECT
-  USING (
-    auth.jwt() ->> 'role' = 'finance'
-  );
-
--- Marketing : Read only
-CREATE POLICY "marketing_read"
-  ON events FOR SELECT
-  USING (
-    auth.jwt() ->> 'role' = 'marketing'
-  );
-```
+Il n'y a pas de Row Level Security (RLS) au niveau de la base PostgreSQL — ce mécanisme n'a jamais été implémenté. Le contrôle d'accès par rôle (`super_admin`, `admin`, `moderator`, `finance`, `marketing`, ...) est appliqué au niveau applicatif, via les middlewares Express qui vérifient le rôle porté par le JWT interne avant d'exécuter les requêtes Prisma correspondantes (voir `back/src/middlewares/`).
 
 ---
 
@@ -528,8 +498,8 @@ CREATE POLICY "marketing_read"
 │           LOCAL (Development)            │
 ├─────────────────────────────────────────┤
 │  URL: http://localhost:5173/admin       │
-│  DB:  Local PostgreSQL / Supabase local │
-│  Auth: Mock users (localStorage)        │
+│  DB:  PostgreSQL local (Prisma)         │
+│  Auth: Firebase Auth (émulateur/projet) │
 │  Logs: Console + localStorage           │
 └─────────────────────────────────────────┘
 
@@ -537,8 +507,8 @@ CREATE POLICY "marketing_read"
 │           STAGING (Pre-prod)             │
 ├─────────────────────────────────────────┤
 │  URL: https://staging-admin.feetiplay.com│
-│  DB:  Supabase staging project          │
-│  Auth: Real Supabase Auth                │
+│  DB:  PostgreSQL staging (hébergeur au choix)│
+│  Auth: Firebase Auth (projet "feetiplay")│
 │  Logs: Sentry (dev mode)                 │
 └─────────────────────────────────────────┘
 
@@ -546,8 +516,8 @@ CREATE POLICY "marketing_read"
 │           PRODUCTION                     │
 ├─────────────────────────────────────────┤
 │  URL: https://admin.feetiplay.com       │
-│  DB:  Supabase production               │
-│  Auth: Supabase Auth + 2FA              │
+│  DB:  PostgreSQL production (Render)    │
+│  Auth: Firebase Auth (projet "feetiplay")│
 │  Logs: Sentry + Datadog                 │
 │  CDN: Cloudflare                        │
 │  Monitoring: Full observability         │
@@ -569,7 +539,7 @@ CREATE POLICY "marketing_read"
 | **API** | Input validation (Zod) | 🚧 | P0 |
 | **API** | SQL Injection prevention | 🚧 | P0 |
 | **API** | CORS strict | 🚧 | P0 |
-| **DB** | Row Level Security (RLS) | 🚧 | P0 |
+| **DB** | Contrôle d'accès applicatif (middlewares, pas de RLS) | ✅ | P0 |
 | **DB** | Encryption at rest | 🚧 | P0 |
 | **DB** | Daily backups | 🚧 | P0 |
 | **Logs** | Audit trail complet | ✅ | P0 |
@@ -602,9 +572,8 @@ CREATE POLICY "marketing_read"
 - [x] Frontend dashboard (React + TypeScript)
 - [x] Système d'auth frontend (localStorage)
 - [x] Pages principales (Dashboard, Events, Logs)
-- [ ] Intégration Supabase
-- [ ] Authentication backend (JWT)
-- [ ] RLS policies
+- [x] Backend Express + Prisma/PostgreSQL (`back/`)
+- [x] Authentification Firebase Auth + JWT interne (access/refresh token)
 
 ### Q2 2025 (Avril-Juin)
 - [ ] Gestion utilisateurs complète

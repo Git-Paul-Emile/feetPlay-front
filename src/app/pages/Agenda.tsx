@@ -296,7 +296,7 @@ export function Agenda() {
       date: `${e.fullDate} ${e.time.replace('h', ':')}`
     }));
     
-    return sortEvents(mappedForSort, sortOption) as typeof filtered;
+    return sortEvents(mappedForSort, sortOption);
   };
 
   const handleMonthChange = (direction: 'prev' | 'next') => {

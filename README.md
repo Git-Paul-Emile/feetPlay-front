@@ -2,15 +2,15 @@
 
 ## ✅ VERSION ACTUELLE
 
-**Version Simple** - Sans système créateur ni abonnement
+Le système Créateur/Abonnement est entièrement implémenté (chaînes créateurs, plans payants, abonnements, vidéos — voir `back/src/routes/creator.routes.ts` et `front/src/app/pages/creator/*`).
 
 Cette version inclut :
 - ✅ Pages publiques (Home, Live, Replay, Chaînes, Agenda, Favoris)
 - ✅ Dashboard Administratif complet (5 rôles)
 - ✅ Système de favoris
 - ✅ Gestion d'événements
-- ❌ Pas de système créateur
-- ❌ Pas de système d'abonnement
+- ✅ Système créateur (chaînes, vidéos, dashboard créateur)
+- ✅ Système d'abonnement (plans payants, paiement en simulation)
 
 ---
 
@@ -30,7 +30,7 @@ Cette version inclut :
    Password : Super@123
    ```
 
-3. **Chaînes (version simple)**
+3. **Chaînes**
    ```
    http://localhost:5173/chaines
    ```
@@ -46,7 +46,7 @@ Cette version inclut :
 | Accueil | `/` | Page d'accueil avec hero et événements |
 | Live | `/live` | Événements en direct |
 | Replay | `/replay` | Replays disponibles |
-| Chaînes | `/chaines` | Liste des chaînes (sans abonnement) |
+| Chaînes | `/chaines` | Liste des chaînes, avec abonnement créateur |
 | Agenda | `/agenda` | Calendrier des événements |
 | Favoris | `/favorites` | Événements favoris |
 | Détail | `/event/:id` | Détail d'un événement |
@@ -123,21 +123,23 @@ Cette version inclut :
 
 ---
 
-## 🗑️ CE QUI A ÉTÉ SUPPRIMÉ
+## ✅ SYSTÈME CRÉATEUR & ABONNEMENT (implémenté)
+
+Après une phase de retrait temporaire (voir historique dans [RESTAURATION_COMPLETE.md](./RESTAURATION_COMPLETE.md)), le système créateur et abonnement est aujourd'hui pleinement implémenté :
 
 **Système Créateur** :
-- ❌ Contexte CreatorAuthContext
-- ❌ Pages créateur (/creator/*)
-- ❌ Composants CreatorCard, CreatorCarousel
-- ❌ Dashboard créateur
+- ✅ Pages créateur (`front/src/app/pages/creator/*`)
+- ✅ Dashboard créateur
+- ✅ Modèles Prisma `Creator`, `CreatorVideo` (`back/prisma/schema.prisma`)
+- ✅ Routes API `back/src/routes/creator.routes.ts`
 
 **Système Abonnement** :
-- ❌ Contexte SubscriptionContext
-- ❌ Composant SubscriptionModal
-- ❌ Vérification d'accès
-- ❌ Plans de paiement
+- ✅ Modal d'abonnement
+- ✅ Vérification d'accès
+- ✅ Plans de paiement (`CreatorPlan`, `CreatorSubscription`)
+- ✅ Paiement en simulation intentionnelle (harmonisée avec FeetiTicketWeb)
 
-**Voir** : [RESTAURATION_COMPLETE.md](./RESTAURATION_COMPLETE.md) pour les détails
+**Voir** : [RESTAURATION_COMPLETE.md](./RESTAURATION_COMPLETE.md) pour l'historique de cette restauration
 
 ---
 
@@ -178,8 +180,8 @@ Cette version inclut :
 ### Test 3 : Chaînes
 ```bash
 1. http://localhost:5173/chaines
-2. ✅ Liste simple des chaînes
-3. ✅ Pas de modal d'abonnement
+2. ✅ Liste des chaînes
+3. ✅ Modal d'abonnement créateur disponible
 ```
 
 ---
@@ -187,17 +189,12 @@ Cette version inclut :
 ## 🚀 PROCHAINES ÉTAPES
 
 ### Option 1 : Développer l'existant
-- Implémenter les 5 pages placeholder admin
+- Implémenter les pages placeholder admin restantes
 - Ajouter plus d'événements
 - Améliorer le système de favoris
-- Intégrer un backend (Supabase)
+- Intégrer les paiements réels (Stripe/Mobile Money/Paystack — actuellement en simulation intentionnelle)
 
-### Option 2 : Réimplémenter le créateur
-- Version simple (juste upload)
-- Version complète (avec abonnement)
-- Système de revenus
-
-### Option 3 : Nouvelles fonctionnalités
+### Option 2 : Nouvelles fonctionnalités
 - Chat en direct
 - Notifications push
 - Système de paris
@@ -213,40 +210,38 @@ Cette version inclut :
 ✅ Pages publiques (9 pages)
 ✅ Dashboard admin (3 pages + 5 placeholders)
 ✅ Système de favoris
-✅ Authentification admin (5 rôles)
+✅ Authentification Firebase Auth (email/password + Google) + rôles admin
 ✅ Protection des routes admin
 ✅ Gestion d'événements (CRUD)
+✅ Système créateur (chaînes, vidéos, dashboard créateur)
+✅ Système d'abonnement (plans payants, paiement en simulation)
 ✅ Logs système
 ✅ Design responsive
 ✅ Animations fluides
+✅ Backend Express + Prisma/PostgreSQL connecté
 ```
 
 ---
 
-## ❌ CE QUI N'EXISTE PAS
+## ⚠️ EN SIMULATION INTENTIONNELLE
 
 ```
-❌ Système créateur
-❌ Système d'abonnement
-❌ Upload vidéos
-❌ Paiements
-❌ Backend connecté
-❌ Base de données réelle
+⚠️ Paiements (Stripe/Mobile Money/Paystack) — simulation harmonisée avec FeetiTicketWeb,
+   intégration réelle prévue plus tard
 ```
-
-**Tout est en localStorage (données temporaires)**
 
 ---
 
 ## 🎯 RÉSUMÉ
 
-**FEETI PLAY - Version Simple**
+**FEETI PLAY**
 
 Une plateforme de streaming sportif avec :
 - Interface moderne et responsive
 - Dashboard admin complet
 - Gestion d'événements
 - Système de favoris
+- Système créateur et abonnement
 
 **Sans** :
 - Système créateur

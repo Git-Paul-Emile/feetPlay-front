@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { X, CreditCard, Smartphone, DollarSign, Check, AlertCircle } from 'lucide-react';
+import { X, CreditCard, Smartphone, Check, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SubscriptionPlan } from '../types/subscription';
+import { legacyApiRaw } from '../services/backend/legacyApi';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   plan: SubscriptionPlan;
-  onSuccess: (paymentMethod: string) => Promise<void>;
+  onSuccess: (payment: { provider: 'stripe' | 'mobile_money'; paymentId: string }) => Promise<void>;
 }
 
-type PaymentMethod = 'mobile_money' | 'card' | 'bank_transfer';
+// Seules les méthodes réellement supportées par le moteur de simulation
+// partagé (payment.service.ts côté feeti2) sont proposées ici — pas de
+// virement bancaire, qui n'a jamais été implémenté nulle part dans l'écosystème.
+type PaymentMethod = 'mobile_money' | 'card';
 type PaymentStep = 'method' | 'details' | 'processing' | 'success' | 'error';
 
 export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalProps) {
@@ -24,7 +28,6 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
     expiryDate: '',
     cvv: '',
     phoneNumber: '',
-    bankAccount: '',
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -36,15 +39,35 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
     setError('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let paymentId: string;
 
-      const random = Math.random();
-      if (random < 0.9) {
-        await onSuccess(paymentMethod);
-        setStep('success');
+      if (paymentMethod === 'mobile_money') {
+        const response = await legacyApiRaw('/payments/mobile-money/initialize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: formData.phoneNumber,
+            provider: 'mtn',
+            amount: plan.price,
+            currency: plan.currency,
+          }),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body?.message ?? 'Échec de l\'initialisation du paiement');
+        paymentId = body?.data?.transaction_id;
       } else {
-        throw new Error('Le paiement a échoué. Veuillez réessayer.');
+        const response = await legacyApiRaw('/payments/stripe/create-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: plan.price, currency: plan.currency }),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body?.message ?? 'Échec de l\'initialisation du paiement');
+        paymentId = body?.data?.intent_id;
       }
+
+      await onSuccess({ provider: paymentMethod === 'mobile_money' ? 'mobile_money' : 'stripe', paymentId });
+      setStep('success');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       setStep('error');
@@ -69,7 +92,6 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
       expiryDate: '',
       cvv: '',
       phoneNumber: '',
-      bankAccount: '',
     });
     onClose();
   };
@@ -143,25 +165,6 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
                       <div className="text-white/60 text-sm">Visa, Mastercard</div>
                     </div>
                     {paymentMethod === 'card' && (
-                      <Check className="w-6 h-6 text-[#16BDA0]" />
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('bank_transfer')}
-                    className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
-                      paymentMethod === 'bank_transfer'
-                        ? 'border-[#16BDA0] bg-[#16BDA0]/10'
-                        : 'border-white/10 hover:border-white/30'
-                    }`}
-                  >
-                    <DollarSign className="w-6 h-6 text-[#16BDA0]" />
-                    <div className="flex-1 text-left">
-                      <div className="text-white font-semibold">Virement bancaire</div>
-                      <div className="text-white/60 text-sm">Transfert direct</div>
-                    </div>
-                    {paymentMethod === 'bank_transfer' && (
                       <Check className="w-6 h-6 text-[#16BDA0]" />
                     )}
                   </button>
@@ -261,21 +264,6 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
                           maxLength={3}
                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-[#16BDA0]"
                         />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'bank_transfer' && (
-                  <div className="space-y-4">
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                      <p className="text-yellow-400 text-sm font-medium mb-2">
-                        Informations de virement
-                      </p>
-                      <div className="space-y-1 text-white/80 text-sm">
-                        <p>Banque: RAWBANK</p>
-                        <p>Compte: 1234567890</p>
-                        <p>Référence: {plan.id.toUpperCase()}</p>
                       </div>
                     </div>
                   </div>

@@ -40,6 +40,7 @@ interface AuthContextType {
   updateProfile: (data: UpdateProfileData) => Promise<AppUser>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 function mapToAppUser(authUser: AuthUser): AppUser {
@@ -128,6 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return appUser;
   }, []);
 
+  const resetPassword = useCallback(async (email: string): Promise<void> => {
+    await backendGateway.auth.resetPassword(email);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -144,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile,
         changePassword,
         deleteAccount,
+        resetPassword,
       }}
     >
       {children}

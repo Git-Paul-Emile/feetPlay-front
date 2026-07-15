@@ -48,11 +48,11 @@ export function CreatorProfile() {
     setShowPaymentModal(true);
   };
 
-  const handlePaymentSuccess = async (paymentMethod: string) => {
+  const handlePaymentSuccess = async (payment: { provider: 'stripe' | 'mobile_money'; paymentId: string }) => {
     if (!currentSubscription) {
-      await subscribe(creator.id, selectedPlanId);
+      await subscribe(creator.id, selectedPlanId, payment);
     }
-    await processPayment(currentSubscription?.id || 'new', paymentMethod);
+    await processPayment(currentSubscription?.id || 'new', payment.provider);
     setShowPaymentModal(false);
   };
 

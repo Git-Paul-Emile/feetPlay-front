@@ -250,12 +250,12 @@ Pour passer en production, vous devrez implémenter :
 - Gestion des permissions
 
 ### 2. Base de données
-- PostgreSQL (recommandé)
-- Tables : users, events, tickets, logs, notifications
-- Row Level Security (RLS)
+- PostgreSQL via Prisma (déjà en place, voir `back/prisma/schema.prisma`)
+- Modèles : User, Channel, StreamingEvent, Ticket, Creator, etc.
+- Contrôle d'accès applicatif par rôle (middlewares Express, pas de RLS)
 
 ### 3. Stockage fichiers
-- AWS S3 ou Supabase Storage
+- AWS S3 (ou équivalent)
 - Upload images/vidéos
 - Backup automatique
 
@@ -286,29 +286,28 @@ Consultez [BACKEND_DOCUMENTATION.md](/BACKEND_DOCUMENTATION.md) pour les détail
 
 ## 📝 NOTES IMPORTANTES
 
-### ⚠️ Version Frontend-Only
+### ⚠️ État de l'intégration backend
 
-Cette version du dashboard est **frontend-only** pour démonstration. 
+Le backend Express + Prisma/PostgreSQL (`back/`) est intégré et fait office de source de vérité pour les données. Certains modules restent partiels :
 
 **Limitations actuelles** :
-- ❌ Pas de persistance réelle (données en `localStorage`)
-- ❌ Pas d'envoi de notifications réelles
-- ❌ Pas de backup automatique
-- ❌ Pas d'intégration paiement
+- ⚠️ Paiements en simulation intentionnelle (harmonisée avec FeetiTicketWeb, intégration réelle prévue plus tard)
+- 🚧 Notifications push : à finaliser
+- 🚧 Backup automatique : à finaliser
 
 **Pour la production** :
-- ✅ Intégrez Supabase ou votre backend
-- ✅ Implémentez l'authentification sécurisée
-- ✅ Configurez la base de données
-- ✅ Activez les backups automatiques
+- ✅ Backend Express/Prisma/PostgreSQL déjà en place
+- ✅ Authentification Firebase Auth déjà en place
+- ✅ Base de données PostgreSQL configurée
+- 🚧 Activer les backups automatiques
 
 ### 🔄 Migration vers Production
 
 Suivez le guide [BACKEND_DOCUMENTATION.md](/BACKEND_DOCUMENTATION.md) pour :
-1. Configuration Supabase
-2. Structure base de données
-3. Politiques de sécurité (RLS)
-4. Intégration Firebase (notifications)
+1. Configuration de l'hébergeur PostgreSQL
+2. Structure base de données (Prisma)
+3. Contrôle d'accès applicatif par rôle
+4. Intégration Firebase (auth + notifications)
 5. Configuration monitoring
 
 ---

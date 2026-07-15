@@ -192,6 +192,7 @@ export interface AuthProvider {
   changePassword(data: ChangePasswordData): Promise<void>;
   deleteAccount(password: string): Promise<void>;
   getCurrentProfile(): Promise<AuthUser | null>;
+  resetPassword(email: string): Promise<void>;
 }
 
 export interface EventsProvider {

@@ -168,10 +168,20 @@ const CreatorAPI = {
     return body.data as Creator & { videos: CreatorVideo[] };
   },
 
-  async subscribe(creatorId: string, plan: "free" | "paid" = "paid"): Promise<{ subscribed: boolean }> {
+  async subscribe(
+    creatorId: string,
+    plan: "free" | "paid" = "paid",
+    price?: number,
+    payment?: { provider: "stripe" | "mobile_money" | "paystack"; paymentId: string }
+  ): Promise<{ subscribed: boolean }> {
     const response = await fetchWithApiFallback(`/creators/${creatorId}/subscribe`, {
       method: "POST",
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({
+        plan,
+        price,
+        paymentProvider: payment?.provider,
+        paymentId: payment?.paymentId,
+      }),
     });
     const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
     if (!response.ok) throw new Error(body.message ?? "Erreur serveur");

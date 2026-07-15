@@ -20,7 +20,11 @@ interface SubscriptionContextType {
   notifications: Notification[];
   creatorStats: Map<string, CreatorStats>;
 
-  subscribe: (creatorId: string, planId: string) => Promise<boolean>;
+  subscribe: (
+    creatorId: string,
+    planId: string,
+    payment?: { provider: 'stripe' | 'mobile_money'; paymentId: string }
+  ) => Promise<boolean>;
   cancelSubscription: (subscriptionId: string, reason: string) => Promise<boolean>;
   renewSubscription: (subscriptionId: string) => Promise<boolean>;
   getCreatorSubscription: (creatorId: string) => UserSubscription | undefined;
@@ -53,9 +57,24 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const subscribe = async (creatorId: string, planId: string): Promise<boolean> => {
+  const subscribe = async (
+    creatorId: string,
+    planId: string,
+    payment?: { provider: 'stripe' | 'mobile_money'; paymentId: string }
+  ): Promise<boolean> => {
     const plan = subscriptionPlans.find(p => p.id === planId);
     if (!plan) return false;
+
+    // Le paiement (simulé via le même moteur que feeti2) est vérifié côté
+    // backend avant que l'abonnement ne soit réellement persisté.
+    const { default: CreatorAPI } = await import('../services/api/CreatorAPI');
+    const isPaid = plan.price > 0;
+    try {
+      await CreatorAPI.subscribe(creatorId, isPaid ? 'paid' : 'free', plan.price, isPaid ? payment : undefined);
+    } catch (err) {
+      console.error('[subscription] Échec de la vérification du paiement:', err);
+      return false;
+    }
 
     const newSubscription: UserSubscription = {
       id: `sub-${Date.now()}`,

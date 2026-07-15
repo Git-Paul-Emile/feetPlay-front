@@ -9,13 +9,33 @@ export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { login, startGoogleAuth, loginFromFeeti2SSO, isAuthenticated, isLoading, user, logout } = useAuth();
+  const { login, startGoogleAuth, loginFromFeeti2SSO, resetPassword, isAuthenticated, isLoading, user, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotDone, setForgotDone] = useState(false);
+
+  const handleSendReset = async () => {
+    if (!forgotEmail.trim()) return;
+    setForgotLoading(true);
+    setForgotError('');
+    try {
+      await resetPassword(forgotEmail.trim());
+      setForgotDone(true);
+    } catch (err: unknown) {
+      setForgotError((err as Error)?.message ?? "Erreur lors de l'envoi de l'email");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
 
@@ -172,6 +192,16 @@ export function Login() {
               </div>
 
               <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => { setShowForgot(true); setForgotDone(false); setForgotEmail(''); setForgotError(''); }}
+                  className="font-['Inter',sans-serif] text-[#999999] text-sm hover:text-white transition-colors"
+                >
+                  Mot de passe oublié ?
+                </button>
+              </div>
+
+              <div className="text-right">
                 <Link
                   to="/register"
                   className="font-['Inter',sans-serif] text-[#de0035] text-sm hover:text-[#c5002f] transition-colors"
@@ -238,6 +268,67 @@ export function Login() {
           </div>
         </motion.div>
       </div>
+
+      {showForgot && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4"
+          onClick={() => setShowForgot(false)}
+        >
+          <div
+            className="bg-[#121212] border border-[#3a3a3a] rounded-2xl p-6 w-full max-w-sm shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-white font-semibold text-lg mb-1">Mot de passe oublié</h3>
+            {forgotDone ? (
+              <>
+                <p className="text-[#CDFF71] bg-[#CDFF71]/10 rounded-lg px-4 py-3 text-sm mt-3">
+                  Un email de réinitialisation a été envoyé à <strong>{forgotEmail}</strong>. Vérifiez votre boîte mail (et les spams).
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowForgot(false)}
+                  className="w-full mt-4 border border-[#3a3a3a] rounded-lg py-2.5 text-sm text-white hover:bg-[#1a1a1a] transition-colors"
+                >
+                  Fermer
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-[#999999] text-sm mb-4 mt-1">Entrez votre email pour recevoir un lien de réinitialisation.</p>
+                <input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="votre@email.com"
+                  className="w-full bg-transparent border border-[#3a3a3a] rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#CDFF71] mb-3"
+                  onKeyDown={(e) => e.key === 'Enter' && void handleSendReset()}
+                />
+                {forgotError && (
+                  <p className="text-[#de0035] text-xs mb-3">{forgotError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgot(false)}
+                    className="flex-1 border border-[#3a3a3a] rounded-lg py-2.5 text-sm text-white hover:bg-[#1a1a1a] transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    disabled={forgotLoading}
+                    onClick={() => void handleSendReset()}
+                    className="flex-1 bg-[#CDFF71] rounded-lg py-2.5 text-sm font-semibold text-black hover:bg-[#b8e663] transition-colors disabled:opacity-60"
+                  >
+                    {forgotLoading ? 'Envoi...' : 'Envoyer'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

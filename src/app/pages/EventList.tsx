@@ -84,7 +84,7 @@ export function EventList() {
           <h1 className="font-['Inter',sans-serif] font-bold text-white text-2xl md:text-3xl lg:text-4xl">
             Tous les événements
           </h1>
-          <SortFilter value={sortOption} onChange={setSortOption} />
+          <SortFilter currentSort={sortOption} onSortChange={setSortOption} />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 mb-8 p-4 bg-white/5 rounded-xl border border-white/10">

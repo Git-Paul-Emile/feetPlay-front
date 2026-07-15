@@ -31,13 +31,13 @@ import {
   BarChart3,
   Settings,
 } from 'lucide-react';
-import { useAdminAuth, logAdminAction } from '../contexts/AdminAuthContext';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 
 type Section = 'overview' | 'content' | 'users' | 'crm' | 'notifications' | 'logs' | 'monitoring' | 'backup';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
-  const { adminUser, logout, hasPermission, isAuthenticated } = useAdminAuth();
+  const { user: adminUser, logout, hasPermission, isAuthenticated } = useAdminAuth();
   const [activeSection, setActiveSection] = useState<Section>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 

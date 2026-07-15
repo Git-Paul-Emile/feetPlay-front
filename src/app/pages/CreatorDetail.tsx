@@ -12,6 +12,7 @@ export function CreatorDetail() {
   const [creator, setCreator] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ContentTab>('videos');
 
   useEffect(() => {
     if (!id) return;

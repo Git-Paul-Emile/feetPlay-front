@@ -82,7 +82,7 @@ http://localhost:5173/chaines
 ### Choix 3 : Développer autre chose
 ```
 → Pages admin manquantes
-→ Backend (Supabase)
+→ Backend (Express + Prisma/PostgreSQL — déjà intégré dans `back/`)
 → Nouvelles fonctionnalités
 → Autre
 ```
@@ -102,7 +102,7 @@ http://localhost:5173/chaines
 Exemples :
 - "Je veux réimplémenter le créateur version complète"
 - "Je veux finir les pages admin"
-- "Je veux intégrer Supabase"
+- "Je veux ajouter une fonctionnalité au backend Express/Prisma"
 - "Je veux juste tester pour l'instant"
 
 **Et je commence immédiatement !** 🚀

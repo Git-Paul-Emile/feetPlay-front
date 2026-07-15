@@ -201,7 +201,7 @@
 **Type** : Technique  
 **Pour qui** : Backend dev  
 **Quand** : Intégration backend  
-**Contenu** : Supabase + Auth + Database + API
+**Contenu** : Firebase Auth + Express/Prisma/PostgreSQL + API
 
 ---
 

@@ -75,7 +75,7 @@ Dites-moi quelle version vous voulez :
 ```
 Dites-moi ce que vous voulez ajouter :
 - Nouvelles fonctionnalités
-- Backend (Supabase)
+- Backend (Express + Prisma/PostgreSQL — déjà intégré dans `back/`)
 - Pages admin manquantes
 - Autre
 ```

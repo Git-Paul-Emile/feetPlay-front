@@ -1,4 +1,4 @@
-import { onAuthStateChanged, updateProfile as updateFirebaseProfile } from "firebase/auth";
+import { onAuthStateChanged, sendPasswordResetEmail, updateProfile as updateFirebaseProfile } from "firebase/auth";
 import {
   doc,
   getDoc,
@@ -222,5 +222,13 @@ export const firebaseAuthProvider: AuthProvider = {
   async loginFromFeeti2SSO(token: string) {
     const AuthAPI = (await import("../../api/AuthAPI")).default;
     return AuthAPI.ssoFeeti2(token);
+  },
+
+  async resetPassword(email: string) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (e) {
+      rethrowUserFacing(e);
+    }
   },
 };

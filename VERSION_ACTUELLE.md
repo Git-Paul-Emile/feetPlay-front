@@ -223,7 +223,7 @@ Rôle     : Marketing
 - Implémenter les 5 pages placeholder admin
 - Ajouter plus d'événements
 - Améliorer les fonctionnalités existantes
-- Intégrer un backend (Supabase)
+- Backend Express + Prisma/PostgreSQL déjà intégré (`back/`)
 
 ---
 
@@ -283,7 +283,7 @@ Rôle     : Marketing
 
 **Concentrez-vous sur** :
 
-1. **Backend** : Intégrer Supabase
+1. **Backend** : Déjà intégré (Express + Prisma/PostgreSQL)
 2. **Admin** : Finir les 5 pages placeholder
 3. **UX** : Améliorer l'expérience utilisateur
 4. **Performance** : Optimiser le chargement

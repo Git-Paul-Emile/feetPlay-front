@@ -2,52 +2,52 @@
 
 ## 🏗️ Architecture du Dashboard Administratif
 
-Cette documentation décrit l'architecture backend nécessaire pour mettre en production le dashboard administratif de FEETI PLAY.
+Cette documentation décrit l'architecture backend du dashboard administratif de FEETI PLAY.
+
+> **Backend réel : `back/` (Express + Prisma/PostgreSQL), déployé sur Render.**
+> Le dossier `functions/` (Cloud Functions Firebase) a été retiré du projet : il n'était pas utilisé en production. Firebase n'intervient que pour l'authentification (Firebase Auth) et, en option, une synchronisation Firestore secondaire (`FIRESTORE_SYNC_ENABLED`).
 
 ---
 
-## 🔐 1. SYSTÈME D'AUTHENTIFICATION FORTE
+## 🔐 1. SYSTÈME D'AUTHENTIFICATION (implémenté)
 
-### 1.1 Technologies Recommandées
+### 1.1 Technologies réellement utilisées
 
-**Supabase Auth** (Recommandé) :
-- Authentification multi-facteurs (2FA)
-- OAuth providers (Google, Facebook, Apple)
-- Magic Links par email
-- Row Level Security (RLS)
-- Sessions sécurisées avec JWT
+**Firebase Auth** (authentification uniquement) :
+- Inscription / connexion par email + mot de passe
+- Connexion via Google OAuth
+- Mot de passe oublié via `sendPasswordResetEmail` (Firebase) — il n'existe pas de flux "reset password" fait-maison côté backend
+- Le token Firebase (ID token) est vérifié côté API (`back/src/config/firebase-admin.ts`, middleware `back/src/middlewares/authenticate.ts`)
 
-**Alternative - NextAuth.js** :
-- Compatible avec multiple providers
-- Sessions côté serveur
-- CSRF protection
+**JWT interne (session API)** :
+- Après validation Firebase, le backend Express (`back/src/services/auth.service.ts`, `back/src/controllers/auth.controller.ts`) émet un `accessToken` + `refreshToken` (bibliothèque `jsonwebtoken`) qui servent de session applicative pour appeler l'API interne
+- Toutes les données métier (utilisateurs, événements, tickets, creators, abonnements, etc.) vivent dans PostgreSQL via Prisma — pas dans Firestore
 
-### 1.2 Configuration de Sécurité
+Il n'y a ni Supabase Auth, ni Row Level Security (RLS), ni Magic Links, ni MFA/TOTP dans le code actuel — ces éléments ne sont pas implémentés.
+
+### 1.2 Configuration réelle (Firebase Auth + JWT interne)
 
 ```typescript
-// Exemple Supabase Auth
-import { createClient } from '@supabase/supabase-js';
+// Authentification Firebase côté back (vérification du ID token)
+// back/src/config/firebase-admin.ts
+import admin from 'firebase-admin';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  }),
+});
 
-// Login avec MFA
-async function loginWithMFA(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  
-  if (data.user && !data.user.confirmed_at) {
-    // Exiger la vérification 2FA
-    await supabase.auth.mfa.enroll({
-      factorType: 'totp',
-    });
-  }
-  
-  return { data, error };
+// Émission de la session applicative après vérification Firebase
+// back/src/services/auth.service.ts
+import jwt from 'jsonwebtoken';
+
+function issueSession(user: { id: string; role: string }) {
+  const accessToken = generateToken({ userId: user.id, role: user.role });
+  const refreshToken = generateRefreshToken({ userId: user.id });
+  return { accessToken, refreshToken };
 }
 ```
 
@@ -132,31 +132,9 @@ const PERMISSIONS_MATRIX = {
 };
 ```
 
-### 2.2 Row Level Security (RLS) - Supabase
+### 2.2 Contrôle d'accès (réalité : middleware applicatif, pas de RLS)
 
-```sql
--- Politique RLS pour la table events
-CREATE POLICY "Super admins can do anything"
-  ON events
-  FOR ALL
-  USING (
-    auth.jwt() ->> 'role' = 'super_admin'
-  );
-
-CREATE POLICY "Admins can manage events"
-  ON events
-  FOR ALL
-  USING (
-    auth.jwt() ->> 'role' IN ('super_admin', 'admin', 'moderator')
-  );
-
-CREATE POLICY "Finance can only read events"
-  ON events
-  FOR SELECT
-  USING (
-    auth.jwt() ->> 'role' = 'finance'
-  );
-```
+La base PostgreSQL/Prisma n'utilise pas de Row Level Security (RLS) — ce mécanisme n'a jamais été implémenté. Le contrôle d'accès est effectué exclusivement au niveau applicatif, dans les middlewares Express (`back/src/middlewares/`) qui vérifient le rôle de l'utilisateur (issu du JWT interne) avant d'exécuter les requêtes Prisma. Voir la matrice de permissions ci-dessus (2.1) et le middleware `requirePermission` (2.3).
 
 ### 2.3 Middleware de Vérification
 
@@ -190,10 +168,12 @@ app.post('/api/events', requirePermission('manage_events'), createEvent);
 
 ### 3.1 Structure de la Table Logs
 
+Implémentée réellement via le modèle Prisma `SystemLog` (`back/prisma/schema.prisma`) sur PostgreSQL — le SQL ci-dessous est indicatif du schéma logique, `auth.users` désignant ici la table `User` de Prisma (pas de schéma `auth` Supabase) :
+
 ```sql
 CREATE TABLE admin_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id),
+  user_id UUID REFERENCES "User"(id),
   user_email TEXT,
   user_role TEXT,
   action TEXT NOT NULL,
@@ -227,21 +207,22 @@ interface LogEntry {
 }
 
 async function createLog(userId: string, entry: LogEntry, req: Request) {
-  const { data, error } = await supabase
-    .from('admin_logs')
-    .insert({
-      user_id: userId,
+  // Implémentation réelle : Prisma vers le modèle SystemLog (back/src/services)
+  const log = await prisma.systemLog.create({
+    data: {
+      userId,
       action: entry.action,
-      resource_type: entry.resourceType,
-      resource_id: entry.resourceId,
+      resourceType: entry.resourceType,
+      resourceId: entry.resourceId,
       description: entry.description,
       level: entry.level,
-      ip_address: req.ip,
-      user_agent: req.headers['user-agent'],
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'] as string,
       metadata: entry.metadata,
-    });
-    
-  return { data, error };
+    },
+  });
+
+  return log;
 }
 
 // Utilisation
@@ -274,10 +255,10 @@ await createLog(user.id, {
 
 ### 4.1 Stratégie de Backup
 
-**Supabase** (Backup automatique) :
-- Point-in-Time Recovery (PITR) : 7 jours
-- Snapshots quotidiens : 30 jours
-- Export manuel à la demande
+**Hébergeur PostgreSQL** (ex. Supabase, ou tout autre hébergeur Postgres géré — Supabase n'est ici qu'un détail d'infrastructure de la base de données, pas une brique applicative) :
+- Point-in-Time Recovery (PITR) selon l'offre de l'hébergeur
+- Snapshots quotidiens selon l'offre de l'hébergeur
+- Export manuel à la demande (`pg_dump`)
 
 **Configuration manuelle** :
 
@@ -480,7 +461,7 @@ CREATE TABLE push_notifications (
   success_count INTEGER DEFAULT 0,
   failure_count INTEGER DEFAULT 0,
   status TEXT CHECK (status IN ('draft', 'scheduled', 'sending', 'sent', 'failed')),
-  created_by UUID REFERENCES auth.users(id),
+  created_by UUID REFERENCES "User"(id),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
@@ -488,37 +469,35 @@ CREATE TABLE push_notifications (
 ### 6.3 Envoi Programmé
 
 ```typescript
-// Cron job pour les notifications programmées
+// Cron job pour les notifications programmées (accès Prisma/PostgreSQL, pas Supabase)
 import cron from 'node-cron';
 
 cron.schedule('* * * * *', async () => {
-  const { data: notifications } = await supabase
-    .from('push_notifications')
-    .select('*')
-    .eq('status', 'scheduled')
-    .lte('scheduled_at', new Date().toISOString());
-    
+  const notifications = await prisma.pushNotification.findMany({
+    where: { status: 'scheduled', scheduledAt: { lte: new Date() } },
+  });
+
   for (const notif of notifications) {
     try {
       // Récupérer les tokens utilisateurs
-      const tokens = await getUserTokens(notif.target_audience, notif.custom_user_ids);
-      
+      const tokens = await getUserTokens(notif.targetAudience, notif.customUserIds);
+
       const response = await sendPushNotification(tokens, notif);
-      
-      await supabase
-        .from('push_notifications')
-        .update({
+
+      await prisma.pushNotification.update({
+        where: { id: notif.id },
+        data: {
           status: 'sent',
-          sent_at: new Date().toISOString(),
-          success_count: response.successCount,
-          failure_count: response.failureCount,
-        })
-        .eq('id', notif.id);
+          sentAt: new Date(),
+          successCount: response.successCount,
+          failureCount: response.failureCount,
+        },
+      });
     } catch (error) {
-      await supabase
-        .from('push_notifications')
-        .update({ status: 'failed' })
-        .eq('id', notif.id);
+      await prisma.pushNotification.update({
+        where: { id: notif.id },
+        data: { status: 'failed' },
+      });
     }
   }
 });
@@ -528,67 +507,23 @@ cron.schedule('* * * * *', async () => {
 
 ## 🗄️ 7. STRUCTURE BASE DE DONNÉES
 
-### 7.1 Schéma Complet
+### 7.1 Schéma réel (Prisma / PostgreSQL)
 
-```sql
--- Users table (extends Supabase auth.users)
-CREATE TABLE user_profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
-  role TEXT NOT NULL DEFAULT 'user',
-  full_name TEXT,
-  avatar_url TEXT,
-  phone TEXT,
-  city TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+La base de données réelle est décrite par `back/prisma/schema.prisma` (PostgreSQL, ORM Prisma) — il ne s'agit pas de tables Supabase ni d'un schéma `auth.*`. Les modèles principaux sont :
 
--- Events table
-CREATE TABLE events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  description TEXT,
-  category TEXT,
-  location TEXT,
-  date DATE NOT NULL,
-  time TIME NOT NULL,
-  price DECIMAL(10,2),
-  reference TEXT UNIQUE NOT NULL,
-  image_url TEXT,
-  video_url TEXT,
-  status TEXT CHECK (status IN ('draft', 'published', 'live', 'ended')),
-  max_attendees INTEGER,
-  current_attendees INTEGER DEFAULT 0,
-  created_by UUID REFERENCES auth.users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+- `User` — utilisateurs applicatifs (le compte Firebase associé est référencé par son UID, l'authentification elle-même reste gérée par Firebase Auth)
+- `AdminUser` — comptes du dashboard administratif
+- `Channel`, `StreamingEvent` — chaînes et événements diffusés
+- `Ticket` — billets liés à un `StreamingEvent`
+- `WatchHistory` — historique de visionnage
+- `Creator`, `CreatorPlan`, `CreatorSubscription`, `CreatorVideo` — système créateur/abonnement entièrement implémenté (chaînes créateurs, plans payants, abonnements, vidéos)
+- `UserFavorite` — favoris utilisateur
+- `AdminNotification`, `UserNotification` — notifications
+- `SystemLog` — journal d'audit (section 3)
+- `SystemSetting`, `Backup` — paramètres système et suivi des sauvegardes
+- `PromotionPack`, `EventPromotion` — promotions d'événements
 
--- Tickets/Purchases table
-CREATE TABLE tickets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id UUID REFERENCES events(id),
-  user_id UUID REFERENCES auth.users(id),
-  user_name TEXT,
-  user_email TEXT,
-  user_phone TEXT,
-  qr_code TEXT UNIQUE,
-  price_paid DECIMAL(10,2),
-  status TEXT CHECK (status IN ('pending', 'paid', 'used', 'cancelled')),
-  purchased_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- CRM Analytics table
-CREATE TABLE user_analytics (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id),
-  event_views INTEGER DEFAULT 0,
-  tickets_purchased INTEGER DEFAULT 0,
-  total_spent DECIMAL(10,2) DEFAULT 0,
-  last_active_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+Toutes les opérations CRUD sur ces modèles passent par les repositories/services Express (`back/src/repositories`, `back/src/services`) — il n'y a pas d'accès direct depuis le front à une base Supabase/Firestore pour ces données.
 
 ---
 
@@ -616,7 +551,7 @@ CREATE TABLE user_analytics (
 
 ### 8.3 Base de Données
 
-- [ ] Row Level Security (RLS) activée
+- [ ] Contrôle d'accès applicatif (middlewares Express) systématiquement vérifié (pas de RLS au niveau base de données)
 - [ ] Backups automatiques quotidiens
 - [ ] Chiffrement au repos
 - [ ] Accès limité par IP
@@ -630,21 +565,20 @@ CREATE TABLE user_analytics (
 ### 9.1 Variables d'Environnement Requises
 
 ```bash
-# Database
+# Database (PostgreSQL — l'hébergeur, ex. Supabase, n'est qu'un détail d'infra)
 DATABASE_URL=postgresql://...
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_ANON_KEY=xxx
-SUPABASE_SERVICE_KEY=xxx
 
-# Auth
+# Auth interne (session API après authentification Firebase)
 JWT_SECRET=xxx
-NEXTAUTH_SECRET=xxx
-NEXTAUTH_URL=https://admin.feetiplay.com
+FEETI2_JWT_SECRET=xxx
 
-# Firebase (Push Notifications)
+# Firebase (Auth + Push Notifications)
 FIREBASE_PROJECT_ID=xxx
 FIREBASE_CLIENT_EMAIL=xxx
 FIREBASE_PRIVATE_KEY=xxx
+
+# Firestore (synchronisation optionnelle, désactivable)
+FIRESTORE_SYNC_ENABLED=true
 
 # AWS S3 (Backups)
 AWS_ACCESS_KEY_ID=xxx

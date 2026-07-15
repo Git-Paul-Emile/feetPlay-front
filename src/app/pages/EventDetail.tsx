@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Ticket, Heart, Calendar, Clock, Tag, MapPin, Users, Share2 } from 'lucide-react';
+import { X, Ticket, Heart, Calendar, Clock, Tag, MapPin, Share2 } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
 import { PurchaseModal, PurchaseData } from '../components/PurchaseModal';
@@ -63,7 +63,7 @@ export function EventDetail() {
       .then((data) => {
         if (canceled) return;
         if (data) {
-          setEventData({ ...data, reference: data.reference ?? data.id });
+          setEventData({ ...data, reference: data.id });
         } else {
           setFetchError('Événement introuvable.');
         }
@@ -246,16 +246,13 @@ export function EventDetail() {
               transition={{ delay: 0.1 }}
               className="flex flex-wrap gap-4 md:gap-6 mb-6 md:mb-8"
             >
-              {event.categories?.map((cat, index) => (
-                <div
-                  key={index}
-                  className="border border-white rounded-sm px-3 py-1"
-                >
+              {event.category && (
+                <div className="border border-white rounded-sm px-3 py-1">
                   <span className="font-['Poppins',sans-serif] font-semibold text-white text-sm md:text-base">
-                    {cat}
+                    {event.category}
                   </span>
                 </div>
-              ))}
+              )}
             </motion.div>
 
             {/* Description */}
@@ -422,36 +419,6 @@ export function EventDetail() {
                 {event.isFree ? 'GRATUIT' : `${event.price?.toLocaleString()} FCFA`}
               </p>
             </div>
-
-            {/* Organizer */}
-            {event.organizer && (
-              <div className="bg-white/5 rounded-[12px] p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <Users className="w-5 h-5 text-[#CDFF71]" />
-                  <span className="font-['Inter',sans-serif] font-semibold text-white/60 text-sm">
-                    Organisateur
-                  </span>
-                </div>
-                <p className="font-['Inter',sans-serif] font-medium text-white text-base">
-                  {event.organizer}
-                </p>
-              </div>
-            )}
-
-            {/* Capacity */}
-            {event.capacity && (
-              <div className="bg-white/5 rounded-[12px] p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <Users className="w-5 h-5 text-[#CDFF71]" />
-                  <span className="font-['Inter',sans-serif] font-semibold text-white/60 text-sm">
-                    Capacité
-                  </span>
-                </div>
-                <p className="font-['Inter',sans-serif] font-medium text-white text-base">
-                  {event.capacity}
-                </p>
-              </div>
-            )}
 
             {/* Share */}
             <div className="bg-white/5 rounded-[12px] p-6">

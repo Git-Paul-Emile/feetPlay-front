@@ -110,8 +110,8 @@ Exemples :
 - 📈 Rapports et exports
 
 #### C. Backend
-- 🔐 Intégration Supabase
-- 💳 Paiements (Stripe/Fedapay)
+- 🔐 Backend Express + Prisma/PostgreSQL (déjà intégré, voir `back/`)
+- 💳 Paiements (Stripe/Fedapay) — actuellement en simulation intentionnelle
 - 📹 Upload vidéos réel (AWS S3)
 - 🔴 Streaming live (WebRTC)
 - 🔒 Authentification OAuth
@@ -191,7 +191,7 @@ Résultat : MVP fonctionnel
 
 Pourquoi ?
 - Finir les 5 pages admin placeholder
-- Intégrer Supabase
+- Backend Express/Prisma/PostgreSQL déjà intégré
 - Avoir un système solide
 - Ajouter créateur plus tard si besoin
 
@@ -216,7 +216,7 @@ Précisez : Version A, B ou C
 "Je veux développer [fonctionnalité X]"
 Exemples :
 - "Je veux finir les pages admin"
-- "Je veux intégrer Supabase"
+- "Je veux ajouter une fonctionnalité au backend Express/Prisma"
 - "Je veux ajouter un système de chat"
 ```
 

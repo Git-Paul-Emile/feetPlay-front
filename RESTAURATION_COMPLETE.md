@@ -237,7 +237,7 @@ Si vous voulez maintenant **ré-implémenter** le système créateur proprement 
 1. Développer les fonctionnalités existantes
 2. Améliorer le dashboard admin
 3. Ajouter des événements
-4. Intégrer un vrai backend (Supabase)
+4. Backend Express + Prisma/PostgreSQL déjà intégré (`back/`)
 
 ---
 

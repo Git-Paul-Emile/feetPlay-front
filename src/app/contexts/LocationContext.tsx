@@ -6,8 +6,6 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import type { StreamingEvent } from '../services/backend/types';
-
 export interface Country {
   code: string;
   name: string;
@@ -15,10 +13,15 @@ export interface Country {
 
 export const ALL_COUNTRIES: Country = { code: 'ALL', name: 'Tous les pays' };
 
+// Contrainte générique volontairement réduite aux champs réellement utilisés par
+// le filtrage (country/location), afin de rester compatible avec les différentes
+// formes locales d'événements (StreamingEvent, CalendarEventCardProps, etc.).
+type LocatableEvent = { country?: string | null; location?: string | null };
+
 interface LocationContextType {
   selectedCountry: Country;
   setSelectedCountry: (country: Country) => void;
-  filterEvents: <T extends StreamingEvent | (StreamingEvent & { fullDate: string })>(events: T[]) => T[];
+  filterEvents: <T extends LocatableEvent>(events: T[]) => T[];
 }
 
 const LocationContext = createContext<LocationContextType | null>(null);
@@ -47,7 +50,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const filterEvents = useCallback(<T extends StreamingEvent | (StreamingEvent & { fullDate: string })>(events: T[]): T[] => {
+  const filterEvents = useCallback(<T extends LocatableEvent>(events: T[]): T[] => {
     if (selectedCountry.code === 'ALL') {
       return events;
     }

@@ -5,6 +5,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   reauthenticateWithCredential,
+  sendPasswordResetEmail,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
@@ -287,5 +288,13 @@ export const expressAuthProvider: AuthProvider = {
 
   async loginFromFeeti2SSO(token: string): Promise<AuthUser> {
     return AuthAPI.ssoFeeti2(token);
+  },
+
+  async resetPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (e) {
+      rethrowUserFacing(e);
+    }
   },
 };

@@ -12,7 +12,14 @@ export interface Event {
   id?: string | number;
 }
 
-export function sortEvents(events: Event[], sortOption: SortOption): Event[] {
+type SortableEvent = {
+  title: string;
+  date: string;
+  category?: string;
+  isFree?: boolean;
+};
+
+export function sortEvents<T extends SortableEvent>(events: T[], sortOption: SortOption): T[] {
   const eventsCopy = [...events];
 
   switch (sortOption) {

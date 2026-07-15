@@ -21,8 +21,8 @@ const PLAN_CONFIG = [
   { key: 'vip',     label: 'VIP',      color: '#de0035' },
 ];
 
-interface RoleStat { role: string; count: number; label: string; color: string }
-interface PlanStat { plan: string; count: number; label: string; color: string }
+interface RoleStat { key: string; count: number; label: string; color: string }
+interface PlanStat { key: string; count: number; label: string; color: string }
 
 async function fetchByRole(role: string): Promise<number> {
   try {
@@ -105,7 +105,7 @@ export function CRMPage() {
     { label: 'Chaînes actives',      value: stats.totalChannels.toLocaleString(),     icon: Tv,        color: 'from-orange-500 to-amber-500' },
     { label: 'Événements créés',     value: stats.totalEvents.toLocaleString(),       icon: Radio,     color: 'from-purple-500 to-pink-500' },
     { label: 'Tickets vendus',       value: stats.totalTickets.toLocaleString(),      icon: UserCheck, color: 'from-[#cdff71] to-[#a8e34f]' },
-    { label: 'Abonnés premium+',     value: planData.filter(p => ['premium','vip'].includes(p.plan)).reduce((s,p) => s + p.count, 0).toLocaleString(), icon: Crown, color: 'from-[#fcc434] to-amber-500' },
+    { label: 'Abonnés premium+',     value: planData.filter(p => ['premium','vip'].includes(p.key)).reduce((s,p) => s + p.count, 0).toLocaleString(), icon: Crown, color: 'from-[#fcc434] to-amber-500' },
   ] : [];
 
   const CustomTooltip = ({ active, payload }: any) => {

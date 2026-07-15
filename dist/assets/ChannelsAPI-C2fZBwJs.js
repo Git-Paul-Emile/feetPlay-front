@@ -1,0 +1,1 @@
+import{y as n}from"./index-COXFPYe1.js";const r={getAll(){return n.channels.getAll()},getById(e){return n.channels.getById(e)},getBySlug(e){return n.channels.getBySlug(e)},getByCategory(e){return n.channels.getByCategory(e)},search(e){return n.channels.search(e)}};export{r as C};

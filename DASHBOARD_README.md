@@ -238,19 +238,8 @@ localStorage.getItem('admin_logs')
 
 ### Migration vers Backend
 
-Pour la production, remplacer localStorage par :
+Le backend réel (Express + Prisma/PostgreSQL, `back/`) remplace déjà localStorage en production, avec Firebase Auth pour l'authentification :
 
-**Option 1 : Supabase** (Recommandé)
-```typescript
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-```
-
-**Option 2 : API Custom**
 ```typescript
 const API_BASE = 'https://api.feetiplay.com';
 
@@ -344,8 +333,7 @@ VITE_API_URL=https://api.feetiplay.com
 
 # Backend (voir BACKEND_DOCUMENTATION.md)
 DATABASE_URL=postgresql://...
-SUPABASE_URL=https://...
-SUPABASE_ANON_KEY=...
+FIREBASE_PROJECT_ID=...
 JWT_SECRET=...
 ```
 
@@ -412,7 +400,6 @@ scp -r dist/* user@server:/var/www/admin.feetiplay.com
 - 🚧 CRM & Analytics
 - 🚧 Notifications push
 - 🚧 Module finances
-- 🚧 Intégration Supabase
 
 ---
 
@@ -445,7 +432,7 @@ scp -r dist/* user@server:/var/www/admin.feetiplay.com
 
 ### Q1 2025 (Mars)
 - [x] Version 1.0 Dashboard frontend
-- [ ] Intégration Supabase
+- [x] Backend Express + Prisma/PostgreSQL intégré
 - [ ] Gestion utilisateurs
 
 ### Q2 2025 (Avril-Juin)
