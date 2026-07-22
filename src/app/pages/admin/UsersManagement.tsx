@@ -205,7 +205,7 @@ export function UsersManagement() {
             </div>
           </div>
 
-          <div className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[12px] overflow-hidden">
+          <div className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[12px] overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/5 border-b border-white/10">
                 <tr>

@@ -466,7 +466,7 @@ function ReportTab() {
 
       {/* Top événements */}
       {report.topEvents.length > 0 && (
-        <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/8 rounded-xl overflow-x-auto">
           <div className="p-5 border-b border-white/8 flex items-center gap-2">
             <Tag className="w-4 h-4 text-[#cdff71]" />
             <h3 className="font-['Inter',sans-serif] font-semibold text-white">Top événements par revenus</h3>
@@ -495,7 +495,7 @@ function ReportTab() {
       )}
 
       {/* Tableau mensuel détaillé */}
-      <div className="bg-white/5 border border-white/8 rounded-xl overflow-hidden">
+      <div className="bg-white/5 border border-white/8 rounded-xl overflow-x-auto">
         <div className="p-5 border-b border-white/8">
           <h3 className="font-['Inter',sans-serif] font-semibold text-white">Détail par mois</h3>
         </div>

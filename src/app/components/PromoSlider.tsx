@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -21,33 +21,44 @@ interface PromoSliderProps {
   promos: PromoContent[];
 }
 
+// Nombre de cartes visibles selon la largeur de l'écran.
+// On pilote `slidesToShow` directement via un état React plutôt que via
+// l'option `responsive` de react-slick, dont la détection de breakpoint
+// s'avère peu fiable (cartes tassées sur mobile).
+function getSlidesToShow(width: number): number {
+  if (width < 768) return 1;   // mobile
+  if (width < 1280) return 2;  // tablette
+  return 3;                    // desktop
+}
+
 export function PromoSlider({ promos }: PromoSliderProps) {
   const sliderRef = useRef<Slider>(null);
 
+  const [slidesToShow, setSlidesToShow] = useState<number>(() =>
+    typeof window !== 'undefined' ? getSlidesToShow(window.innerWidth) : 1,
+  );
+
+  useEffect(() => {
+    const handleResize = () => setSlidesToShow(getSlidesToShow(window.innerWidth));
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // On ne montre jamais plus de cartes qu'il n'y en a, et l'infini n'a de sens
+  // que s'il y a plus de cartes que de slots visibles.
+  const visibleSlides = Math.max(1, Math.min(slidesToShow, promos.length));
+
   const settings = {
     dots: true,
-    infinite: true,
+    infinite: promos.length > visibleSlides,
     speed: 500,
-    slidesToShow: 3,
+    slidesToShow: visibleSlides,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 4000,
     arrows: false,
     pauseOnHover: true,
-    responsive: [
-      {
-        breakpoint: 1280,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
   };
 
   const getIcon = (iconType: string, accentColor: string) => {

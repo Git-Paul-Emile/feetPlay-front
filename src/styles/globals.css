@@ -137,3 +137,46 @@
 .slick-next {
   display: none !important;
 }
+
+/* =========================================================================
+   Filet de sécurité responsive (audit UI 2026-07)
+   Empêche tout débordement horizontal / cassure de mise en page.
+   ========================================================================= */
+
+/* Contient les débordements horizontaux résiduels (décorations, éléments
+   absolus, cartes) SANS casser les position: sticky.
+   `clip` (contrairement à `hidden`) ne crée pas de conteneur de défilement. */
+html {
+  overflow-x: clip;
+}
+
+/* Les médias ne dépassent jamais la largeur de leur conteneur. */
+img,
+video,
+canvas,
+svg,
+iframe,
+embed,
+object {
+  max-width: 100%;
+}
+img,
+video {
+  height: auto;
+}
+
+/* Les longues chaînes non sécables (emails, URLs, IDs, montants) se coupent
+   au lieu d'élargir la page. */
+p,
+h1, h2, h3, h4, h5, h6,
+span, a, li, dd, dt, label,
+td, th,
+figcaption, blockquote, small, strong, em {
+  overflow-wrap: break-word;
+}
+
+/* Les tableaux ne débordent pas de leur conteneur ; le défilement horizontal
+   se fait via le wrapper .overflow-x-auto quand nécessaire. */
+table {
+  max-width: 100%;
+}

@@ -30,10 +30,30 @@ function PrevArrow({ onClick }: { onClick?: () => void }) {
   );
 }
 
+// Nombre de cartes visibles selon la largeur de l'écran (piloté en JS car la
+// détection de breakpoint de l'option `responsive` de react-slick n'est pas
+// fiable et tasse les cartes sur mobile).
+function getCreatorSlides(width: number): number {
+  if (width < 640) return 1;
+  if (width < 1024) return 2;
+  if (width < 1536) return 3;
+  return 4;
+}
+
 export function Createurs() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
+
+  const [creatorSlides, setCreatorSlides] = useState<number>(() =>
+    typeof window !== 'undefined' ? getCreatorSlides(window.innerWidth) : 1,
+  );
+  useEffect(() => {
+    const onResize = () => setCreatorSlides(getCreatorSlides(window.innerWidth));
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   const { creators: subscriptionCreators, getCreatorSubscription } = useSubscription();
 
   const [creatorsData, setCreatorsData] = useState<Array<{ id: string; name: string; category: string; followers: number; rating: number; image: string }>>([]);
@@ -62,41 +82,11 @@ export function Createurs() {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: creatorSlides,
     slidesToScroll: 1,
+    arrows: creatorSlides > 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
-    responsive: [
-      {
-        breakpoint: 1536,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 1280,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          arrows: false
-        }
-      }
-    ],
     customPaging: () => (
       <div className="w-2 h-2 rounded-full bg-white/30 hover:bg-[#CDFF71] transition-all duration-300" />
     ),

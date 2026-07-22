@@ -565,7 +565,7 @@ export function SettingsPage() {
               {backupToast && <ToastAlert toast={backupToast} />}
 
               {/* Table */}
-              <div className="border border-white/10 rounded-lg overflow-hidden bg-black/30">
+              <div className="border border-white/10 rounded-lg overflow-x-auto bg-black/30">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-white/5 border-b border-white/10 text-white/80 font-medium">
                     <tr>

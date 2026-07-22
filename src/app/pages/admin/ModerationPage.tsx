@@ -301,7 +301,7 @@ function UsersTab() {
         {total} utilisateur{total !== 1 ? 's' : ''} — consultation uniquement
       </p>
 
-      <div className="bg-white/3 border border-white/8 rounded-xl overflow-hidden">
+      <div className="bg-white/3 border border-white/8 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead className="border-b border-white/8">
             <tr>
