@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { ChevronLeft, ChevronRight, Star, Gift, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PromoContent {
   id: number;
@@ -61,20 +61,6 @@ export function PromoSlider({ promos }: PromoSliderProps) {
     pauseOnHover: true,
   };
 
-  const getIcon = (iconType: string, accentColor: string) => {
-    const iconClass = `w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 ${accentColor} drop-shadow-lg flex-shrink-0`;
-    switch (iconType) {
-      case 'star':
-        return <Star className={iconClass} fill="currentColor" strokeWidth={1.5} />;
-      case 'gift':
-        return <Gift className={iconClass} strokeWidth={1.5} />;
-      case 'zap':
-        return <Zap className={iconClass} fill="currentColor" strokeWidth={1.5} />;
-      default:
-        return <Star className={iconClass} />;
-    }
-  };
-
   const renderPromo = (promo: PromoContent) => {
     return (
       <div key={promo.id} className="px-3 py-2">
@@ -94,13 +80,6 @@ export function PromoSlider({ promos }: PromoSliderProps) {
                   {promo.discount}
                 </div>
                 <div className="absolute inset-0 bg-white/20 rounded-lg sm:rounded-xl blur-lg"></div>
-              </div>
-            </div>
-
-            {/* Icône améliorée */}
-            <div className="relative z-10 mb-3 sm:mb-4">
-              <div className={`inline-flex p-2 sm:p-3 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-md rounded-lg sm:rounded-xl border border-white/20 shadow-xl group-hover:scale-110 transition-transform duration-300`}>
-                {getIcon(promo.icon, promo.accentColor)}
               </div>
             </div>
 

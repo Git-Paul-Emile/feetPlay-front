@@ -151,6 +151,24 @@ type HeroSlide = { id: string | number; image: string; title: string; location: 
 type EventCardData = { id?: string; image: string; title: string; location: string; country?: string | null; date: string; category: string; isLive?: boolean; isFree?: boolean; price?: number; hasStreaming?: boolean };
 type ReplayCardData = { image: string; title: string; location: string; country?: string | null; date: string; duration?: string; category?: string };
 
+// Formate une date d'événement en badge « MOIS / JOUR » (ex. NOV / 20), quel que
+// soit le format reçu : ISO ("2026-11-20"), JJ/MM/AAAA ("20/11/2026") ou déjà
+// « NOV 20 ». Évite d'afficher la date brute non parsée dans la carte.
+const MONTHS_FR = ['JANV', 'FÉVR', 'MARS', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEPT', 'OCT', 'NOV', 'DÉC'];
+function formatDateBadge(raw?: string): { month: string; day: string } {
+  if (!raw) return { month: '', day: '' };
+  const parts = raw.trim().split(' ');
+  // Déjà au format "NOV 20" (mois non numérique + jour).
+  if (parts.length >= 2 && Number.isNaN(Number(parts[0]))) {
+    return { month: parts[0].toUpperCase(), day: parts[1] };
+  }
+  // JJ/MM/AAAA → AAAA-MM-JJ pour un parsing fiable.
+  const iso = raw.includes('/') ? raw.split('/').reverse().join('-') : raw;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { month: raw, day: '' };
+  return { month: MONTHS_FR[d.getMonth()] ?? '', day: String(d.getDate()) };
+}
+
 export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeCategory, setActiveCategory] = useState(0);
@@ -479,10 +497,10 @@ export function Home() {
                   {/* Date Badge */}
                   <div className="absolute left-4 md:left-6 lg:left-12 top-16 md:top-20 lg:top-28 flex flex-col items-center gap-1">
                     <p className="font-['DM_Sans',sans-serif] font-bold text-[#de0035] text-base md:text-lg lg:text-[22px] text-center">
-                      {event.date.split(' ')[0]}
+                      {formatDateBadge(event.date).month}
                     </p>
                     <p className="font-['DM_Sans',sans-serif] font-bold text-white text-3xl md:text-4xl lg:text-[48px]">
-                      {event.date.split(' ')[1]}
+                      {formatDateBadge(event.date).day}
                     </p>
                   </div>
 
