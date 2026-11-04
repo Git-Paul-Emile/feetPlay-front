@@ -25,12 +25,9 @@ const CreatorSettingsLazy    = lazy(() => import('./pages/creator/CreatorSetting
 const CreatorDashboardPublicLazy = lazy(() => import('./pages/CreatorDashboard').then(m => ({ default: m.CreatorDashboard })));
 
 // Lazy load des pages légales
-const TermsOfServiceLazy = lazy(() => import('./pages/legal/TermsOfService').then(m => ({ default: m.TermsOfService })));
-const PrivacyPolicyLazy  = lazy(() => import('./pages/legal/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
-const CookiePolicyLazy   = lazy(() => import('./pages/legal/CookiePolicy').then(m => ({ default: m.CookiePolicy })));
-const LegalNoticeLazy    = lazy(() => import('./pages/legal/LegalNotice').then(m => ({ default: m.LegalNotice })));
-const RefundPolicyLazy   = lazy(() => import('./pages/legal/RefundPolicy').then(m => ({ default: m.RefundPolicy })));
 const FAQLazy            = lazy(() => import('./pages/legal/FAQ').then(m => ({ default: m.FAQ })));
+// Documents du pack juridique (contenu unique : data/legalPack.ts)
+const LegalDocumentLazy  = lazy(() => import('./pages/legal/LegalDocumentPage').then(m => ({ default: m.LegalDocumentPage })));
 
 // Lazy load des pages lourdes — pattern identique à feeti2
 const LiveLazy             = lazy(() => import('./pages/Live').then(m => ({ default: m.Live })));
@@ -53,10 +50,8 @@ const CreatorProfileLazy    = lazy(() => import('./pages/CreatorProfile').then(m
 const ManageSubscriptionsLazy = lazy(() => import('./pages/ManageSubscriptions').then(m => ({ default: m.ManageSubscriptions })));
 const AboutLazy             = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
 const PressLazy             = lazy(() => import('./pages/Press').then(m => ({ default: m.Press })));
-const CGULazy               = lazy(() => import('./pages/CGU').then(m => ({ default: m.CGU })));
-const CookiesLazy           = lazy(() => import('./pages/Cookies').then(m => ({ default: m.Cookies })));
 const HelpLazy              = lazy(() => import('./pages/Help').then(m => ({ default: m.Help })));
-const PrivacyLazy           = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
+const ContactLazy           = lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact })));
 
 // Lazy load admin sous-pages
 const EventsManagementLazy   = lazy(() => import('./pages/admin/EventsManagement').then(m => ({ default: m.EventsManagement })));
@@ -109,10 +104,8 @@ const CreatorProfile        = withSuspense(CreatorProfileLazy);
 const ManageSubscriptions   = withSuspense(ManageSubscriptionsLazy);
 const About                 = withSuspense(AboutLazy);
 const Press                 = withSuspense(PressLazy);
-const CGU                   = withSuspense(CGULazy);
-const Cookies               = withSuspense(CookiesLazy);
 const Help                  = withSuspense(HelpLazy);
-const Privacy               = withSuspense(PrivacyLazy);
+const Contact               = withSuspense(ContactLazy);
 const EventsManagement      = withSuspense(EventsManagementLazy);
 const SystemLogs            = withSuspense(SystemLogsLazy);
 const UsersManagement       = withSuspense(UsersManagementLazy);
@@ -128,12 +121,14 @@ const CreatorSettings       = withSuspense(CreatorSettingsLazy);
 const CreatorDashboardPublic = withSuspense(CreatorDashboardPublicLazy);
 
 // Pages légales wrappées
-const TermsOfService = withSuspense(TermsOfServiceLazy);
-const PrivacyPolicy  = withSuspense(PrivacyPolicyLazy);
-const CookiePolicy   = withSuspense(CookiePolicyLazy);
-const LegalNotice    = withSuspense(LegalNoticeLazy);
-const RefundPolicy   = withSuspense(RefundPolicyLazy);
 const FAQ            = withSuspense(FAQLazy);
+const LegalDocument  = withSuspense(LegalDocumentLazy);
+const LegalTerms       = () => <LegalDocument slug="terms" />;
+const LegalPrivacy     = () => <LegalDocument slug="privacy" />;
+const LegalCookies     = () => <LegalDocument slug="cookies" />;
+const LegalNotice      = () => <LegalDocument slug="notice" />;
+const LegalRefund      = () => <LegalDocument slug="refund" />;
+const LegalAdvertising = () => <LegalDocument slug="advertising" />;
 
 function AdminRedirect() {
   return <Navigate to="/admin/dashboard" replace />;
@@ -166,19 +161,22 @@ export const router = createBrowserRouter([
       { path: 'creator-dashboard',    Component: CreatorDashboardPublic },
       { path: 'about',                Component: About },
       { path: 'press',                Component: Press },
-      { path: 'cgu',                  Component: CGU },
-      { path: 'terms',                Component: CGU },
-      { path: 'cookies',              Component: Cookies },
+      { path: 'cgu',                  Component: LegalTerms },
+      { path: 'terms',                Component: LegalTerms },
+      { path: 'cookies',              Component: LegalCookies },
       { path: 'help',                 Component: Help },
-      { path: 'privacy',              Component: Privacy },
+      { path: 'contact',              Component: Contact },
+      { path: 'privacy',              Component: LegalPrivacy },
+      // ── Pack juridique ─────────────────────────────────────────────────────
+      { path: 'legal/terms',          Component: LegalTerms },
+      { path: 'legal/privacy',        Component: LegalPrivacy },
+      { path: 'legal/cookies',        Component: LegalCookies },
+      { path: 'legal/notice',         Component: LegalNotice },
+      { path: 'legal/refund',         Component: LegalRefund },
+      { path: 'legal/advertising',    Component: LegalAdvertising },
     ],
   },
   // ── Legal (pages complètes dédiées) ──────────────────────────────────────
-  { path: '/legal/terms',   Component: TermsOfService },
-  { path: '/legal/privacy', Component: PrivacyPolicy },
-  { path: '/legal/cookies', Component: CookiePolicy },
-  { path: '/legal/notice',  Component: LegalNotice },
-  { path: '/legal/refund',  Component: RefundPolicy },
   { path: '/legal/faq',     Component: FAQ },
   {
     path: '/login',
