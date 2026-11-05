@@ -189,7 +189,8 @@ export function Home() {
   };
 
   useEffect(() => {
-    EventsAPI.getFeatured().then(events => setHeroSlides(events.slice(0, 4).map(e => ({
+    type HeroSource = Awaited<ReturnType<typeof EventsAPI.getAll>>[number];
+    const toHeroSlides = (events: HeroSource[]): HeroSlide[] => events.slice(0, 4).map(e => ({
       id: e.id,
       image: e.image,
       title: e.title.toUpperCase(),
@@ -199,9 +200,21 @@ export function Home() {
       description: e.description,
       price: e.price,
       isFree: e.isFree,
-    })))).catch(() => {});
+    }));
 
-    EventsAPI.getAll().then(events => {
+    // Hero : événements à promotion OR active. Sans promotion en cours, on retombe sur les
+    // événements mis en avant par l'admin, puis les lives et les prochains événements.
+    const allEvents = EventsAPI.getAll();
+    EventsAPI.getFeatured()
+      .then(async featured => {
+        if (featured.length > 0) return setHeroSlides(toHeroSlides(featured));
+        const events = (await allEvents).filter(e => e.image && !e.isReplay);
+        const rank = (e: HeroSource) => (e.isFeatured ? 0 : e.isLive ? 1 : 2);
+        setHeroSlides(toHeroSlides([...events].sort((a, b) => rank(a) - rank(b))));
+      })
+      .catch(() => {});
+
+    allEvents.then(events => {
       const upcoming = events.filter(e => !e.isLive && !e.isReplay).map(e => ({
         id: e.id, image: e.image, title: e.title, location: e.location ?? '', country: e.country ?? null,
         date: e.date, category: e.category, isFree: e.isFree, price: e.price, hasStreaming: true,
