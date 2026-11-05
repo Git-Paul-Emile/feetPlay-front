@@ -102,7 +102,6 @@ export function Contact() {
       {/* Bandeau */}
       <section className="relative overflow-hidden pb-40 pt-32 text-center">
         <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:48px_48px]" />
-        <div className="pointer-events-none absolute left-1/2 top-[75%] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#CDFF71]/15 blur-3xl" />
         <div className="relative mx-auto max-w-3xl px-4">
           <span className="inline-block rounded-full bg-[#CDFF71] px-3 py-1 font-['Inter',sans-serif] text-xs font-semibold text-black">Support</span>
           <h1 className="mt-5 font-['Montserrat',sans-serif] text-4xl font-bold text-white md:text-5xl lg:text-6xl">
