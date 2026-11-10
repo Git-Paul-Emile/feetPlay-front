@@ -271,7 +271,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(recentRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -281,7 +281,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(recentRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -309,7 +309,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(thisMonthRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -319,7 +319,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(thisMonthRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -347,7 +347,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(lastMonthRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -357,7 +357,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(lastMonthRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -385,7 +385,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(topRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -395,7 +395,7 @@ export function Replay() {
               <button 
                 onClick={() => scrollCarousel(topRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">

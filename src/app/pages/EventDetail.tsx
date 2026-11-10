@@ -222,7 +222,7 @@ export function EventDetail() {
         <motion.button
           onClick={() => navigate(-1)}
           className="absolute top-[100px] md:top-[120px] right-4 md:right-8 lg:right-16 z-50 w-12 h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-105 transition-transform"
-          style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >

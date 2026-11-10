@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Heart, Video } from 'lucide-react';
+import { Heart, Video, Check as CheckIcon } from 'lucide-react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useNavigate } from 'react-router';
 import listSvgPaths from "../../imports/svg-z1dvbaxtvj";
@@ -86,7 +86,7 @@ export function EventCard({
           className="absolute top-[14px] right-[14px] z-10"
         >
           <div className="backdrop-blur-[5px] w-[32px] h-[32px] rounded-[28px] flex items-center justify-center transition-all hover:scale-110"
-            style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
           >
             <Heart 
               className={`w-3.5 h-3.5 transition-colors ${isInFavorites ? 'fill-[#de0035] text-[#de0035]' : 'text-[#F5F6F8]'}`}
@@ -144,8 +144,8 @@ export function EventCard({
                 transition={{ delay: 0.2 }}
                 className="flex items-center gap-1"
               >
-                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] flex items-center justify-center">
-                  <span className="text-white text-[7px] font-bold">✓</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-[#DE0035] flex items-center justify-center">
+                  <span className="text-white text-[7px] font-bold"><CheckIcon className="w-2 h-2" strokeWidth={4} aria-hidden="true" /></span>
                 </div>
                 <span className="font-['DM_Sans',sans-serif] font-bold text-white text-[10px] leading-tight">
                   100% Gratuit
@@ -161,8 +161,8 @@ export function EventCard({
                 transition={{ delay: 0.3 }}
                 className="flex items-center gap-1"
               >
-                <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] flex items-center justify-center">
-                  <span className="text-white text-[7px] font-bold">✓</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-[#DE0035] flex items-center justify-center">
+                  <span className="text-white text-[7px] font-bold"><CheckIcon className="w-2 h-2" strokeWidth={4} aria-hidden="true" /></span>
                 </div>
                 <span className="font-['DM_Sans',sans-serif] font-bold text-white text-[10px] leading-tight">
                   {price} FCFA

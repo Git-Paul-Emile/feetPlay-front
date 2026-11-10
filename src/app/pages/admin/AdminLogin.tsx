@@ -12,7 +12,6 @@ export function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showCredentials, setShowCredentials] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,21 +32,8 @@ export function AdminLogin() {
     }
   };
 
-  const credentials = [
-    { role: 'Super Admin', email: 'superadmin@feetiplay.com', password: 'Super@123' },
-    { role: 'Admin', email: 'admin@feetiplay.com', password: 'Admin@123' },
-    { role: 'Finance', email: 'finance@feetiplay.com', password: 'Finance@123' },
-  ];
-
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#de0035]/20 via-black to-[#cdff71]/10" />
-      
-      {/* Animated circles */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-[#de0035]/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#cdff71]/10 rounded-full blur-3xl animate-pulse delay-1000" />
-
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <motion.div
@@ -132,7 +118,7 @@ export function AdminLogin() {
             <motion.button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#cdff71] to-[#a8e34f] text-black font-['Inter',sans-serif] font-semibold py-3 rounded-[8px] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#cdff71] text-black font-['Inter',sans-serif] font-semibold py-3 rounded-[8px] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}
             >
@@ -147,34 +133,6 @@ export function AdminLogin() {
             </motion.button>
           </form>
 
-          {/* Demo credentials button */}
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <button
-              onClick={() => setShowCredentials(!showCredentials)}
-              className="w-full text-white/60 hover:text-white/80 text-sm font-['Inter',sans-serif] transition-colors"
-            >
-              {showCredentials ? '▼ Masquer' : '▶ Voir'} les accès de démo
-            </button>
-            
-            {showCredentials && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4 space-y-2"
-              >
-                {credentials.map((cred, index) => (
-                  <div
-                    key={index}
-                    className="bg-[rgba(255,255,255,0.05)] rounded-[6px] p-3 text-xs font-['Courier_New',monospace]"
-                  >
-                    <div className="text-[#cdff71] font-semibold mb-1">{cred.role}</div>
-                    <div className="text-white/60">Email: {cred.email}</div>
-                    <div className="text-white/60">Pass: {cred.password}</div>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </div>
         </motion.div>
 
         {/* Footer */}

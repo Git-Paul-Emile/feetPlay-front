@@ -75,7 +75,7 @@ export function CreatorRegister() {
         className="w-full max-w-lg"
       >
         <div className="text-center mb-8">
-          <Link to="/" className="text-3xl font-bold bg-gradient-to-r from-[#DE0035] to-[#CDFF71] bg-clip-text text-transparent">
+          <Link to="/" className="text-3xl font-bold text-[#DE0035]">
             FéétiPlay
           </Link>
           <p className="text-gray-400 mt-2">Devenez Créateur</p>

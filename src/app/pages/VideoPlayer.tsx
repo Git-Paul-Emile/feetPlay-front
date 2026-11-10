@@ -124,7 +124,7 @@ export function VideoPlayer() {
             </div>
           </div>
         ) : !hasAccess ? (
-          <div className="w-full aspect-video bg-gradient-to-br from-[#111] to-black rounded-2xl flex items-center justify-center border border-white/10 relative overflow-hidden">
+          <div className="w-full aspect-video bg-[#111] rounded-2xl flex items-center justify-center border border-white/10 relative overflow-hidden">
             {video.thumbnail && (
               <img src={video.thumbnail} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-sm" />
             )}

@@ -74,7 +74,7 @@ export function Press() {
         </div>
 
         {/* Contact Presse */}
-        <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl p-8 md:p-10 border border-white/10 mb-12">
+        <div className="bg-[#1a1a2e] rounded-2xl p-8 md:p-10 border border-white/10 mb-12">
           <h2 className="font-['Montserrat',sans-serif] font-semibold text-white text-2xl md:text-3xl mb-6">
             Contact Presse
           </h2>
@@ -144,7 +144,7 @@ export function Press() {
             {mediaAssets.map((asset, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 border border-white/10 rounded-2xl p-6 hover:border-[#16BDA0]/50 transition-all"
+                className="bg-[#1a1a2e]/80 border border-white/10 rounded-2xl p-6 hover:border-[#16BDA0]/50 transition-all"
               >
                 <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4">
                   <Download className="w-6 h-6 text-[#CDFF71]" />

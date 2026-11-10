@@ -39,7 +39,7 @@ export function CreatorLayout() {
         {/* Logo */}
         <div className="p-6 border-b border-white/10">
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-[#DE0035] to-[#CDFF71] bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-[#DE0035]">
               FéétiPlay
             </span>
             <span className="text-xs text-gray-500 mt-1">Streamer</span>

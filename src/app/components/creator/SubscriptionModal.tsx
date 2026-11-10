@@ -146,7 +146,7 @@ export function SubscriptionModal({
               >
                 {/* Header */}
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#CDFF71]/20 to-[#DE0035]/20 border border-[#CDFF71]/30 flex items-center justify-center mx-auto mb-3">
+                  <div className="w-16 h-16 rounded-full bg-[#CDFF71]/20 border border-[#CDFF71]/30 flex items-center justify-center mx-auto mb-3">
                     <Crown className="w-8 h-8 text-[#CDFF71]" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-1">Abonnement Premium</h3>

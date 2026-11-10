@@ -28,7 +28,7 @@ export function Chaines() {
           className="mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-[#DE0035] to-[#CDFF71] bg-clip-text text-transparent">
+            <span className="text-[#DE0035]">
               Chaînes Sportives
             </span>
           </h1>
@@ -99,7 +99,7 @@ export function Chaines() {
         >
           <div className="inline-block px-6 py-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10">
             <p className="text-gray-400">
-              Plus de chaînes bientôt disponibles ! 🎬
+              Plus de chaînes bientôt disponibles !
             </p>
           </div>
         </motion.div>

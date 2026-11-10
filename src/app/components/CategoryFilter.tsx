@@ -33,7 +33,7 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
                 : 'bg-[rgba(29,29,29,0.5)] text-white border-2 border-transparent hover:border-[#F5A623]'
             }`}
             style={{
-              boxShadow: isHovered && !isSelected ? '0 0 15px rgba(245, 166, 35, 0.3)' : 'none',
+              boxShadow: 'none',
             }}
           >
             {category.name}

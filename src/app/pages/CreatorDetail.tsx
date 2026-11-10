@@ -154,7 +154,7 @@ export function CreatorDetail() {
               {/* Subscribe Button */}
               <button
                 onClick={() => (isAuthenticated ? setShowSubModal(true) : navigate('/login'))}
-                className="mt-6 px-8 py-3 bg-gradient-to-r from-[#CDFF71] to-[#B8E65C] text-black font-['Inter',sans-serif] font-semibold rounded-full hover:shadow-[0_0_30px_rgba(205,255,113,0.6)] transition-all duration-300"
+                className="mt-6 px-8 py-3 bg-[#CDFF71] text-black font-['Inter',sans-serif] font-semibold rounded-full transition-all duration-300"
               >
                 {isSubscribed ? 'Abonné · Gérer' : isAuthenticated ? "S'abonner" : "Se connecter pour s'abonner"}
               </button>

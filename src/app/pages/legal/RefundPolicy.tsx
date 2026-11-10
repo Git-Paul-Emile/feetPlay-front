@@ -22,7 +22,7 @@ export function RefundPolicy() {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -118,7 +118,7 @@ export function RefundPolicy() {
         </Section>
 
         {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-8 text-center mt-8">
+        <div className="bg-green-600 rounded-xl p-8 text-center mt-8">
           <CheckCircle className="w-10 h-10 mx-auto mb-3" />
           <h3 className="text-xl font-bold mb-2">Politique Équitable et Transparente</h3>
           <p className="text-green-100 mb-6 max-w-xl mx-auto text-sm">Notre objectif est de traiter chaque demande de remboursement de manière juste et rapide.</p>

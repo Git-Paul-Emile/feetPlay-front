@@ -180,10 +180,9 @@ export function CalendarEventCard({
         </div>
       </div>
 
-      {/* Hover Glow */}
+      {/* Bordure au survol */}
       <div 
         className="absolute inset-0 rounded-[12px] border-2 border-[#DE0035] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        style={{ boxShadow: '0 0 20px rgba(222, 0, 53, 0.3)' }}
       />
     </motion.div>
   );

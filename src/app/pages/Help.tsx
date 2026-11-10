@@ -173,7 +173,7 @@ export function Help() {
         </div>
 
         {/* Contact Support */}
-        <div className="mt-12 bg-gradient-to-r from-[#DE0035]/20 to-[#CDFF71]/20 border border-white/20 rounded-xl p-6 md:p-8">
+        <div className="mt-12 bg-[#DE0035]/20 border border-white/20 rounded-xl p-6 md:p-8">
           <h3 className="font-['Montserrat',sans-serif] font-semibold text-white text-xl md:text-2xl mb-3">
             Vous ne trouvez pas de réponse ?
           </h3>

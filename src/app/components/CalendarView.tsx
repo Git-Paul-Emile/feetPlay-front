@@ -120,7 +120,7 @@ export function CalendarView({
           <motion.button
             onClick={() => onMonthChange('prev')}
             className="w-10 h-10 backdrop-blur-[5px] rounded-[12px] flex items-center justify-center hover:bg-white/10 transition-colors"
-            style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -129,7 +129,7 @@ export function CalendarView({
           <motion.button
             onClick={() => onMonthChange('next')}
             className="w-10 h-10 backdrop-blur-[5px] rounded-[12px] flex items-center justify-center hover:bg-white/10 transition-colors"
-            style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

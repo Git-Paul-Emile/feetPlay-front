@@ -16,17 +16,17 @@ export function SubscriptionCard({ plan, isSubscribed, onSubscribe, popular }: S
     basic: {
       icon: <Star className="w-6 h-6" />,
       color: 'text-blue-400',
-      bgGradient: 'from-blue-500/20 to-blue-600/20',
+      bgGradient: 'bg-blue-500/20',
     },
     premium: {
       icon: <Zap className="w-6 h-6" />,
       color: 'text-purple-400',
-      bgGradient: 'from-purple-500/20 to-purple-600/20',
+      bgGradient: 'bg-purple-500/20',
     },
     vip: {
       icon: <Crown className="w-6 h-6" />,
       color: 'text-yellow-400',
-      bgGradient: 'from-yellow-500/20 to-yellow-600/20',
+      bgGradient: 'bg-yellow-500/20',
     },
   };
 
@@ -43,12 +43,12 @@ export function SubscriptionCard({ plan, isSubscribed, onSubscribe, popular }: S
 
   return (
     <div
-      className={`relative bg-gradient-to-br ${config.bgGradient} backdrop-blur-sm border-2 ${
+      className={`relative ${config.bgGradient} backdrop-blur-sm border-2 ${
         popular ? 'border-[#16BDA0]' : 'border-white/10'
       } rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:scale-105 hover:border-[#16BDA0]/50`}
     >
       {popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#16BDA0] to-[#0d9488] px-6 py-1.5 rounded-full">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#16BDA0] px-6 py-1.5 rounded-full">
           <span className="text-white text-sm font-bold">Plus populaire</span>
         </div>
       )}
@@ -97,7 +97,7 @@ export function SubscriptionCard({ plan, isSubscribed, onSubscribe, popular }: S
         className={`w-full py-3.5 rounded-lg font-semibold text-lg transition-all ${
           isSubscribed
             ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-            : 'bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white hover:from-[#c5002f] hover:to-[#e6153d]'
+            : 'bg-[#DE0035] hover:bg-[#c5002f] text-white'
         }`}
       >
         {loading ? (

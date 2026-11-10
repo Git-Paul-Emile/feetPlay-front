@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, SlidersHorizontal, Check } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, Check, Calendar, ArrowDownAZ, ArrowUpAZ, Tag, Coins } from 'lucide-react';
 
 export type SortOption = 'date-asc' | 'date-desc' | 'name-asc' | 'name-desc' | 'category' | 'price-asc' | 'price-desc';
 
@@ -10,13 +10,13 @@ interface SortFilterProps {
 }
 
 const sortOptions = [
-  { value: 'date-asc', label: 'Date : Plus récent', icon: '📅' },
-  { value: 'date-desc', label: 'Date : Plus ancien', icon: '📅' },
-  { value: 'name-asc', label: 'Nom : A → Z', icon: '🔤' },
-  { value: 'name-desc', label: 'Nom : Z → A', icon: '🔤' },
-  { value: 'category', label: 'Catégorie', icon: '🏷️' },
-  { value: 'price-asc', label: 'Prix : Gratuit en premier', icon: '💰' },
-  { value: 'price-desc', label: 'Prix : Payant en premier', icon: '💰' },
+  { value: 'date-asc', label: 'Date : Plus récent', icon: Calendar },
+  { value: 'date-desc', label: 'Date : Plus ancien', icon: Calendar },
+  { value: 'name-asc', label: 'Nom : A → Z', icon: ArrowDownAZ },
+  { value: 'name-desc', label: 'Nom : Z → A', icon: ArrowUpAZ },
+  { value: 'category', label: 'Catégorie', icon: Tag },
+  { value: 'price-asc', label: 'Prix : Gratuit en premier', icon: Coins },
+  { value: 'price-desc', label: 'Prix : Payant en premier', icon: Coins },
 ] as const;
 
 export function SortFilter({ currentSort, onSortChange }: SortFilterProps) {
@@ -42,7 +42,7 @@ export function SortFilter({ currentSort, onSortChange }: SortFilterProps) {
       {/* Trigger Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-[rgba(255,255,255,0.1)] to-[rgba(255,255,255,0.05)] backdrop-blur-md border border-white/10 hover:border-[#DE0035]/50 transition-all group"
+        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.1)] backdrop-blur-md border border-white/10 hover:border-[#DE0035]/50 transition-all group"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -83,7 +83,7 @@ export function SortFilter({ currentSort, onSortChange }: SortFilterProps) {
                   }}
                   className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
                     currentSort === option.value
-                      ? 'bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white'
+                      ? 'bg-[#DE0035] text-white'
                       : 'hover:bg-white/5 text-gray-300'
                   }`}
                   initial={{ opacity: 0, x: -20 }}
@@ -92,7 +92,7 @@ export function SortFilter({ currentSort, onSortChange }: SortFilterProps) {
                   whileHover={{ x: 4 }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">{option.icon}</span>
+                    <option.icon className="w-4 h-4" aria-hidden="true" />
                     <span className="text-sm font-['Inter',sans-serif] font-medium">
                       {option.label}
                     </span>

@@ -112,7 +112,7 @@ export function About() {
         </div>
 
         {/* Mission Section */}
-        <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl p-8 md:p-12 border border-white/10 mb-16">
+        <div className="bg-[#1a1a2e] rounded-2xl p-8 md:p-12 border border-white/10 mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="font-['Montserrat',sans-serif] font-bold text-white text-3xl md:text-4xl mb-6">
@@ -148,7 +148,7 @@ export function About() {
             {values.map((value, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 border border-white/10 rounded-2xl p-6 hover:border-[#16BDA0]/50 transition-all"
+                className="bg-[#1a1a2e]/80 border border-white/10 rounded-2xl p-6 hover:border-[#16BDA0]/50 transition-all"
               >
                 <div className="w-16 h-16 bg-[#16BDA0]/20 rounded-xl flex items-center justify-center text-[#16BDA0] mb-4">
                   {value.icon}
@@ -170,7 +170,7 @@ export function About() {
               <div key={index} className="relative pl-8 pb-12 last:pb-0">
                 {/* Timeline line */}
                 {index !== milestones.length - 1 && (
-                  <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-gradient-to-b from-[#16BDA0] to-transparent" />
+                  <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-black/40" />
                 )}
 
                 {/* Timeline dot */}
@@ -178,7 +178,7 @@ export function About() {
                   <div className="w-3 h-3 bg-white rounded-full" />
                 </div>
 
-                <div className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 border border-white/10 rounded-xl p-6">
+                <div className="bg-[#1a1a2e]/80 border border-white/10 rounded-xl p-6">
                   <div className="flex items-center gap-4 mb-3">
                     <span className="text-[#CDFF71] text-2xl font-bold">{milestone.year}</span>
                     <h3 className="text-white text-xl font-bold">{milestone.title}</h3>
@@ -199,7 +199,7 @@ export function About() {
             {teamMembers.map((member, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 border border-white/10 rounded-2xl overflow-hidden hover:border-[#16BDA0]/50 transition-all group"
+                className="bg-[#1a1a2e]/80 border border-white/10 rounded-2xl overflow-hidden hover:border-[#16BDA0]/50 transition-all group"
               >
                 <div className="relative h-64 overflow-hidden">
                   <img
@@ -219,7 +219,7 @@ export function About() {
         </section>
 
         {/* Stats Section */}
-        <section className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl p-8 md:p-12 border border-white/10">
+        <section className="bg-[#1a1a2e] rounded-2xl p-8 md:p-12 border border-white/10">
           <h2 className="font-['Montserrat',sans-serif] font-bold text-white text-3xl md:text-4xl mb-12 text-center">
             Fééti Play en chiffres
           </h2>
@@ -254,7 +254,7 @@ export function About() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               to="/register"
-              className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+              className="bg-[#DE0035] hover:bg-[#c5002f] text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all"
             >
               Créer un compte
             </Link>

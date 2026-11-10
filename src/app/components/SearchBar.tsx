@@ -29,7 +29,7 @@ export function SearchBar({
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white px-4 py-1.5 rounded-lg text-xs font-medium pointer-events-none"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#DE0035] text-white px-4 py-1.5 rounded-lg text-xs font-medium pointer-events-none"
           >
             {searchTerm.length} caractères
           </motion.div>

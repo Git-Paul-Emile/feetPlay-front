@@ -10,7 +10,7 @@ export function ChatButton() {
       {/* Chat Button - Floating */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r from-[#DE0035] to-[#FF1744] rounded-full flex items-center justify-center shadow-2xl hover:shadow-[0_0_30px_rgba(222,0,53,0.6)] transition-all duration-300 group"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 md:w-16 md:h-16 bg-[#DE0035] rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         initial={{ scale: 0 }}
@@ -56,7 +56,7 @@ export function ChatButton() {
             className="fixed bottom-24 md:bottom-28 right-6 z-50 w-[calc(100vw-3rem)] sm:w-96 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden"
           >
             {/* Chat Header */}
-            <div className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] p-4 flex items-center justify-between">
+            <div className="bg-[#DE0035] p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-white" />
@@ -76,12 +76,12 @@ export function ChatButton() {
             {/* Chat Messages */}
             <div className="p-4 space-y-3 h-64 overflow-y-auto">
               <div className="flex gap-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-[#DE0035] to-[#FF1744] rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-[#DE0035] rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs font-bold">F</span>
                 </div>
                 <div className="bg-white/10 rounded-xl rounded-tl-none p-3 max-w-[80%]">
                   <p className="font-['Inter',sans-serif] text-white text-sm">
-                    Bonjour ! 👋 Comment puis-je vous aider aujourd'hui ?
+                    Bonjour ! Comment puis-je vous aider aujourd'hui ?
                   </p>
                   <span className="font-['Inter',sans-serif] text-white/50 text-xs mt-1 block">
                     Maintenant
@@ -118,7 +118,7 @@ export function ChatButton() {
                   placeholder="Écrivez votre message..."
                   className="flex-1 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-white placeholder:text-white/50 font-['Inter',sans-serif] text-sm focus:outline-none focus:border-[#CDFF71] focus:ring-2 focus:ring-[#CDFF71]/30 transition-all"
                 />
-                <button className="w-10 h-10 bg-gradient-to-r from-[#DE0035] to-[#FF1744] rounded-full flex items-center justify-center hover:shadow-lg transition-all">
+                <button className="w-10 h-10 bg-[#DE0035] rounded-full flex items-center justify-center hover:shadow-lg transition-all">
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>

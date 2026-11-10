@@ -17,6 +17,7 @@ import {
   User,
   Calendar,
   Tag,
+  Check as CheckIcon
 } from 'lucide-react';
 import AdminAPI, { type AdminEventItem, type AdminUserItem, type SystemLogItem } from '../../services/api/AdminAPI';
 
@@ -189,7 +190,7 @@ function StreamingTab() {
 
             {actionMsg?.id === event.id ? (
               <span className="font-['Inter',sans-serif] text-[#cdff71] text-xs font-medium px-3 py-1.5 bg-[#cdff71]/10 rounded-lg border border-[#cdff71]/20">
-                ✓ {actionMsg.text}
+                <CheckIcon className="w-4 h-4 inline-block mr-1.5 -mt-0.5 align-middle" aria-hidden="true" />{actionMsg.text}
               </span>
             ) : (
               <div className="flex items-center gap-2 flex-shrink-0">

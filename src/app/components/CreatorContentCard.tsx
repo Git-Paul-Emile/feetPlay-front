@@ -125,7 +125,6 @@ export function CreatorContentCard({
         className="absolute inset-0 border-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
         style={{
           borderColor: badge.color,
-          boxShadow: `0 0 20px ${badge.color}80`
         }}
       />
     </motion.div>

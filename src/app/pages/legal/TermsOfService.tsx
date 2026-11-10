@@ -22,7 +22,7 @@ export function TermsOfService() {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -108,7 +108,7 @@ export function TermsOfService() {
         </Section>
 
         {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 text-center mt-8">
+        <div className="bg-blue-600 rounded-xl p-8 text-center mt-8">
           <FileText className="w-10 h-10 mx-auto mb-3" />
           <h3 className="text-xl font-bold mb-2">Conditions Claires et Équitables</h3>
           <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">Ces conditions garantissent une expérience de streaming sûre et agréable pour tous.</p>

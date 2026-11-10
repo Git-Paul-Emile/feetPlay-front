@@ -204,7 +204,7 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
             <button
               onClick={handleCloseModal}
               className="absolute top-4 right-4 z-10 w-10 h-10 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-              style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
             >
               <X className="w-5 h-5 text-white" />
             </button>

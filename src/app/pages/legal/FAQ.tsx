@@ -19,7 +19,7 @@ const faqs: FAQItem[] = [
   { id: '6', category: 'Tickets & Paiement', question: 'Où trouver mes tickets achetés ?', answer: 'Vos tickets sont accessibles depuis :\n1. La rubrique "Mes Tickets" dans votre profil\n2. L\'email de confirmation reçu après l\'achat\n\nChaque ticket contient un QR code unique à présenter à l\'entrée des événements physiques.', icon: Ticket },
   { id: '7', category: 'Compte Utilisateur', question: 'Comment créer un compte Fééti Play ?', answer: '1. Cliquez sur "S\'inscrire" en haut de la page\n2. Renseignez votre nom, email et mot de passe\n3. Validez votre email via le lien de confirmation\n4. Votre compte est prêt !\n\nVous pouvez aussi vous connecter avec Google ou Facebook.', icon: Shield },
   { id: '8', category: 'Compte Utilisateur', question: 'J\'ai oublié mon mot de passe, que faire ?', answer: '1. Cliquez sur "Mot de passe oublié ?" sur la page de connexion\n2. Entrez votre adresse email\n3. Recevez un lien de réinitialisation par email\n4. Créez un nouveau mot de passe sécurisé\n\nSi vous ne recevez pas l\'email, vérifiez vos spams ou contactez support@feetiplay.com', icon: Shield },
-  { id: '9', category: 'QR Code & Événements', question: 'Comment utiliser mon QR code à l\'entrée ?', answer: 'À l\'entrée de l\'événement physique :\n1. Ouvrez votre ticket depuis "Mes Tickets" ou l\'email de confirmation\n2. Présentez le QR code à l\'agent de sécurité\n3. Le QR code sera scanné une seule fois\n\n⚠️ Ne partagez jamais votre QR code avant l\'événement — il ne peut être utilisé qu\'une seule fois.', icon: Smartphone },
+  { id: '9', category: 'QR Code & Événements', question: 'Comment utiliser mon QR code à l\'entrée ?', answer: 'À l\'entrée de l\'événement physique :\n1. Ouvrez votre ticket depuis "Mes Tickets" ou l\'email de confirmation\n2. Présentez le QR code à l\'agent de sécurité\n3. Le QR code sera scanné une seule fois\n\nNe partagez jamais votre QR code avant l\'événement — il ne peut être utilisé qu\'une seule fois.', icon: Smartphone },
   { id: '10', category: 'QR Code & Événements', question: 'Que faire si mon QR code ne fonctionne pas ?', answer: 'Solutions possibles :\n• Augmentez la luminosité de votre écran au maximum\n• Téléchargez à nouveau le ticket depuis "Mes Tickets"\n• Imprimez le billet PDF reçu par email\n• Contactez l\'équipe sur place avec votre email de confirmation et numéro de commande', icon: HelpCircle },
   { id: '11', category: 'Sécurité', question: 'Mes données de paiement sont-elles sécurisées ?', answer: 'Oui, absolument :\n• Chiffrement SSL/TLS pour toutes les transactions\n• Paiements traités par Stripe et Paystack (certifiés PCI-DSS)\n• Fééti Play ne stocke jamais vos coordonnées bancaires complètes\n• Authentification à deux facteurs disponible', icon: Shield },
   { id: '12', category: 'Support Technique', question: 'Le stream se coupe ou est de mauvaise qualité, que faire ?', answer: 'Solutions de dépannage :\n1. Vérifiez votre connexion Internet (testez votre débit)\n2. Actualisez la page (F5)\n3. Videz le cache de votre navigateur\n4. Essayez en navigation privée\n5. Réduisez la qualité vidéo manuellement\n\nSi le problème vient de notre côté, nous en serons informés automatiquement.', icon: HelpCircle },
@@ -54,7 +54,7 @@ export function FAQ() {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
               <HelpCircle className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -150,7 +150,7 @@ export function FAQ() {
         </div>
 
         {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 text-center mt-10">
+        <div className="bg-blue-600 rounded-xl p-8 text-center mt-10">
           <HelpCircle className="w-10 h-10 mx-auto mb-3" />
           <h3 className="text-xl font-bold mb-2">Vous ne trouvez pas votre réponse ?</h3>
           <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">Notre équipe support est disponible pour vous aider.</p>

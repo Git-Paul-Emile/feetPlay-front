@@ -64,7 +64,7 @@ export function ManageSubscriptions() {
                     key={subscription.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
+                    className="bg-[#1a1a2e]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
                   >
                     <div className="flex items-start gap-4 mb-6">
                       <img
@@ -138,7 +138,7 @@ export function ManageSubscriptions() {
               <p className="text-white/60 text-lg mb-4">Aucun abonnement actif</p>
               <button
                 onClick={() => navigate('/createurs')}
-                className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white px-6 py-3 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+                className="bg-[#DE0035] hover:bg-[#c5002f] text-white px-6 py-3 rounded-lg font-semibold transition-all"
               >
                 Découvrir les créateurs
               </button>
@@ -166,7 +166,7 @@ export function ManageSubscriptions() {
                       key={subscription.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-gradient-to-br from-[#1a1a2e]/40 to-[#16202e]/40 backdrop-blur-sm border border-white/5 rounded-2xl p-6 opacity-60"
+                      className="bg-[#1a1a2e]/40 backdrop-blur-sm border border-white/5 rounded-2xl p-6 opacity-60"
                     >
                       <div className="flex items-start gap-4 mb-4">
                         <img
@@ -196,7 +196,7 @@ export function ManageSubscriptions() {
 
                       <button
                         onClick={() => navigate(`/creator/${subscription.creatorId}`)}
-                        className="w-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white py-2.5 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+                        className="w-full bg-[#DE0035] hover:bg-[#c5002f] text-white py-2.5 rounded-lg font-semibold transition-all"
                       >
                         Se réabonner
                       </button>
@@ -210,7 +210,7 @@ export function ManageSubscriptions() {
         {/* Payment History */}
         <section>
           <h2 className="text-white text-2xl font-bold mb-6">Historique des paiements</h2>
-          <div className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+          <div className="bg-[#1a1a2e]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-white/5">
@@ -277,7 +277,7 @@ export function ManageSubscriptions() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl max-w-md w-full p-6 border border-white/10"
+              className="bg-[#1a1a2e] rounded-2xl max-w-md w-full p-6 border border-white/10"
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">

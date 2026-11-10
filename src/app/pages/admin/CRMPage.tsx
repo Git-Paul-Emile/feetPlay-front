@@ -100,12 +100,12 @@ export function CRMPage() {
   }
 
   const kpis = stats ? [
-    { label: 'Utilisateurs total',   value: stats.totalUsers.toLocaleString(),       icon: Users,     color: 'from-blue-500 to-cyan-500' },
-    { label: 'Nouveaux ce mois',     value: `+${stats.newUsersThisMonth}`,            icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
-    { label: 'Chaînes actives',      value: stats.totalChannels.toLocaleString(),     icon: Tv,        color: 'from-orange-500 to-amber-500' },
-    { label: 'Événements créés',     value: stats.totalEvents.toLocaleString(),       icon: Radio,     color: 'from-purple-500 to-pink-500' },
-    { label: 'Tickets vendus',       value: stats.totalTickets.toLocaleString(),      icon: UserCheck, color: 'from-[#cdff71] to-[#a8e34f]' },
-    { label: 'Abonnés premium+',     value: planData.filter(p => ['premium','vip'].includes(p.key)).reduce((s,p) => s + p.count, 0).toLocaleString(), icon: Crown, color: 'from-[#fcc434] to-amber-500' },
+    { label: 'Utilisateurs total',   value: stats.totalUsers.toLocaleString(),       icon: Users,     color: 'bg-blue-500' },
+    { label: 'Nouveaux ce mois',     value: `+${stats.newUsersThisMonth}`,            icon: TrendingUp, color: 'bg-green-500' },
+    { label: 'Chaînes actives',      value: stats.totalChannels.toLocaleString(),     icon: Tv,        color: 'bg-orange-500' },
+    { label: 'Événements créés',     value: stats.totalEvents.toLocaleString(),       icon: Radio,     color: 'bg-purple-500' },
+    { label: 'Tickets vendus',       value: stats.totalTickets.toLocaleString(),      icon: UserCheck, color: 'bg-[#cdff71]' },
+    { label: 'Abonnés premium+',     value: planData.filter(p => ['premium','vip'].includes(p.key)).reduce((s,p) => s + p.count, 0).toLocaleString(), icon: Crown, color: 'bg-[#fcc434]' },
   ] : [];
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -136,7 +136,7 @@ export function CRMPage() {
             transition={{ delay: i * 0.07 }}
             className="bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-[12px] p-4"
           >
-            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${kpi.color} flex items-center justify-center mb-3`}>
+            <div className={`w-10 h-10 rounded-lg ${kpi.color} flex items-center justify-center mb-3`}>
               <kpi.icon className="w-5 h-5 text-white" />
             </div>
             <p className="text-white/60 text-xs mb-1 leading-tight">{kpi.label}</p>

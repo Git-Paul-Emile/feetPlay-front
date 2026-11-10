@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Play, Pause, Volume2, VolumeX, Maximize, Clock, Calendar, MapPin } from 'lucide-react';
+import { X, Play, Pause, Volume2, VolumeX, Maximize, Clock, Calendar, MapPin, Clapperboard as ClapperboardIcon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface ReplayPlayerModalProps {
@@ -279,7 +279,7 @@ export function ReplayPlayerModal({ isOpen, onClose, replay }: ReplayPlayerModal
                 <div className="absolute top-4 left-4 z-40">
                   <div className="bg-[#CDFF71] px-4 py-2 rounded-full">
                     <span className="font-['Inter',sans-serif] font-bold text-[#000441] text-sm">
-                      🎬 REPLAY GRATUIT
+                      <ClapperboardIcon className="w-4 h-4 inline-block mr-1.5 -mt-0.5 align-middle" aria-hidden="true" />REPLAY GRATUIT
                     </span>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export function ReplayPlayerModal({ isOpen, onClose, replay }: ReplayPlayerModal
                 {/* CTA */}
                 <div className="mt-6 p-4 bg-white/5 rounded-lg border border-[#CDFF71]/20">
                   <p className="font-['Inter',sans-serif] text-white/80 text-sm text-center">
-                    🎉 Ce replay est <span className="text-[#CDFF71] font-bold">100% gratuit</span> et disponible immédiatement !
+                    Ce replay est <span className="text-[#CDFF71] font-bold">100% gratuit</span> et disponible immédiatement !
                   </p>
                 </div>
               </div>

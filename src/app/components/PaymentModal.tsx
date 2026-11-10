@@ -105,10 +105,10 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10"
+          className="bg-[#1a1a2e] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-br from-[#1a1a2e] to-[#16202e] border-b border-white/10 p-6 flex items-center justify-between">
+          <div className="sticky top-0 bg-[#1a1a2e] border-b border-white/10 p-6 flex items-center justify-between">
             <div>
               <h2 className="text-white text-2xl font-bold">Paiement sécurisé</h2>
               <p className="text-white/60 text-sm mt-1">
@@ -172,7 +172,7 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white py-3.5 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+                  className="w-full bg-[#DE0035] hover:bg-[#c5002f] text-white py-3.5 rounded-lg font-semibold transition-all"
                 >
                   Continuer
                 </button>
@@ -271,7 +271,7 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
 
                 <button
                   onClick={handleConfirmPayment}
-                  className="w-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white py-3.5 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all mt-6"
+                  className="w-full bg-[#DE0035] hover:bg-[#c5002f] text-white py-3.5 rounded-lg font-semibold transition-all mt-6"
                 >
                   Confirmer le paiement
                 </button>
@@ -305,7 +305,7 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
                 </p>
                 <button
                   onClick={resetAndClose}
-                  className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+                  className="bg-[#DE0035] hover:bg-[#c5002f] text-white px-8 py-3 rounded-lg font-semibold transition-all"
                 >
                   Terminer
                 </button>
@@ -325,7 +325,7 @@ export function PaymentModal({ isOpen, onClose, plan, onSuccess }: PaymentModalP
                 <div className="flex gap-3 justify-center">
                   <button
                     onClick={() => setStep('details')}
-                    className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+                    className="bg-[#DE0035] hover:bg-[#c5002f] text-white px-8 py-3 rounded-lg font-semibold transition-all"
                   >
                     Réessayer
                   </button>

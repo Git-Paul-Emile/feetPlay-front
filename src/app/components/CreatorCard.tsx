@@ -16,7 +16,7 @@ export function CreatorCard({ id, name, category, followers, rating, image }: Cr
     <motion.div
       whileHover={{ y: -8 }}
       transition={{ duration: 0.3 }}
-      className="group relative bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] rounded-2xl overflow-hidden border border-white/10 hover:border-[#CDFF71]/50 transition-all duration-300"
+      className="group relative bg-[#2a2a2a] rounded-2xl overflow-hidden border border-white/10 hover:border-[#CDFF71]/50 transition-all duration-300"
     >
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden">
@@ -63,7 +63,7 @@ export function CreatorCard({ id, name, category, followers, rating, image }: Cr
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          className="absolute bottom-5 right-5 w-10 h-10 bg-[#CDFF71] rounded-full flex items-center justify-center shadow-lg hover:shadow-[0_0_20px_rgba(205,255,113,0.6)] transition-all duration-300"
+          className="absolute bottom-5 right-5 w-10 h-10 bg-[#CDFF71] rounded-full flex items-center justify-center shadow-lg transition-all duration-300"
         >
           <ArrowRight className="w-5 h-5 text-black" strokeWidth={2.5} />
         </motion.button>

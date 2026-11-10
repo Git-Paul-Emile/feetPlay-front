@@ -674,7 +674,7 @@ export function SettingsPage() {
                       </div>
                       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-cyan-400 to-[#cdff71] transition-all duration-500"
+                          className="h-full bg-cyan-400 transition-all duration-500"
                           style={{ width: `${monitoringData.metrics.ram.usagePercent}%` }}
                         />
                       </div>

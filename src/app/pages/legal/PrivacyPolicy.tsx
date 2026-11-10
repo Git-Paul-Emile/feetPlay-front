@@ -22,7 +22,7 @@ export function PrivacyPolicy() {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -128,7 +128,7 @@ export function PrivacyPolicy() {
         </Section>
 
         {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-8 text-center mt-8">
+        <div className="bg-purple-600 rounded-xl p-8 text-center mt-8">
           <Shield className="w-10 h-10 mx-auto mb-3" />
           <h3 className="text-xl font-bold mb-2">Vos Données, Notre Responsabilité</h3>
           <p className="text-purple-100 mb-6 max-w-xl mx-auto text-sm">Nous nous engageons à protéger votre vie privée avec les plus hauts standards de sécurité.</p>

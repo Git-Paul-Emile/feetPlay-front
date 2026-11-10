@@ -22,7 +22,7 @@ export function CookiePolicy() {
             <ArrowLeft className="w-4 h-4" /> Retour
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
               <Cookie className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -138,7 +138,7 @@ export function CookiePolicy() {
         </Section>
 
         {/* Footer CTA */}
-        <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl p-8 text-center mt-8">
+        <div className="bg-amber-500 rounded-xl p-8 text-center mt-8">
           <Cookie className="w-10 h-10 mx-auto mb-3" />
           <h3 className="text-xl font-bold mb-2">Vous Contrôlez Vos Cookies</h3>
           <p className="text-amber-100 mb-6 max-w-xl mx-auto text-sm">Gérez vos préférences à tout moment pour une expérience de streaming adaptée à vos choix.</p>

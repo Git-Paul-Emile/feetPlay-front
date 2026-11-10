@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { CalendarEventCard } from '../components/CalendarEventCard';
 import { EventPlayerModal } from '../components/EventPlayerModal';
-import { Heart, Trash2, Calendar, Filter } from 'lucide-react';
+import { Heart, Trash2, Calendar, Filter, Heart as HeartIcon } from 'lucide-react';
 import { SortFilter, SortOption } from '../components/SortFilter';
 import { sortEvents } from '../utils/sortEvents';
 
@@ -61,7 +61,7 @@ export function Favorites() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#DE0035] to-[#FF1744] rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#DE0035] rounded-full flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white" fill="white" />
                 </div>
                 <div>
@@ -244,7 +244,7 @@ export function Favorites() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', damping: 15 }}
-              className="w-24 h-24 bg-gradient-to-br from-[#DE0035]/20 to-[#FF1744]/20 rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-24 h-24 bg-[#DE0035]/20 rounded-full flex items-center justify-center mx-auto mb-6"
             >
               <Heart className="w-12 h-12 text-[#DE0035]" />
             </motion.div>
@@ -252,7 +252,7 @@ export function Favorites() {
               Aucun favori pour le moment
             </h2>
             <p className="font-['DM_Sans',sans-serif] text-white/60 text-[16px] mb-6 max-w-md mx-auto">
-              Ajoutez des événements à vos favoris en cliquant sur l'icône ❤️ pour les retrouver facilement ici.
+              Ajoutez des événements à vos favoris en cliquant sur l'icône <HeartIcon className="w-4 h-4 inline-block mr-1.5 -mt-0.5 align-middle" aria-hidden="true" />pour les retrouver facilement ici.
             </p>
             <motion.a
               href="/"

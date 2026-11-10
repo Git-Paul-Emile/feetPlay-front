@@ -69,7 +69,7 @@ export function CreatorDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6"
+            className="bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
@@ -88,7 +88,7 @@ export function CreatorDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-green-500/20 to-green-600/20 backdrop-blur-sm border border-green-500/30 rounded-2xl p-6"
+            className="bg-green-500/20 backdrop-blur-sm border border-green-500/30 rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
@@ -109,7 +109,7 @@ export function CreatorDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6"
+            className="bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
@@ -130,7 +130,7 @@ export function CreatorDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-red-500/20 to-red-600/20 backdrop-blur-sm border border-red-500/30 rounded-2xl p-6"
+            className="bg-red-500/20 backdrop-blur-sm border border-red-500/30 rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
@@ -148,7 +148,7 @@ export function CreatorDashboard() {
 
         {/* Subscriber Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-6">
+          <div className="bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-6">
             <h3 className="text-white text-lg font-semibold mb-4">Plan Basic</h3>
             <p className="text-white text-4xl font-bold mb-2">
               {stats.subscribersByTier.basic.toLocaleString()}
@@ -156,7 +156,7 @@ export function CreatorDashboard() {
             <p className="text-white/60">abonnés</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6">
+          <div className="bg-purple-500/10 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6">
             <h3 className="text-white text-lg font-semibold mb-4">Plan Premium</h3>
             <p className="text-white text-4xl font-bold mb-2">
               {stats.subscribersByTier.premium.toLocaleString()}
@@ -164,7 +164,7 @@ export function CreatorDashboard() {
             <p className="text-white/60">abonnés</p>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 backdrop-blur-sm border border-yellow-500/20 rounded-2xl p-6">
+          <div className="bg-yellow-500/10 backdrop-blur-sm border border-yellow-500/20 rounded-2xl p-6">
             <h3 className="text-white text-lg font-semibold mb-4">Plan VIP</h3>
             <p className="text-white text-4xl font-bold mb-2">
               {stats.subscribersByTier.vip.toLocaleString()}
@@ -174,7 +174,7 @@ export function CreatorDashboard() {
         </div>
 
         {/* Revenue Chart */}
-        <div className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-12">
+        <div className="bg-[#1a1a2e]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-12">
           <h2 className="text-white text-2xl font-bold mb-6">Évolution des revenus</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={stats.revenueByMonth}>
@@ -215,7 +215,7 @@ export function CreatorDashboard() {
             <h2 className="text-white text-2xl font-bold">Contenu exclusif</h2>
             <button
               onClick={() => setShowPublishModal(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white px-6 py-3 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
+              className="flex items-center gap-2 bg-[#DE0035] hover:bg-[#c5002f] text-white px-6 py-3 rounded-lg font-semibold transition-all"
             >
               <Plus className="w-5 h-5" />
               Publier du contenu
@@ -228,7 +228,7 @@ export function CreatorDashboard() {
                 key={content.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden group"
+                className="bg-[#1a1a2e]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden group"
               >
                 <div className="relative aspect-video">
                   <img
@@ -288,7 +288,7 @@ export function CreatorDashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-gradient-to-br from-[#1a1a2e] to-[#16202e] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-white/10"
+              className="bg-[#1a1a2e] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-white/10"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-white text-2xl font-bold">Publier du contenu exclusif</h2>
@@ -376,7 +376,7 @@ export function CreatorDashboard() {
 
                 <button
                   onClick={handlePublishContent}
-                  className="w-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white py-3.5 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-[#DE0035] hover:bg-[#c5002f] text-white py-3.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
                 >
                   <Upload className="w-5 h-5" />
                   Publier

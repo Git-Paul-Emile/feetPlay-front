@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Download, Share2 } from 'lucide-react';
+import { X, Download, Share2, Check as CheckIcon } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import svgPaths from "../../imports/svg-z30khrsoqy";
 import { PurchaseData } from './PurchaseModal';
@@ -70,7 +70,7 @@ export function DigitalTicket({ isOpen, onClose, purchaseData }: DigitalTicketPr
             <button
               onClick={onClose}
               className="absolute -top-12 right-0 w-10 h-10 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-10"
-              style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
             >
               <X className="w-5 h-5 text-white" />
             </button>
@@ -227,7 +227,7 @@ export function DigitalTicket({ isOpen, onClose, purchaseData }: DigitalTicketPr
               className="mt-6 text-center"
             >
               <p className="font-['Inter',sans-serif] text-[#CDFF71] text-sm">
-                ✓ Achat confirmé ! Un email de confirmation a été envoyé à {purchaseData.userEmail}
+                <CheckIcon className="w-4 h-4 inline-block mr-1.5 -mt-0.5 align-middle" aria-hidden="true" />Achat confirmé ! Un email de confirmation a été envoyé à {purchaseData.userEmail}
               </p>
             </motion.div>
           </motion.div>

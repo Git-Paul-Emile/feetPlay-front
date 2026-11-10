@@ -12,7 +12,7 @@ function NextArrow({ onClick }: { onClick?: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="absolute top-1/2 -right-6 -translate-y-1/2 z-10 w-12 h-12 bg-[#CDFF71] rounded-full flex items-center justify-center shadow-lg hover:shadow-[0_0_25px_rgba(205,255,113,0.6)] hover:scale-110 transition-all duration-300"
+      className="absolute top-1/2 -right-6 -translate-y-1/2 z-10 w-12 h-12 bg-[#CDFF71] rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-300"
     >
       <ChevronRight className="w-6 h-6 text-black" strokeWidth={2.5} />
     </button>
@@ -23,7 +23,7 @@ function PrevArrow({ onClick }: { onClick?: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="absolute top-1/2 -left-6 -translate-y-1/2 z-10 w-12 h-12 bg-[#CDFF71] rounded-full flex items-center justify-center shadow-lg hover:shadow-[0_0_25px_rgba(205,255,113,0.6)] hover:scale-110 transition-all duration-300"
+      className="absolute top-1/2 -left-6 -translate-y-1/2 z-10 w-12 h-12 bg-[#CDFF71] rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-300"
     >
       <ChevronLeft className="w-6 h-6 text-black" strokeWidth={2.5} />
     </button>
@@ -120,7 +120,7 @@ export function Createurs() {
         >
           <div
             className={`relative bg-white/10 backdrop-blur-xl rounded-full border transition-all duration-300 ${
-              searchFocused ? 'border-[#CDFF71] shadow-[0_0_30px_rgba(205,255,113,0.3)]' : 'border-white/20'
+              searchFocused ? 'border-[#CDFF71]' : 'border-white/20'
             }`}
           >
             <Search
@@ -173,7 +173,7 @@ export function Createurs() {
                   key={creator.id}
                   whileHover={{ scale: 1.03 }}
                   onClick={() => navigate(`/creator-profile/${creator.id}`)}
-                  className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16202e]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer group"
+                  className="bg-[#1a1a2e]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer group"
                 >
                   <div className="relative h-48">
                     <img
@@ -223,7 +223,7 @@ export function Createurs() {
                         <span className="text-green-400 font-semibold text-sm">Abonné</span>
                       </div>
                     ) : (
-                      <button className="w-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white py-2.5 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all">
+                      <button className="w-full bg-[#DE0035] hover:bg-[#c5002f] text-white py-2.5 rounded-lg font-semibold transition-all">
                         S'abonner
                       </button>
                     )}

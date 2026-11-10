@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { ChevronLeft, ChevronRight, Play, MapPin, Calendar, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, MapPin, Calendar, Clock, Star as StarIcon } from 'lucide-react';
 
 interface BannerContent {
   id: number;
@@ -82,7 +82,7 @@ export function BannerSlider({ banners }: BannerSliderProps) {
               )}
               {banner.type === 'promo' && (
                 <span className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                  ⭐ PROMOTION
+                  <StarIcon className="w-4 h-4 inline-block mr-1.5 -mt-0.5 align-middle" aria-hidden="true" />PROMOTION
                 </span>
               )}
             </div>

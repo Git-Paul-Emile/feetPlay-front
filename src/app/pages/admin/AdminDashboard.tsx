@@ -61,28 +61,28 @@ export function AdminDashboard() {
       value: fmt(stats.totalUsers),
       sub: `+${fmt(stats.newUsersThisMonth)} ce mois`,
       icon: Users,
-      color: 'from-blue-500 to-cyan-500',
+      color: 'bg-blue-500',
     },
     {
       name: 'Événements',
       value: fmt(stats.totalEvents),
       sub: `${fmt(stats.liveEvents)} en live`,
       icon: CalendarDays,
-      color: 'from-[#cdff71] to-[#a8e34f]',
+      color: 'bg-[#cdff71]',
     },
     {
       name: 'Revenus du mois',
       value: `${fmt(stats.revenueThisMonth)} FCFA`,
       sub: `${fmt(stats.totalRevenue)} FCFA au total`,
       icon: DollarSign,
-      color: 'from-green-500 to-emerald-500',
+      color: 'bg-green-500',
     },
     {
       name: 'Tickets vendus',
       value: fmt(stats.totalTickets),
       sub: `${fmt(stats.ticketsThisMonth)} ce mois`,
       icon: ShoppingCart,
-      color: 'from-purple-500 to-pink-500',
+      color: 'bg-purple-500',
     },
   ] : [];
 
@@ -119,7 +119,7 @@ export function AdminDashboard() {
             transition={{ delay: index * 0.05 }}
             className="bg-[rgba(255,255,255,0.05)] backdrop-blur-[20px] border border-white/10 rounded-[12px] p-6"
           >
-            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4`}>
+            <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center mb-4`}>
               <stat.icon className="w-6 h-6 text-white" />
             </div>
             <p className="font-['Inter',sans-serif] text-white/60 text-sm mb-1">{stat.name}</p>

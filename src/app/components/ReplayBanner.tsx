@@ -60,7 +60,7 @@ export function ReplayBanner() {
 
       <div
         className="absolute inset-0 rounded-[20px] md:rounded-[25px] lg:rounded-[30px] opacity-72 mix-blend-multiply"
-        style={{ background: 'linear-gradient(90deg, #03033b 20.325%, #16bda0 45.393%, rgba(0,0,0,0) 70.461%)' }}
+        style={{ background: 'rgba(0, 0, 0, 0.45)' }}
       />
 
       <div className="absolute inset-0 flex items-center px-4 md:px-6 lg:px-8 xl:px-12">

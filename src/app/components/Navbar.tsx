@@ -109,22 +109,22 @@ export function Navbar() {
             {/* Search Button */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20"
-              style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
+              className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 border border-white/20"
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
               aria-label="Rechercher"
             >
-              <Search className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,1)]" strokeWidth={2.5} />
+              <Search className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110" strokeWidth={2.5} />
             </button>
 
             {/* Flag/Location Button with Dropdown */}
             <div className="relative hidden md:block">
               <button
-                className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] border border-white/20"
-                style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%))" }}
+                className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 border border-white/20"
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                 onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
                 aria-label="Sélectionner un pays"
               >
-                <MapPin className="w-5 h-5 text-white transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,1)]" strokeWidth={2.5} />
+                <MapPin className="w-5 h-5 text-white transition-all duration-300 group-hover:scale-110" strokeWidth={2.5} />
               </button>
 
               {/* Country Dropdown Menu */}
@@ -175,8 +175,8 @@ export function Navbar() {
                 <>
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20 overflow-hidden"
-                    style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
+                    className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 border border-white/20 overflow-hidden"
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                     aria-label="Menu utilisateur"
                   >
                     {user.avatar ? (
@@ -221,11 +221,11 @@ export function Navbar() {
               ) : (
                 <Link to="/login">
                   <button
-                    className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-[0_0_25px_rgba(205,255,113,0.5)] border border-white/20"
-                    style={{ backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(205, 255, 113, 0.1) 100%))" }}
+                    className="group relative w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 border border-white/20"
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                     aria-label="Profil"
                   >
-                    <User className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(205,255,113,1)]" strokeWidth={2.5} />
+                    <User className="w-5 h-5 text-[#CDFF71] transition-all duration-300 group-hover:scale-110" strokeWidth={2.5} />
                   </button>
                 </Link>
               )}

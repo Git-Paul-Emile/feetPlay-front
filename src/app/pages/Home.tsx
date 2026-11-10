@@ -365,7 +365,7 @@ export function Home() {
                     className="mb-5 md:mb-6 lg:mb-7"
                   >
                     {slide?.isFree ? (
-                      <div className="inline-flex items-center gap-2 md:gap-2.5 bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
+                      <div className="inline-flex items-center gap-2 md:gap-2.5 bg-[#DE0035] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
                         <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full bg-white flex items-center justify-center">
                           <span className="text-[#DE0035] text-xs md:text-sm lg:text-base font-bold"></span>
                         </div>
@@ -374,7 +374,7 @@ export function Home() {
                         </span>
                       </div>
                     ) : slide?.price ? (
-                      <div className="inline-flex items-center gap-2 md:gap-2.5 bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
+                      <div className="inline-flex items-center gap-2 md:gap-2.5 bg-[#DE0035] px-4 md:px-5 lg:px-6 py-2 md:py-2.5 lg:py-3 rounded-full">
                         <div className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 rounded-full bg-white flex items-center justify-center">
                           <span className="text-[#DE0035] text-xs md:text-sm lg:text-base font-bold">₣</span>
                         </div>
@@ -470,7 +470,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(upcomingRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -480,7 +480,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(upcomingRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -520,13 +520,13 @@ export function Home() {
                   {/* Price Badge */}
                   <div className="absolute right-4 md:right-6 top-16 md:top-20 lg:top-28">
                     {event.isFree ? (
-                      <div className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-3 md:px-4 py-2 rounded-full">
+                      <div className="bg-[#DE0035] px-3 md:px-4 py-2 rounded-full">
                         <span className="font-['DM_Sans',sans-serif] font-bold text-white text-xs md:text-sm">
                           GRATUIT
                         </span>
                       </div>
                     ) : (
-                      <div className="bg-gradient-to-r from-[#DE0035] to-[#FF1744] px-3 md:px-4 py-2 rounded-full">
+                      <div className="bg-[#DE0035] px-3 md:px-4 py-2 rounded-full">
                         <span className="font-['DM_Sans',sans-serif] font-bold text-white text-xs md:text-sm">
                           {event.price?.toLocaleString()} FCFA
                         </span>
@@ -569,7 +569,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(liveStreamRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -579,7 +579,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(liveStreamRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -614,7 +614,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(freeEventsRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -624,7 +624,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(freeEventsRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%))" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -658,7 +658,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(replayRef, 'left')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center rotate-180 hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Précédent"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">
@@ -668,7 +668,7 @@ export function Home() {
               <button 
                 onClick={() => scrollCarousel(replayRef, 'right')}
                 className="w-10 h-10 md:w-12 md:h-12 backdrop-blur-[5px] rounded-[28px] flex items-center justify-center hover:scale-110 hover:bg-white/10 active:scale-95 transition-all" 
-                style={{ backgroundImage: "linear-gradient(88.1659deg, rgba(255, 255, 255, 0.3) 0%, rgba(32, 11, 11, 0.3) 100%)" }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.12)" }}
                 aria-label="Suivant"
               >
                 <svg className="w-4 h-3 md:w-5 md:h-3 rotate-90" fill="none" viewBox="0 0 20.1716 12.1216">

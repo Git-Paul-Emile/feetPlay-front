@@ -237,11 +237,8 @@ export function ReplayCard({ image, title, location, date, duration, category, o
         </div>
       </div>
 
-      {/* Hover Glow Effect */}
+      {/* Bordure au survol */}
       <div className="absolute inset-0 rounded-[12px] border-2 border-[#DE0035] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" 
-           style={{ 
-             boxShadow: '0 0 20px rgba(222, 0, 53, 0.5)' 
-           }} 
       />
     </motion.div>
   );
