@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 import {
   UserSubscription,
   SubscriptionPlan,
@@ -57,6 +58,50 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Abonnements réels du spectateur (persistés côté serveur)
+  const { user } = useAuth();
+  const loadMySubscriptions = async () => {
+    if (!user) { setUserSubscriptions([]); setPayments([]); return; }
+    try {
+      const { default: CreatorAPI } = await import('../services/api/CreatorAPI');
+      const subs = await CreatorAPI.getMySubscriptions();
+      setUserSubscriptions(subs.map((s) => {
+        const start = new Date(s.startDate);
+        const end = s.endDate ? new Date(s.endDate) : new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+        return {
+          id: s.id,
+          userId: user.id,
+          creatorId: s.creatorId,
+          planId: s.plan,
+          status: 'active' as SubscriptionStatus,
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+          nextBillingDate: end.toISOString(),
+          amount: s.price,
+          currency: s.currency,
+          autoRenew: true,
+        };
+      }));
+      setPayments(subs.filter((s) => s.price > 0).map((s) => ({
+        id: `pay-${s.id}`,
+        subscriptionId: s.id,
+        userId: user.id,
+        creatorId: s.creatorId,
+        amount: s.price,
+        currency: s.currency,
+        status: 'completed' as const,
+        paymentMethod: 'simulation',
+        transactionId: s.id,
+        createdAt: s.startDate,
+        processedAt: s.startDate,
+      })));
+    } catch (err) {
+      console.error('[subscription] Chargement des abonnements impossible:', err);
+    }
+  };
+
+  useEffect(() => { void loadMySubscriptions(); }, [user?.id]);
+
   const subscribe = async (
     creatorId: string,
     planId: string,
@@ -109,6 +154,16 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   };
 
   const cancelSubscription = async (subscriptionId: string, reason: string): Promise<boolean> => {
+    const target = userSubscriptions.find(sub => sub.id === subscriptionId);
+    if (target) {
+      try {
+        const { default: CreatorAPI } = await import('../services/api/CreatorAPI');
+        await CreatorAPI.unsubscribe(target.creatorId);
+      } catch (err) {
+        console.error('[subscription] Annulation refusée par le serveur:', err);
+        return false;
+      }
+    }
     setUserSubscriptions(prev =>
       prev.map(sub =>
         sub.id === subscriptionId

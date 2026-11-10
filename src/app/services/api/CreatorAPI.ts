@@ -195,6 +195,17 @@ const CreatorAPI = {
     return body.data as { subscribed: boolean };
   },
 
+  async getMySubscriptions(): Promise<Array<{
+    id: string; creatorId: string; plan: string; price: number; currency: string;
+    startDate: string; endDate: string | null; isActive: boolean;
+    creator: { id: string; channelName: string; channelSlug: string; avatar: string | null; category: string | null };
+  }>> {
+    const response = await fetchWithApiFallback(`/creators/subscriptions/mine`);
+    const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
+    if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
+    return body.data ?? [];
+  },
+
   async getSubscriptionStatus(creatorId: string): Promise<{ subscribed: boolean }> {
     const response = await fetchWithApiFallback(`/creators/${creatorId}/subscription`);
     const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
@@ -228,11 +239,8 @@ const CreatorAPI = {
   },
 
   async checkVideoAccess(videoId: string): Promise<{ hasAccess: boolean; reason: string }> {
-    const response = await fetchWithApiFallback(`/creators/videos/${videoId}/access`, {
-      headers: {
-        Authorization: `Bearer ${window.localStorage.getItem("feetiplay_token") ?? ""}`,
-      },
-    });
+    // Le jeton de l'utilisateur est ajouté automatiquement par fetchWithApiFallback
+    const response = await fetchWithApiFallback(`/creators/videos/${videoId}/access`);
     const body = await response.json().catch(() => ({ message: "Erreur serveur" }));
     if (!response.ok) throw new Error(body.message ?? "Erreur serveur");
     return body.data;

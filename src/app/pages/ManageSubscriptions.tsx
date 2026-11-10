@@ -53,7 +53,9 @@ export function ManageSubscriptions() {
               .filter(sub => sub.status === 'active')
               .map(subscription => {
                 const creator = creators.find(c => c.id === subscription.creatorId);
-                const plan = subscriptionPlans.find(p => p.id === subscription.planId);
+                // Plans gérés côté serveur sous forme d'un abonnement unique par chaîne
+                const plan = subscriptionPlans.find(p => p.id === subscription.planId)
+                  ?? { name: subscription.amount > 0 ? 'Abonnement Premium' : 'Abonnement gratuit' };
 
                 if (!creator || !plan) return null;
 
@@ -153,7 +155,9 @@ export function ManageSubscriptions() {
                 .filter(sub => sub.status === 'cancelled' || sub.status === 'expired')
                 .map(subscription => {
                   const creator = creators.find(c => c.id === subscription.creatorId);
-                  const plan = subscriptionPlans.find(p => p.id === subscription.planId);
+                  // Plans gérés côté serveur sous forme d'un abonnement unique par chaîne
+                const plan = subscriptionPlans.find(p => p.id === subscription.planId)
+                  ?? { name: subscription.amount > 0 ? 'Abonnement Premium' : 'Abonnement gratuit' };
 
                   if (!creator || !plan) return null;
 
@@ -191,10 +195,10 @@ export function ManageSubscriptions() {
                       )}
 
                       <button
-                        onClick={() => handleRenewSubscription(subscription.id)}
+                        onClick={() => navigate(`/creator/${subscription.creatorId}`)}
                         className="w-full bg-gradient-to-r from-[#DE0035] to-[#FF1744] text-white py-2.5 rounded-lg font-semibold hover:from-[#c5002f] hover:to-[#e6153d] transition-all"
                       >
-                        Réactiver l'abonnement
+                        Se réabonner
                       </button>
                     </motion.div>
                   );

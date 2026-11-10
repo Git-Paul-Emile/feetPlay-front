@@ -10,7 +10,7 @@ type MuxResult = Awaited<ReturnType<typeof AdminAPI.createMuxLiveStream>>;
 function statusLabel(event: AdminEventItem) {
   if (event.isLive) return 'En direct';
   if (event.isReplay) return 'Replay';
-  return 'Planifie';
+  return 'Planifié';
 }
 
 export function EventsManagement() {
@@ -28,7 +28,7 @@ export function EventsManagement() {
     setError(null);
     AdminAPI.getRecentEvents(100)
       .then(setEvents)
-      .catch((err) => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des evenements.')))
+      .catch((err) => setError(firebaseClientErrorToUserMessage(err, 'Erreur de chargement des événements.')))
       .finally(() => setLoading(false));
   };
 
@@ -77,7 +77,7 @@ export function EventsManagement() {
       await AdminAPI.deleteEvent(event.id);
       setEvents((prev) => prev.filter((item) => item.id !== event.id));
     } catch (err) {
-      setError(firebaseClientErrorToUserMessage(err, 'Impossible de supprimer cet evenement.'));
+      setError(firebaseClientErrorToUserMessage(err, 'Impossible de supprimer cet événement.'));
     } finally {
       setActionId(null);
     }
@@ -89,8 +89,8 @@ export function EventsManagement() {
     <div className="p-6 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-['DM_Sans',sans-serif] font-bold text-white text-3xl mb-2">Gestion des evenements</h1>
-          <p className="font-['Inter',sans-serif] text-white/60 text-base">Evenements reels, diffusion Mux et moderation operationnelle</p>
+          <h1 className="font-['DM_Sans',sans-serif] font-bold text-white text-3xl mb-2">Gestion des événements</h1>
+          <p className="font-['Inter',sans-serif] text-white/60 text-base">Événements réels, diffusion Mux et modération</p>
         </div>
         <button onClick={load} className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white px-4 py-2.5 rounded-lg transition-colors">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -120,7 +120,7 @@ export function EventsManagement() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
         <input
           type="text"
-          placeholder="Rechercher un evenement..."
+          placeholder="Rechercher un événement..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-[rgba(255,255,255,0.05)] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#cdff71] transition-colors"
@@ -132,7 +132,7 @@ export function EventsManagement() {
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="text-left px-5 py-4 text-white/80 text-sm">Evenement</th>
+                <th className="text-left px-5 py-4 text-white/80 text-sm">Événement</th>
                 <th className="text-left px-5 py-4 text-white/80 text-sm">Date</th>
                 <th className="text-left px-5 py-4 text-white/80 text-sm">Statut</th>
                 <th className="text-left px-5 py-4 text-white/80 text-sm">Ventes</th>
@@ -162,7 +162,7 @@ export function EventsManagement() {
                       <a href={`/event/${event.id}`} className="p-2 rounded-lg bg-white/10 hover:bg-white/15 text-white" title="Voir"><Eye className="w-4 h-4" /></a>
                       {canEdit && (
                         <>
-                          <button onClick={() => createMux(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-[#CDFF71]/10 hover:bg-[#CDFF71]/20 text-[#CDFF71] disabled:opacity-40" title="Creer live Mux"><Radio className="w-4 h-4" /></button>
+                          <button onClick={() => createMux(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-[#CDFF71]/10 hover:bg-[#CDFF71]/20 text-[#CDFF71] disabled:opacity-40" title="Créer le live Mux"><Radio className="w-4 h-4" /></button>
                           {event.muxStreamId && <button onClick={() => disableMux(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 disabled:opacity-40" title="Desactiver Mux"><Square className="w-4 h-4" /></button>}
                           <button onClick={() => deleteEvent(event)} disabled={actionId === event.id} className="p-2 rounded-lg bg-[#DE0035]/10 hover:bg-[#DE0035]/20 text-[#DE0035] disabled:opacity-40" title="Supprimer"><Trash2 className="w-4 h-4" /></button>
                         </>
@@ -174,7 +174,7 @@ export function EventsManagement() {
             </tbody>
           </table>
         </div>
-        {!loading && filteredEvents.length === 0 && <div className="py-16 text-center text-white/50">Aucun evenement trouve</div>}
+        {!loading && filteredEvents.length === 0 && <div className="py-16 text-center text-white/50">Aucun événement trouvé</div>}
       </div>
     </div>
   );

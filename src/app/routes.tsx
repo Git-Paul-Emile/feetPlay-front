@@ -46,7 +46,6 @@ const VideoPlayerLazy      = lazy(() => import('./pages/VideoPlayer').then(m => 
 // Pages v2 — nouvelles / mises à jour
 const CreateursLazy         = lazy(() => import('./pages/Createurs').then(m => ({ default: m.Createurs })));
 const CreatorDetailLazy     = lazy(() => import('./pages/CreatorDetail').then(m => ({ default: m.CreatorDetail })));
-const CreatorProfileLazy    = lazy(() => import('./pages/CreatorProfile').then(m => ({ default: m.CreatorProfile })));
 const ManageSubscriptionsLazy = lazy(() => import('./pages/ManageSubscriptions').then(m => ({ default: m.ManageSubscriptions })));
 const AboutLazy             = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
 const PressLazy             = lazy(() => import('./pages/Press').then(m => ({ default: m.Press })));
@@ -100,7 +99,6 @@ const ChannelDetail         = withSuspense(ChannelDetailLazy);
 const VideoPlayer           = withSuspense(VideoPlayerLazy);
 const Createurs             = withSuspense(CreateursLazy);
 const CreatorDetail         = withSuspense(CreatorDetailLazy);
-const CreatorProfile        = withSuspense(CreatorProfileLazy);
 const ManageSubscriptions   = withSuspense(ManageSubscriptionsLazy);
 const About                 = withSuspense(AboutLazy);
 const Press                 = withSuspense(PressLazy);
@@ -156,7 +154,7 @@ export const router = createBrowserRouter([
       // Pages v2
       { path: 'createurs',            Component: Createurs },
       { path: 'creator/:id',          Component: CreatorDetail },
-      { path: 'creator-profile/:id',  Component: CreatorProfile },
+      { path: 'creator-profile/:id',  Component: CreatorDetail },
       { path: 'subscriptions',        Component: ManageSubscriptions },
       { path: 'creator-dashboard',    Component: CreatorDashboardPublic },
       { path: 'about',                Component: About },

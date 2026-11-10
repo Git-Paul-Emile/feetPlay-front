@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router';
-import { ArrowLeft, Star, MapPin, Users, Play, Mic, FileText } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router';
+import { ArrowLeft, MapPin, Users, Play, Mic, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { CreatorContentCard } from '../components/CreatorContentCard';
 import CreatorAPI from '../services/api/CreatorAPI';
+import { SubscriptionModal } from '../components/creator/SubscriptionModal';
+import { useAuth } from '../contexts/AuthContext';
 
 type ContentTab = 'videos' | 'podcasts' | 'autres';
 
@@ -13,6 +15,18 @@ export function CreatorDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ContentTab>('videos');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showSubModal, setShowSubModal] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Statut d'abonnement réel (serveur) une fois la chaîne chargée
+  useEffect(() => {
+    if (!creator?.id || !isAuthenticated) { setIsSubscribed(false); return; }
+    CreatorAPI.getSubscriptionStatus(creator.id)
+      .then((res) => setIsSubscribed(res.subscribed))
+      .catch(() => setIsSubscribed(false));
+  }, [creator?.id, isAuthenticated]);
 
   useEffect(() => {
     if (!id) return;
@@ -32,20 +46,20 @@ export function CreatorDetail() {
     // Filtrage basique en fonction de la catégorie si le backend renvoie toutes les vidéos dans creator.videos
     switch (activeTab) {
       case 'videos':
-        return creator.videos?.filter((v: any) => v.category === 'video' || !v.category) || [];
+        return creator.videos?.filter((v: any) => v.category !== 'podcast' && v.category !== 'autre') || [];
       case 'podcasts':
         return creator.videos?.filter((v: any) => v.category === 'podcast') || [];
       case 'autres':
-        return creator.videos?.filter((v: any) => v.category !== 'video' && v.category !== 'podcast' && v.category) || [];
+        return creator.videos?.filter((v: any) => v.category === 'autre') || [];
       default:
         return [];
     }
   };
 
   const tabs = [
-    { id: 'videos' as ContentTab, label: 'Vidéos', icon: Play, count: creator?.videos?.filter((v: any) => v.category === 'video' || !v.category).length || 0 },
+    { id: 'videos' as ContentTab, label: 'Vidéos', icon: Play, count: creator?.videos?.filter((v: any) => v.category !== 'podcast' && v.category !== 'autre').length || 0 },
     { id: 'podcasts' as ContentTab, label: 'Podcasts', icon: Mic, count: creator?.videos?.filter((v: any) => v.category === 'podcast').length || 0 },
-    { id: 'autres' as ContentTab, label: 'Autres', icon: FileText, count: creator?.videos?.filter((v: any) => v.category !== 'video' && v.category !== 'podcast' && v.category).length || 0 }
+    { id: 'autres' as ContentTab, label: 'Autres', icon: FileText, count: creator?.videos?.filter((v: any) => v.category === 'autre').length || 0 }
   ];
 
   if (loading) {
@@ -103,21 +117,12 @@ export function CreatorDetail() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="font-['Inter',sans-serif] text-white text-4xl md:text-5xl font-bold mb-2">
-                    {creator.name}
+                    {creator.channelName || creator.name}
                   </h1>
                   <div className="flex items-center gap-4 mb-4">
                     <span className="px-4 py-1.5 bg-[#CDFF71]/10 border border-[#CDFF71]/30 rounded-full font-['Inter',sans-serif] text-[#CDFF71] text-sm font-medium">
                       {creator.category}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-5 h-5 text-[#CDFF71] fill-[#CDFF71]" />
-                      <span className="font-['Inter',sans-serif] text-white font-semibold">
-                        4.8
-                      </span>
-                      <span className="font-['Inter',sans-serif] text-white/50 text-sm">
-                        (142 avis)
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -147,8 +152,11 @@ export function CreatorDetail() {
               </div>
 
               {/* Subscribe Button */}
-              <button className="mt-6 px-8 py-3 bg-gradient-to-r from-[#CDFF71] to-[#B8E65C] text-black font-['Inter',sans-serif] font-semibold rounded-full hover:shadow-[0_0_30px_rgba(205,255,113,0.6)] transition-all duration-300">
-                S'abonner
+              <button
+                onClick={() => (isAuthenticated ? setShowSubModal(true) : navigate('/login'))}
+                className="mt-6 px-8 py-3 bg-gradient-to-r from-[#CDFF71] to-[#B8E65C] text-black font-['Inter',sans-serif] font-semibold rounded-full hover:shadow-[0_0_30px_rgba(205,255,113,0.6)] transition-all duration-300"
+              >
+                {isSubscribed ? 'Abonné · Gérer' : isAuthenticated ? "S'abonner" : "Se connecter pour s'abonner"}
               </button>
             </div>
           </div>
@@ -216,12 +224,34 @@ export function CreatorDetail() {
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
               <Link to={`/video/${content.id}`}>
-                <CreatorContentCard {...content} />
+                <CreatorContentCard
+                  image={content.thumbnail || creator.coverImage || creator.avatar || ''}
+                  title={content.title}
+                  date={new Date(content.createdAt).toLocaleDateString('fr-FR')}
+                  duration={content.duration || ''}
+                  views={`${(content.viewCount ?? 0).toLocaleString('fr-FR')} vues`}
+                  type={content.category === 'podcast' ? 'podcast' : content.category === 'autre' ? 'other' : 'video'}
+                />
               </Link>
             </motion.div>
           ))}
         </motion.div>
       </div>
+      {showSubModal && creator && (
+        <SubscriptionModal
+          creator={creator}
+          isSubscribed={isSubscribed}
+          subscriptionPrice={creator.subscriptionPrice ?? null}
+          onClose={() => setShowSubModal(false)}
+          onToggle={(subscribed) => {
+            setIsSubscribed(subscribed);
+            setCreator((prev: any) => prev && {
+              ...prev,
+              subscriberCount: Math.max(0, (prev.subscriberCount ?? 0) + (subscribed ? 1 : -1)),
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -5,8 +5,9 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useCreatorAuth } from "../../contexts/CreatorAuthContext";
 
 const CATEGORIES = [
-  "Football", "Basketball", "Tennis", "Fitness", "MMA", "Rugby",
-  "Natation", "Athlétisme", "Cyclisme", "Sports de combat", "Autre",
+  "Musique", "Concert", "Humour", "Culture", "Cinéma", "Festival",
+  "Conférence", "Business", "Religion", "Sport", "Football", "Basketball",
+  "Fitness", "Sports de combat", "Autre",
 ];
 
 export function CreatorRegister() {
@@ -32,7 +33,13 @@ export function CreatorRegister() {
   }
 
   function handleChannelName(val: string) {
-    const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    // Retire les accents avant de construire le slug (« Présentation » → « presentation »)
+    const slug = val
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
     setForm({ ...form, channelName: val, channelSlug: slug });
   }
 
@@ -183,7 +190,7 @@ export function CreatorRegister() {
               className="w-full rounded-xl bg-[#DE0035] hover:bg-[#DE0035]/80 text-white font-semibold py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 mt-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Créer ma chaîne
+              {loading ? "Création de votre chaîne..." : "Créer ma chaîne"}
             </button>
           </form>
 

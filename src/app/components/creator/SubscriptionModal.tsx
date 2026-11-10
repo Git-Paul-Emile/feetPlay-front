@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Bell, BellOff, Loader2, Crown, CreditCard, Smartphone, CheckCircle2, AlertTriangle } from "lucide-react";
 import CreatorAPI, { type Creator } from "../../services/api/CreatorAPI";
+import { legacyApiRaw } from "../../services/backend/legacyApi";
 import { useAuth } from "../../contexts/AuthContext";
 
 interface SubscriptionModalProps {
@@ -17,6 +18,45 @@ type PaymentMethod = "mobile-money" | "card" | null;
 
 const DEFAULT_PRICE = 5000;
 
+type SimulatedPayment = { provider: "stripe" | "mobile_money"; paymentId: string };
+
+async function initiateSimulatedPayment(
+  method: Exclude<PaymentMethod, null>,
+  amount: number,
+  phone?: string
+): Promise<SimulatedPayment> {
+  if (method === "card") {
+    const res = await legacyApiRaw("/payments/stripe/create-intent", {
+      method: "POST",
+      body: JSON.stringify({ amount, currency: "FCFA" }),
+    });
+    const body = await res.json().catch(() => ({}));
+    const paymentId = body?.data?.intent_id;
+    if (!res.ok || !paymentId) throw new Error(body?.message ?? "Paiement par carte refusé");
+    return { provider: "stripe", paymentId };
+  }
+
+  const res = await legacyApiRaw("/payments/mobile-money/initialize", {
+    method: "POST",
+    body: JSON.stringify({ phone: phone || "+242060000000", provider: "mtn", amount, currency: "FCFA" }),
+  });
+  const body = await res.json().catch(() => ({}));
+  const paymentId = body?.data?.transaction_id;
+  if (!res.ok || !paymentId) throw new Error(body?.message ?? "Paiement Mobile Money refusé");
+
+  // Attente de la confirmation sur le téléphone (simulée côté serveur)
+  for (let i = 0; i < 15; i++) {
+    await new Promise((r) => setTimeout(r, 1000));
+    const st = await legacyApiRaw(`/payments/mobile-money/status/${paymentId}`);
+    const sb = await st.json().catch(() => ({}));
+    const status = sb?.data?.status;
+    if (status === "completed" || status === "success" || status === "successful") break;
+    if (status === "failed") throw new Error("Paiement Mobile Money échoué");
+  }
+  return { provider: "mobile_money", paymentId };
+}
+
+
 export function SubscriptionModal({
   creator,
   isSubscribed,
@@ -24,7 +64,7 @@ export function SubscriptionModal({
   onClose,
   onToggle,
 }: SubscriptionModalProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [step, setStep] = useState<Step>("overview");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [loading, setLoading] = useState(false);
@@ -54,12 +94,11 @@ export function SubscriptionModal({
     setStep("processing");
     setError(null);
 
-    // Simulate payment processing (3s) then subscribe
-    await new Promise((r) => setTimeout(r, 2500));
-
     setLoading(true);
     try {
-      const result = await CreatorAPI.subscribe(creator.id, "paid");
+      // Paiement simulé par le moteur de paiement Feeti, puis vérifié côté serveur
+      const payment = await initiateSimulatedPayment(paymentMethod, price, user?.phone ?? undefined);
+      const result = await CreatorAPI.subscribe(creator.id, "paid", price, payment);
       onToggle(result.subscribed);
       onClose();
     } catch (err: unknown) {

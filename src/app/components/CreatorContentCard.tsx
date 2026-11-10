@@ -26,7 +26,7 @@ export function CreatorContentCard({
         return { label: 'VIDÉO', color: '#DE0035' };
       case 'podcast':
         return { label: 'PODCAST', color: '#811AEC' };
-      case 'other':
+      default:
         return { label: 'CONTENU', color: '#16BDA0' };
     }
   };

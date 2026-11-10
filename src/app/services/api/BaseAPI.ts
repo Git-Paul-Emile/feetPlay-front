@@ -44,9 +44,8 @@ class BaseAPIService {
     endpoint: string,
     options?: RequestInit & { useAdminToken?: boolean }
   ): Promise<T> {
-    const { useAdminToken: _useAdminToken, ...fetchOptions } = options ?? {};
-
-    const response = await fetchWithApiFallback(endpoint, fetchOptions);
+    // useAdminToken doit être transmis : sans lui, les routes /admin répondent 401
+    const response = await fetchWithApiFallback(endpoint, options ?? {});
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({ message: 'Erreur serveur' }));

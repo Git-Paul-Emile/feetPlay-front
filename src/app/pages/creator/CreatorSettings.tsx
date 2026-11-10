@@ -5,8 +5,9 @@ import CreatorAPI, { type CreatorStreamConfig } from "../../services/api/Creator
 import { useCreatorAuth } from "../../contexts/CreatorAuthContext";
 
 const CATEGORIES = [
-  "Football", "Basketball", "Tennis", "Fitness", "MMA", "Rugby",
-  "Natation", "Athlétisme", "Cyclisme", "Sports de combat", "Autre",
+  "Musique", "Concert", "Humour", "Culture", "Cinéma", "Festival",
+  "Conférence", "Business", "Religion", "Sport", "Football", "Basketball",
+  "Fitness", "Sports de combat", "Autre",
 ];
 
 function CopyField({ label, value }: { label: string; value: string }) {

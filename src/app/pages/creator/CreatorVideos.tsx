@@ -4,8 +4,9 @@ import { Plus, Pencil, Trash2, Play, Radio, X, Loader2 } from "lucide-react";
 import CreatorAPI, { type CreatorVideo, type CreatorVideoInput } from "../../services/api/CreatorAPI";
 
 const CATEGORIES = [
-  "Football", "Basketball", "Tennis", "Fitness", "MMA", "Rugby",
-  "Natation", "Athlétisme", "Cyclisme", "Sports de combat", "Autre",
+  "Musique", "Concert", "Humour", "Culture", "Cinéma", "Festival",
+  "Conférence", "Business", "Religion", "Sport", "Football", "Basketball",
+  "Fitness", "Sports de combat", "Autre",
 ];
 
 const emptyForm: CreatorVideoInput = {
