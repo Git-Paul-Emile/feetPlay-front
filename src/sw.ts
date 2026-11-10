@@ -5,7 +5,6 @@ import { registerRoute, NavigationRoute } from 'workbox-routing';
 import {
   NetworkFirst,
   CacheFirst,
-  StaleWhileRevalidate,
   NetworkOnly,
 } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
@@ -21,6 +20,13 @@ clientsClaim();
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
+// Anciens caches runtime remplacés (réponses opaques ou données périmées)
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    Promise.all(['cloudinary-images', 'events-api-cache'].map((name) => caches.delete(name)))
+  );
+});
+
 // ── Navigation : app shell (SPA) ─────────────────────────────────────────────
 registerRoute(
   new NavigationRoute(
@@ -35,16 +41,19 @@ registerRoute(
   )
 );
 
-// ── API events & content (read-only) ─────────────────────────────────────────
+// ── API events & content publics (lecture seule) ─────────────────────────────
+// Réseau d'abord (statut live, accès après achat) ; cache seulement hors-ligne.
+// Les requêtes authentifiées ne sont jamais mises en cache.
 registerRoute(
-  ({ url }) =>
-    url.pathname.startsWith('/api/events') ||
-    url.pathname.startsWith('/api/content') ||
-    (url.hostname === 'localhost' && url.port === '8001' && url.pathname.startsWith('/api/events')),
-  new StaleWhileRevalidate({
-    cacheName: 'events-api-cache',
+  ({ url, request }) =>
+    request.method === 'GET' &&
+    (url.pathname.startsWith('/api/events') || url.pathname.startsWith('/api/content')) &&
+    !request.headers.has('Authorization'),
+  new NetworkFirst({
+    cacheName: 'events-api-v2',
+    networkTimeoutSeconds: 4,
     plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: [200] }),
       new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 }),
     ],
   })
@@ -76,11 +85,11 @@ registerRoute(
 
 // ── Images Cloudinary ────────────────────────────────────────────────────────
 registerRoute(
-  ({ url }) => url.hostname === 'res.cloudinary.com',
+  ({ url, request }) => url.hostname === 'res.cloudinary.com' && request.mode === 'cors',
   new CacheFirst({
-    cacheName: 'cloudinary-images',
+    cacheName: 'cloudinary-images-v2',
     plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: [200] }),
       new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 }),
     ],
   })

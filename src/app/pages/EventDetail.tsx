@@ -37,7 +37,7 @@ export function EventDetail() {
 
   const { isAuthenticated } = useAuth();
   const [eventData, setEventData] = useState<EventDetailData | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [purchaseData, setPurchaseData] = useState<PurchaseData | null>(null);
@@ -81,7 +81,39 @@ export function EventDetail() {
     };
   }, [id]);
 
-  if (isFetching && !resolvedEvent) {
+  // Hooks déclarés avant tout retour anticipé (règle des hooks React)
+  const clearWatchState = () => {
+    setIsWatchOpen(false);
+    setMuxPlaybackId(null);
+    setMuxToken(null);
+    setWatchLoading(false);
+  };
+
+  useEffect(() => {
+    clearWatchState();
+    setWatchError(null);
+    setWatchStartTime(undefined);
+
+    if (!id || !isAuthenticated) return;
+    StreamingAPI.getWatchHistory('me')
+      .then(history => {
+        const entry = history.find(h => h.eventId === id);
+        if (!entry || entry.progress >= 95 || !entry.duration) return;
+        const hMatch = entry.duration.match(/(\d+)h/);
+        const mMatch = entry.duration.match(/(\d+)m/);
+        const sMatch = entry.duration.match(/(\d+)s/);
+        const totalSec =
+          (hMatch ? parseInt(hMatch[1]) * 3600 : 0) +
+          (mMatch ? parseInt(mMatch[1]) * 60 : 0) +
+          (sMatch ? parseInt(sMatch[1]) : 0);
+        if (totalSec > 0) {
+          setWatchStartTime(Math.floor((entry.progress / 100) * totalSec));
+        }
+      })
+      .catch(() => {});
+  }, [id, isAuthenticated]);
+
+  if ((isFetching || (!fetchError && !resolvedEvent)) && !resolvedEvent) {
     return (
       <div className="min-h-screen bg-[#080808] flex items-center justify-center">
         <div className="text-center">
@@ -140,36 +172,6 @@ export function EventDetail() {
     setPurchaseData(null);
   };
 
-  const clearWatchState = () => {
-    setIsWatchOpen(false);
-    setMuxPlaybackId(null);
-    setMuxToken(null);
-    setWatchLoading(false);
-  };
-
-  useEffect(() => {
-    clearWatchState();
-    setWatchError(null);
-    setWatchStartTime(undefined);
-
-    if (!id || !isAuthenticated) return;
-    StreamingAPI.getWatchHistory('me')
-      .then(history => {
-        const entry = history.find(h => h.eventId === id);
-        if (!entry || entry.progress >= 95 || !entry.duration) return;
-        const hMatch = entry.duration.match(/(\d+)h/);
-        const mMatch = entry.duration.match(/(\d+)m/);
-        const sMatch = entry.duration.match(/(\d+)s/);
-        const totalSec =
-          (hMatch ? parseInt(hMatch[1]) * 3600 : 0) +
-          (mMatch ? parseInt(mMatch[1]) * 60 : 0) +
-          (sMatch ? parseInt(sMatch[1]) : 0);
-        if (totalSec > 0) {
-          setWatchStartTime(Math.floor((entry.progress / 100) * totalSec));
-        }
-      })
-      .catch(() => {});
-  }, [id, isAuthenticated]);
 
   const handleWatchEvent = async () => {
     if (!resolvedEvent) return;

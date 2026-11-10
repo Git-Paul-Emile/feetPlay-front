@@ -225,4 +225,7 @@ export const router = createBrowserRouter([
       { path: 'moderation',          Component: ModerationPage },
     ],
   },
+  // URL inconnue (ou ancien lien /signup) : retour propre au lieu de l'écran d'erreur brut
+  { path: '/signup', element: <Navigate to="/register" replace /> },
+  { path: '*', element: <Navigate to="/" replace /> },
 ]);

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CreditCard, Smartphone, CheckCircle2 } from 'lucide-react';
 
@@ -53,6 +54,19 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const { user } = useAuth();
+
+  // Pré-remplit les informations avec le compte connecté (modifiables)
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    setFormData(prev => ({
+      userName: prev.userName || user.name || '',
+      userEmail: prev.userEmail || user.email || '',
+      userPhone: prev.userPhone || user.phone || '',
+      userCity: prev.userCity,
+    }));
+  }, [isOpen, user]);
 
   const handleInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +78,7 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
     if (!isFreeEvent && !paymentMethod) return;
 
     setLoading(true);
+    setErrorMessage('');
     setStep('processing');
 
     try {
@@ -133,7 +148,7 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
       console.error(err);
       setStep('payment');
       setLoading(false);
-      window.alert(err?.message || 'Erreur lors de l’achat du ticket');
+      setErrorMessage(err?.response?.data?.message || err?.message || "Erreur lors de l'achat du ticket");
       return;
     }
 
@@ -382,6 +397,11 @@ export function PurchaseModal({ isOpen, onClose, onPurchaseComplete, event }: Pu
                     <p className="font-['Inter',sans-serif] text-white/60 text-sm">
                       Vérifiez vos informations et choisissez votre mode de paiement
                     </p>
+                    {errorMessage && (
+                      <p role="alert" className="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                        {errorMessage}
+                      </p>
+                    )}
                   </div>
 
                   {/* Order Summary */}

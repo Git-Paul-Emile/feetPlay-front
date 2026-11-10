@@ -206,7 +206,7 @@ export function Login() {
                   to="/register"
                   className="font-['Inter',sans-serif] text-[#de0035] text-sm hover:text-[#c5002f] transition-colors"
                 >
-                  Vous n'êtes pas compté ? <span className="underline">S'inscrire</span>
+                  Vous n'avez pas de compte ? <span className="underline">S'inscrire</span>
                 </Link>
               </div>
 

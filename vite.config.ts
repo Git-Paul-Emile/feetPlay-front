@@ -111,7 +111,7 @@ export default defineConfig(() => ({
       },
 
       devOptions: {
-        enabled: true,
+        enabled: false, // SW désactivé en dev : évite modules et données périmés
         type: 'module',
       },
     }),
