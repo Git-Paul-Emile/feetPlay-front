@@ -1,7 +1,29 @@
 import { Link } from 'react-router';
+import { Facebook, Instagram, Twitter, Youtube, type LucideIcon } from 'lucide-react';
 import { getPreferredFeeti2BaseUrl } from '../utils/serviceConfig';
 
 type FooterLink = { label: string; href: string; external?: boolean };
+
+const socialLinks: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: 'Facebook', href: 'https://facebook.com/feeti', icon: Facebook },
+  { label: 'Instagram', href: 'https://instagram.com/feeti', icon: Instagram },
+  { label: 'Twitter', href: 'https://twitter.com/feeti', icon: Twitter },
+  { label: 'YouTube', href: 'https://youtube.com/feeti', icon: Youtube },
+];
+
+function SocialLink({ label, href, icon: Icon }: (typeof socialLinks)[number]) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Suivre Feeti sur ${label}`}
+      className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/80 transition-all hover:scale-110 hover:border-[#16bda0]/50 hover:bg-[#16bda0] hover:text-white"
+    >
+      <Icon className="h-5 w-5" aria-hidden="true" />
+    </a>
+  );
+}
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -38,6 +60,11 @@ export function Footer() {
             )
           )}
         </div>
+        <nav aria-label="Réseaux sociaux" className="mt-6 flex justify-center gap-3">
+          {socialLinks.map((social) => (
+            <SocialLink key={social.label} {...social} />
+          ))}
+        </nav>
         <div className="mt-6 text-center">
           <p className="font-['Inter',sans-serif] text-[#666666] text-xs">
             © {currentYear} Fééti.io, propulsé par Eroiste, Tous droits réservés.
