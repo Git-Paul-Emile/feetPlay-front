@@ -20,7 +20,9 @@ export function GoogleCompletion() {
 
   const [name, setName] = useState(googleName);
   const [phone, setPhone] = useState("");
-  const role = "viewer" as const;
+  const [role, setRole] = useState<"viewer" | "admin">("viewer");
+  const canChooseAdminRole = import.meta.env.VITE_ENABLE_ADMIN_SIGNUP === "true"
+    && import.meta.env.VITE_BACKEND_PROVIDER === "express";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,7 +33,7 @@ export function GoogleCompletion() {
     try {
       await completeGoogleRegistration({ name: name.trim(), phone: phone.trim() || undefined, role });
       window.sessionStorage.removeItem('feetiplay_google_requires_completion');
-      navigate("/", { replace: true });
+      navigate(role === "admin" ? "/admin/login" : "/", { replace: true });
     } catch (err: unknown) {
       setError(
         firebaseClientErrorToUserMessage(
@@ -63,6 +65,19 @@ export function GoogleCompletion() {
           placeholder="Téléphone (optionnel)"
           className="w-full h-12 rounded-xl bg-transparent border border-[#3a3a3a] px-4"
         />
+        {canChooseAdminRole ? (
+          <label className="block space-y-2 text-sm text-[#b8b8b8]">
+            <span>Rôle du compte (test)</span>
+            <select
+              value={role}
+              onChange={(event) => setRole(event.target.value as "viewer" | "admin")}
+              className="w-full h-12 rounded-xl bg-[#121212] border border-[#3a3a3a] px-4 text-white"
+            >
+              <option value="viewer">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+            </select>
+          </label>
+        ) : null}
         {error ? <p className="text-sm text-red-400">{error}</p> : null}
 
         <button

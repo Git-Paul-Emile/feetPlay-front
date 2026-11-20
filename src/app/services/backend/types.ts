@@ -17,13 +17,13 @@ export interface RegisterData {
   email: string;
   phone?: string;
   password: string;
-  role?: "viewer";
+  role?: "viewer" | "admin";
 }
 
 export interface GoogleCompletionData {
   name: string;
   phone?: string;
-  role?: "viewer";
+  role?: "viewer" | "admin";
 }
 
 export interface GoogleAuthStartResult {

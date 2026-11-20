@@ -12,11 +12,14 @@ export function Register() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [role, setRole] = useState<'viewer' | 'admin'>('viewer');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const canChooseAdminRole = import.meta.env.VITE_ENABLE_ADMIN_SIGNUP === 'true'
+    && import.meta.env.VITE_BACKEND_PROVIDER === 'express';
 
   useEffect(() => {
     if (isLoading) return;
@@ -37,9 +40,9 @@ export function Register() {
         email: email.trim(),
         password,
         phone: phone.trim() || undefined,
-        role: 'viewer',
+        role,
       });
-      navigate('/', { replace: true });
+      navigate(role === 'admin' ? '/admin/login' : '/', { replace: true });
     } catch (err: unknown) {
       setError((err as Error)?.message ?? 'Impossible de créer le compte');
     } finally {
@@ -152,6 +155,20 @@ export function Register() {
                   className="w-full h-[56px] bg-transparent border border-[#3a3a3a] rounded-full px-12 text-white placeholder:text-[#666666] font-['Inter',sans-serif] text-sm focus:outline-none focus:border-[#CDFF71] transition-colors"
                 />
               </div>
+
+              {canChooseAdminRole ? (
+                <label className="block space-y-2 text-sm text-[#999999]">
+                  <span>Rôle du compte (test)</span>
+                  <select
+                    value={role}
+                    onChange={(event) => setRole(event.target.value as 'viewer' | 'admin')}
+                    className="w-full h-[56px] bg-black border border-[#3a3a3a] rounded-full px-5 text-white focus:outline-none focus:border-[#CDFF71]"
+                  >
+                    <option value="viewer">Utilisateur</option>
+                    <option value="admin">Administrateur</option>
+                  </select>
+                </label>
+              ) : null}
 
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">

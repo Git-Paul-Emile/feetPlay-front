@@ -80,6 +80,9 @@ export const firebaseAuthProvider: AuthProvider = {
 
   async register(data: RegisterData) {
     try {
+      if (data.role === "admin") {
+        throw new Error("L'inscription administrateur exige le mode backend sécurisé.");
+      }
       const firebaseUser = await createFirebaseAccount(data.name, data.email, data.password);
       const now = serverTimestamp();
       await setDoc(doc(db, "users", firebaseUser.uid), {
@@ -129,6 +132,9 @@ export const firebaseAuthProvider: AuthProvider = {
     const pending = window.sessionStorage.getItem(PENDING_GOOGLE_TOKEN_KEY);
     if (!user || !pending) {
       throw new Error("Session Google expirée. Relancez l'inscription Google.");
+    }
+    if (data.role === "admin") {
+      throw new Error("L'inscription administrateur exige le mode backend sécurisé.");
     }
 
     const existing = await getDoc(doc(db, "users", user.uid));
