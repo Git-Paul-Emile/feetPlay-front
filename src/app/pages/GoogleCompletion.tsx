@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import { getBackendProviderMode } from "../services/backend/mode";
 import { firebaseClientErrorToUserMessage } from "../utils/firebaseUserFacingError";
 
 type Prefill = { name?: string; email?: string; avatar?: string | null };
@@ -21,8 +22,7 @@ export function GoogleCompletion() {
   const [name, setName] = useState(googleName);
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<"viewer" | "admin">("viewer");
-  const canChooseAdminRole = import.meta.env.VITE_ENABLE_ADMIN_SIGNUP === "true"
-    && import.meta.env.VITE_BACKEND_PROVIDER === "express";
+  const canChooseAdminRole = getBackendProviderMode() === "express";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 

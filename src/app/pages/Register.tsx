@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router';
 import { Loader2, X, Mail, Phone, User as UserIcon, Lock, Eye, EyeOff } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
+import { getBackendProviderMode } from '../services/backend/mode';
 
 export function Register() {
   const navigate = useNavigate();
@@ -18,8 +19,7 @@ export function Register() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-  const canChooseAdminRole = import.meta.env.VITE_ENABLE_ADMIN_SIGNUP === 'true'
-    && import.meta.env.VITE_BACKEND_PROVIDER === 'express';
+  const canChooseAdminRole = getBackendProviderMode() === 'express';
 
   useEffect(() => {
     if (isLoading) return;
