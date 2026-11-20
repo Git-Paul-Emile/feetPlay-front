@@ -95,13 +95,13 @@ export function Login() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-black/95 backdrop-blur-md">
+      <div className="flex min-h-0 flex-1 flex-col items-center overflow-y-auto p-4 auth-scrollbar-hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full max-w-md my-8"
+          className="relative my-auto w-full max-w-md shrink-0 py-4"
         >
           <Link to="/">
             <button

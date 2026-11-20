@@ -176,3 +176,12 @@ figcaption, blockquote, small, strong, em {
 table {
   max-width: 100%;
 }
+
+.auth-scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.auth-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
